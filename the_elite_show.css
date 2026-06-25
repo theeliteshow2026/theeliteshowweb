@@ -840,6 +840,31 @@ nav {
   }
 }
 
+@media (hover: none), (pointer: coarse) {
+  .cursor-dot,
+  .cursor-ring {
+    display: none !important;
+  }
+
+  .nav-cta,
+  .btn-primary,
+  .feature-card {
+    transform: none !important;
+  }
+
+  .feature-card::before,
+  .feature-card::after {
+    display: none;
+  }
+
+  .nav-cta:hover,
+  .btn-primary:hover,
+  .feature-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
 .form-step-heading {
   text-align: left;
   margin-bottom: 1.5rem;

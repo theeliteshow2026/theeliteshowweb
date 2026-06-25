@@ -490,10 +490,11 @@ document.querySelectorAll('#formStep1 input').forEach(input => {
 // ===== CUSTOM CURSOR =====
 const cursorDot = document.getElementById('cursorDot');
 const cursorRing = document.getElementById('cursorRing');
+const supportsPointerEffects = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 let mouseX = 0, mouseY = 0;
 let ringX = 0, ringY = 0;
 
-if (window.matchMedia("(pointer: fine)").matches) {
+if (supportsPointerEffects) {
   document.addEventListener('mousemove', (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
@@ -529,21 +530,23 @@ if (window.matchMedia("(pointer: fine)").matches) {
 }
 
 // ===== MAGNETIC NAV LINKS =====
-document.querySelectorAll('.nav-cta').forEach(link => {
-  link.addEventListener('mousemove', e => {
-    const rect = link.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    link.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+if (supportsPointerEffects) {
+  document.querySelectorAll('.nav-cta').forEach(link => {
+    link.addEventListener('mousemove', e => {
+      const rect = link.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      link.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+    });
+    link.addEventListener('mouseleave', () => {
+      link.style.transform = '';
+    });
   });
-  link.addEventListener('mouseleave', () => {
-    link.style.transform = '';
-  });
-});
+}
 
 // ===== HERO TITLE TEXT SCRAMBLE =====
 const scrambleTarget = document.querySelector('.scramble-target');
-if (scrambleTarget) {
+if (scrambleTarget && supportsPointerEffects) {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   let interval = null;
 
@@ -583,31 +586,33 @@ if (scrambleTarget) {
 }
 
 // ===== 3D CARD TILT & SPOTLIGHT =====
-document.querySelectorAll('.feature-card').forEach(card => {
-  card.addEventListener('mousemove', e => {
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    // Spotlight variables
-    card.style.setProperty('--mouse-x', `${x}px`);
-    card.style.setProperty('--mouse-y', `${y}px`);
+if (supportsPointerEffects) {
+  document.querySelectorAll('.feature-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      // Spotlight variables
+      card.style.setProperty('--mouse-x', `${x}px`);
+      card.style.setProperty('--mouse-y', `${y}px`);
 
-    // 3D Tilt
-    const cx = rect.width / 2;
-    const cy = rect.height / 2;
-    const rotX = ((y - cy) / cy) * -8;
-    const rotY = ((x - cx) / cx) * 8;
-    card.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-4px)`;
+      // 3D Tilt
+      const cx = rect.width / 2;
+      const cy = rect.height / 2;
+      const rotX = ((y - cy) / cy) * -8;
+      const rotY = ((x - cx) / cx) * 8;
+      card.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-4px)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) translateY(0)';
+      card.style.transition = 'transform 0.5s ease, background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease';
+    });
+    card.addEventListener('mouseenter', () => {
+      card.style.transition = 'transform 0.1s ease, background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease';
+    });
   });
-  card.addEventListener('mouseleave', () => {
-    card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) translateY(0)';
-    card.style.transition = 'transform 0.5s ease, background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease';
-  });
-  card.addEventListener('mouseenter', () => {
-    card.style.transition = 'transform 0.1s ease, background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease';
-  });
-});
+}
 
 // ===== ANIMATED STAT COUNTERS =====
 const statTargets = [
@@ -643,7 +648,7 @@ if (statTargets[0].el) statsObserver.observe(statTargets[0].el);
 
 // ===== MAGNETIC EFFECT ON JOIN WAITLIST BUTTON =====
 const magBtn = document.querySelector('.btn-primary');
-if (magBtn) {
+if (magBtn && supportsPointerEffects) {
   magBtn.addEventListener('mousemove', e => {
     const rect = magBtn.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
