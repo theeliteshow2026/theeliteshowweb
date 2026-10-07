@@ -597,6 +597,36 @@ if (scrambleTarget && supportsPointerEffects) {
   });
 }
 
+if (scrambleTarget && !supportsPointerEffects) {
+  window.addEventListener('load', () => {
+    const targetText = scrambleTarget.dataset.value;
+    const rupee = String.fromCharCode(8377);
+    let step = 0;
+
+    setTimeout(() => {
+      const interval = setInterval(() => {
+        scrambleTarget.innerText = targetText
+          .split("")
+          .map((letter, index) => {
+            if (letter === " ") return " ";
+
+            const resolveThreshold = 12 + index * 2;
+            if (step < resolveThreshold) return rupee;
+            return letter;
+          })
+          .join("");
+
+        step++;
+
+        if (step >= 12 + targetText.length * 2) {
+          clearInterval(interval);
+          scrambleTarget.innerText = targetText;
+        }
+      }, 42);
+    }, 600);
+  }, { once: true });
+}
+
 // ===== 3D CARD TILT & SPOTLIGHT =====
 if (supportsPointerEffects) {
   document.querySelectorAll('.feature-card').forEach(card => {
