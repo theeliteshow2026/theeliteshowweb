@@ -175,8 +175,8 @@ function validateContactDetails() {
   if (!phone) {
     showFieldError('phone', 'phoneError', 'Phone number is required.');
     hasError = true;
-  } else if (!/^[\d\s\+\-\(\)]{7,}$/.test(phone)) {
-    showFieldError('phone', 'phoneError', 'Enter a valid phone number (digits only).');
+  } else if (!/^[\d\s\+\-\(\)]+$/.test(phone) || phone.replace(/\D/g, '').length < 10) {
+    showFieldError('phone', 'phoneError', 'Enter a valid phone number with at least 10 digits.');
     hasError = true;
   }
 
@@ -319,12 +319,15 @@ async function handleSubmit() {
 
   try {
     if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL") {
-      await fetch(GOOGLE_SCRIPT_URL, {
+      // text/plain keeps this a "simple" CORS request, so Apps Script's JSON
+      // reply is readable and a failed save is no longer shown as a success.
+      const res = await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
       });
+      const result = await res.json();
+      if (!result.success) throw new Error(result.message || 'Unable to save registration.');
     }
     openModal();
     localStorage.setItem('eliteWaitlistSubmitted', 'true');
@@ -472,6 +475,15 @@ function launchConfetti() {
   }, 6000);
 }
 
+// Close on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// Keep the footer year current
+const footerYear = document.getElementById('footerYear');
+if (footerYear) footerYear.textContent = new Date().getFullYear();
+
 // Close on overlay click
 document.getElementById('modalOverlay').addEventListener('click', function (e) {
   if (e.target === this) closeModal();
@@ -583,6 +595,36 @@ if (scrambleTarget && supportsPointerEffects) {
       }
     }, 30);
   });
+}
+
+if (scrambleTarget && !supportsPointerEffects) {
+  window.addEventListener('load', () => {
+    const targetText = scrambleTarget.dataset.value;
+    const rupee = String.fromCharCode(8377);
+    let step = 0;
+
+    setTimeout(() => {
+      const interval = setInterval(() => {
+        scrambleTarget.innerText = targetText
+          .split("")
+          .map((letter, index) => {
+            if (letter === " ") return " ";
+
+            const resolveThreshold = 12 + index * 2;
+            if (step < resolveThreshold) return rupee;
+            return letter;
+          })
+          .join("");
+
+        step++;
+
+        if (step >= 12 + targetText.length * 2) {
+          clearInterval(interval);
+          scrambleTarget.innerText = targetText;
+        }
+      }, 42);
+    }, 600);
+  }, { once: true });
 }
 
 // ===== 3D CARD TILT & SPOTLIGHT =====
