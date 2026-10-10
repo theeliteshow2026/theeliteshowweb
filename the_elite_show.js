@@ -216,7 +216,116 @@ function goToContactDetails() {
   document.getElementById('formStep1').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+// ===== JOINING AS (member / mentor / investor / partner) =====
+const JOIN_COPY = {
+  Member: {
+    step2: 'About Me',
+    submit: 'Join the Community'
+  },
+  Mentor: {
+    step2: 'Mentoring With Us',
+    submit: 'Apply as a Mentor',
+    label: 'What could you share with the community?',
+    placeholder: 'Your area of expertise, and whether you would host a mentor session, an Elite Brew or a workshop.'
+  },
+  Investor: {
+    step2: 'Investing With Us',
+    submit: 'Start the Conversation',
+    label: 'What would you like to explore with us?',
+    placeholder: 'A little about you or your fund, and what you would like to know about The Elite Show Community.'
+  },
+  Collaborator: {
+    step2: 'Partnering With Us',
+    submit: 'Partner With Us',
+    label: 'How would you like to collaborate?',
+    placeholder: 'Hosting, sponsoring or co-creating an event, a workshop, a program or something else.'
+  }
+};
+
+function getJoiningAs() {
+  const checked = document.querySelector('input[name="joiningAs"]:checked');
+  return checked ? checked.value : 'Member';
+}
+
+function isMemberSignup() {
+  return getJoiningAs() === 'Member';
+}
+
+function updateJoinMode() {
+  const joiningAs = getJoiningAs();
+  const copy = JOIN_COPY[joiningAs] || JOIN_COPY.Member;
+  const isMember = joiningAs === 'Member';
+
+  document.getElementById('memberFields').hidden = !isMember;
+  document.getElementById('partnerFields').hidden = isMember;
+  document.getElementById('step2Title').textContent = copy.step2;
+  document.querySelector('#progressStep2 strong').textContent = isMember ? 'About Me' : 'Your Interest';
+  document.getElementById('nextBtnText').textContent = isMember ? 'Next: About Me' : 'Next: Your Interest';
+  if (!isMember) {
+    document.getElementById('messageLabel').textContent = copy.label;
+    document.getElementById('message').placeholder = copy.placeholder;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  if (!btn.disabled) document.getElementById('btnText').textContent = copy.submit;
+}
+
+document.querySelectorAll('input[name="joiningAs"]').forEach(input => {
+  input.addEventListener('change', updateJoinMode);
+});
+
+// Audience buttons pre-select who is joining before jumping to the form
+document.querySelectorAll('[data-join]').forEach(link => {
+  link.addEventListener('click', () => {
+    const option = document.querySelector(`input[name="joiningAs"][value="${link.dataset.join}"]`);
+    if (option) option.checked = true;
+    setFormStep(1);
+    updateJoinMode();
+  });
+});
+
+function validatePartnerDetails() {
+  [
+    ['organisation', 'organisationError'],
+    ['profileLink', 'profileLinkError'],
+    ['message', 'messageError']
+  ].forEach(([inputId, errorId]) => {
+    document.getElementById(inputId).classList.remove('invalid', 'valid');
+    const err = document.getElementById(errorId);
+    err.textContent = '';
+    err.classList.remove('visible');
+  });
+  document.getElementById('formError').style.display = 'none';
+
+  const organisation = document.getElementById('organisation').value.trim();
+  const profileLink = document.getElementById('profileLink').value.trim();
+  const message = document.getElementById('message').value.trim();
+  let hasError = false;
+
+  if (!organisation) {
+    showFieldError('organisation', 'organisationError', 'Tell us your organisation or what you do.');
+    hasError = true;
+  }
+  if (profileLink && !/^(https?:\/\/)?[^\s.]+\.[^\s]{2,}$/i.test(profileLink)) {
+    showFieldError('profileLink', 'profileLinkError', 'Enter a valid link, or leave this blank.');
+    hasError = true;
+  }
+  if (message.length < 10) {
+    showFieldError('message', 'messageError', 'Please add a few words so we know how to reach out.');
+    hasError = true;
+  }
+
+  return !hasError;
+}
+
+['organisation', 'profileLink', 'message'].forEach(id => {
+  document.getElementById(id).addEventListener('input', function () {
+    if (this.value.trim()) clearFieldError(id, id + 'Error');
+  });
+});
+
 function validateAboutMe() {
+  if (!isMemberSignup()) return validatePartnerDetails();
   clearAboutMeErrors();
 
   const age = document.querySelector('input[name="age"]:checked');
@@ -290,11 +399,14 @@ async function handleSubmit() {
   const email = document.getElementById('email').value.trim();
   const state = document.getElementById('state').value.trim();
   const city = document.getElementById('city').value.trim();
-  const age = document.querySelector('input[name="age"]:checked').value;
-  const role = document.querySelector('input[name="role"]:checked').value;
-  const topics = [...document.querySelectorAll('input[name="topics"]:checked')].map(input => input.value);
-  const involvement = document.querySelector('input[name="involvement"]:checked').value;
-  const paymentConsent = document.getElementById('paymentConsent').checked;
+  const joiningAs = getJoiningAs();
+  const isMember = joiningAs === 'Member';
+  const checkedValue = name => document.querySelector(`input[name="${name}"]:checked`)?.value || '';
+  const age = isMember ? checkedValue('age') : '';
+  const role = isMember ? checkedValue('role') : '';
+  const topics = isMember ? [...document.querySelectorAll('input[name="topics"]:checked')].map(input => input.value) : [];
+  const involvement = isMember ? checkedValue('involvement') : '';
+  const paymentConsent = isMember && document.getElementById('paymentConsent').checked;
   const errEl = document.getElementById('formError');
   const btn = document.getElementById('submitBtn');
   const btnTxt = document.getElementById('btnText');
@@ -313,7 +425,11 @@ async function handleSubmit() {
     topics: topics.join(', '),
     involvement,
     paymentConsent,
-    accessFee: 299
+    accessFee: isMember ? 299 : 0,
+    joiningAs,
+    organisation: isMember ? '' : document.getElementById('organisation').value.trim(),
+    profileLink: isMember ? '' : document.getElementById('profileLink').value.trim(),
+    message: isMember ? '' : document.getElementById('message').value.trim()
   };
   let isSuccess = false;
 
@@ -329,7 +445,7 @@ async function handleSubmit() {
       const result = await res.json();
       if (!result.success) throw new Error(result.message || 'Unable to save registration.');
     }
-    openModal();
+    openModal(joiningAs);
     localStorage.setItem('eliteWaitlistSubmitted', 'true');
     isSuccess = true;
   } catch (err) {
@@ -338,7 +454,7 @@ async function handleSubmit() {
   } finally {
     if (!isSuccess) {
       btn.disabled = false;
-      btnTxt.textContent = 'Join The Elite';
+      btnTxt.textContent = (JOIN_COPY[joiningAs] || JOIN_COPY.Member).submit;
     } else {
       btnTxt.textContent = 'Already Joined';
     }
@@ -350,6 +466,8 @@ document.getElementById('waitlistForm').addEventListener('submit', function (e) 
   handleSubmit();
 });
 
+updateJoinMode();
+
 // Check on page load
 if (localStorage.getItem('eliteWaitlistSubmitted') === 'true') {
   const btn = document.getElementById('submitBtn');
@@ -360,7 +478,13 @@ if (localStorage.getItem('eliteWaitlistSubmitted') === 'true') {
   }
 }
 
-function openModal() {
+function openModal(joiningAs = 'Member') {
+  if (joiningAs !== 'Member') {
+    document.getElementById('modalTitle').textContent = 'Thank you for reaching out 🤝';
+    document.getElementById('modalMsg').innerHTML =
+      "We've received your details and <strong>someone from the team will reach out personally</strong>. " +
+      'In the meantime, you are welcome to join the WhatsApp community and see the room for yourself.';
+  }
   document.getElementById('modalOverlay').classList.add('active');
   document.body.style.overflow = 'hidden';
   launchConfetti();
@@ -528,7 +652,7 @@ if (supportsPointerEffects) {
   };
   animateRing();
 
-  const interactables = document.querySelectorAll('a, button, input, textarea, .feature-card, .scramble-target');
+  const interactables = document.querySelectorAll('a, button, input, textarea, .feature-card, .audience-card, .scramble-target');
   interactables.forEach(el => {
     el.addEventListener('mouseenter', () => {
       cursorRing?.classList.add('hovered');
@@ -657,36 +781,30 @@ if (supportsPointerEffects) {
 }
 
 // ===== ANIMATED STAT COUNTERS =====
-const statTargets = [
-  { el: document.querySelectorAll('.stat-number')[0], target: 100, suffix: '%', prefix: '' },
-  { el: document.querySelectorAll('.stat-number')[2], target: null, suffix: '', prefix: 'Elite' },
-  { el: document.querySelectorAll('.stat-number')[3], target: null, suffix: '', prefix: '24/7' },
-];
-
-function animateCounter(el, target, suffix, prefix) {
-  if (target === null) return;
-  let start = 0;
-  const duration = 1800;
+function animateCounter(el) {
+  const target = Number(el.dataset.count);
+  const pad = Number(el.dataset.pad || 0);
+  const suffix = el.dataset.suffix || '';
+  const duration = 1400;
   const startTime = performance.now();
   function step(now) {
     const progress = Math.min((now - startTime) / duration, 1);
     const ease = 1 - Math.pow(1 - progress, 3);
-    el.textContent = Math.floor(ease * target) + suffix;
+    el.textContent = String(Math.round(ease * target)).padStart(pad, '0') + suffix;
     if (progress < 1) requestAnimationFrame(step);
   }
   requestAnimationFrame(step);
 }
 
+const counters = document.querySelectorAll('.stat-number[data-count]');
 const statsObserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      animateCounter(statTargets[0].el, 100, '%', '');
-      statsObserver.disconnect();
-    }
-  });
+  if (entries.some(entry => entry.isIntersecting)) {
+    counters.forEach(animateCounter);
+    statsObserver.disconnect();
+  }
 }, { threshold: 0.5 });
 
-if (statTargets[0].el) statsObserver.observe(statTargets[0].el);
+if (counters.length) statsObserver.observe(counters[0]);
 
 // ===== MAGNETIC EFFECT ON JOIN WAITLIST BUTTON =====
 const magBtn = document.querySelector('.btn-primary');

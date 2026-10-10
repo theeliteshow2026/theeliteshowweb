@@ -1,2 +1,2 @@
 # theeliteshowweb
-The community announcement website built for The Elite Show.
+The community website for The Elite Show Community.

@@ -15,7 +15,11 @@ const HEADERS = [
   'Topics',
   'Community Involvement',
   'Payment Consent',
-  'Access Fee (INR)'
+  'Access Fee (INR)',
+  'Joining As',
+  'Organisation',
+  'Profile Link',
+  'Message'
 ];
 
 function doPost(e) {
@@ -50,7 +54,11 @@ function doPost(e) {
       payload.topics,
       payload.involvement,
       payload.paymentConsent ? 'Yes' : 'No',
-      Number(payload.accessFee) || 299
+      isMember(payload) ? Number(payload.accessFee) || 299 : '',
+      payload.joiningAs || 'Member',
+      payload.organisation || '',
+      payload.profileLink || '',
+      payload.message || ''
     ]);
 
     return jsonResponse({
@@ -81,7 +89,7 @@ function setupSheet() {
 function doGet() {
   return jsonResponse({
     success: true,
-    message: 'The Elite Show waitlist endpoint is active.'
+    message: 'The Elite Show Community waitlist endpoint is active.'
   });
 }
 
@@ -113,18 +121,17 @@ function ensureHeaders(sheet) {
   sheet.autoResizeColumns(1, HEADERS.length);
 }
 
+// Mentors, investors and collaborators skip the member questions and the
+// access fee, and tell us about themselves in organisation + message instead.
+function isMember(payload) {
+  return !payload.joiningAs || payload.joiningAs === 'Member';
+}
+
 function validatePayload(payload) {
-  const requiredFields = [
-    'name',
-    'phone',
-    'email',
-    'state',
-    'city',
-    'age',
-    'role',
-    'topics',
-    'involvement'
-  ];
+  const contactFields = ['name', 'phone', 'email', 'state', 'city'];
+  const requiredFields = isMember(payload)
+    ? contactFields.concat(['age', 'role', 'topics', 'involvement'])
+    : contactFields.concat(['organisation', 'message']);
 
   requiredFields.forEach(field => {
     if (!payload[field] || String(payload[field]).trim() === '') {
@@ -132,7 +139,7 @@ function validatePayload(payload) {
     }
   });
 
-  if (payload.paymentConsent !== true) {
+  if (isMember(payload) && payload.paymentConsent !== true) {
     throw new Error('Payment consent is required.');
   }
 }

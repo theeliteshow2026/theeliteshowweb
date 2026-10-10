@@ -173,6 +173,29 @@ nav {
   color: var(--white);
 }
 
+a.nav-logo {
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2.2rem;
+}
+
+.nav-links a {
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--grey);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: var(--green);
+}
+
 .nav-cta {
   font-size: 0.7rem;
   font-weight: 600;
@@ -338,7 +361,7 @@ nav {
 
 .hero-name {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(3.5rem, 10vw, 8rem);
+  font-size: clamp(2.6rem, 8vw, 6.5rem);
   font-weight: 700;
   line-height: 0.9;
   color: var(--green);
@@ -1119,7 +1142,8 @@ nav {
   color: var(--green-dim);
 }
 
-.field-group input {
+.field-group input,
+.field-group textarea {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-bottom-color: rgba(0, 200, 83, 0.3);
@@ -1133,12 +1157,14 @@ nav {
   transition: all 0.3s ease;
 }
 
-.field-group input::placeholder {
+.field-group input::placeholder,
+.field-group textarea::placeholder {
   color: var(--grey-dark);
   font-size: 0.82rem;
 }
 
-.field-group input:focus {
+.field-group input:focus,
+.field-group textarea:focus {
   border-color: transparent;
   border-bottom-color: var(--green);
   background: rgba(0, 200, 83, 0.06);
@@ -1214,12 +1240,14 @@ nav {
   transform: translateY(0);
 }
 
-.field-group input.invalid {
+.field-group input.invalid,
+.field-group textarea.invalid {
   border-bottom-color: #ff6b6b !important;
   background: rgba(255, 50, 50, 0.04) !important;
 }
 
-.field-group input.valid {
+.field-group input.valid,
+.field-group textarea.valid {
   border-bottom-color: var(--green) !important;
 }
 
@@ -1523,6 +1551,439 @@ footer {
 .reveal-scale.visible {
   opacity: 1;
   transform: scale(1);
+}
+
+/* ===================== CONTENT SECTIONS ===================== */
+[hidden] {
+  display: none !important;
+}
+
+.section {
+  position: relative;
+  z-index: 2;
+  padding: 7rem 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.section .section-title {
+  max-width: 760px;
+  margin-bottom: 1.5rem;
+}
+
+.section-lead {
+  max-width: 620px;
+  font-size: 0.95rem;
+  font-weight: 300;
+  line-height: 1.9;
+  color: var(--grey);
+  margin-bottom: 3rem;
+}
+
+.section-kicker {
+  margin-top: 3.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(202, 251, 12, 0.25);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  line-height: 1.8;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+#about .section-title {
+  margin-bottom: 3.5rem;
+}
+
+#about .features-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+#about .feature-card {
+  padding: 2.2rem 1.8rem;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-ghost {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--white);
+  border: 1px solid rgba(245, 245, 240, 0.3);
+  padding: 1.05rem 2.2rem;
+  border-radius: 3px;
+  text-decoration: none;
+  opacity: 0;
+  animation: fadeSlideUp 1s ease 1.45s forwards;
+  transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease;
+}
+
+.btn-ghost:hover {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(202, 251, 12, 0.05);
+}
+
+/* One conversation can lead to */
+.lead-to {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.lead-to li {
+  border-top: 1px solid var(--green);
+  padding-top: 0.9rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.4rem, 2.6vw, 2rem);
+  font-weight: 700;
+  color: var(--white);
+}
+
+.lead-to li span {
+  display: block;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--green);
+  margin-bottom: 0.6rem;
+}
+
+/* Experiences */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 4rem;
+  align-items: start;
+}
+
+.split-motto {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem;
+  line-height: 1.35;
+  color: var(--grey);
+  margin: 1rem 0 2rem;
+}
+
+.split-motto strong {
+  color: var(--green);
+}
+
+.not-list {
+  list-style: none;
+}
+
+.not-list li {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--grey-dark);
+  padding: 0.35rem 0;
+  text-decoration: line-through;
+  text-decoration-color: rgba(202, 251, 12, 0.6);
+}
+
+.exp-list {
+  list-style: none;
+}
+
+.exp-list li {
+  padding: 1.6rem 0;
+  border-bottom: 1px solid rgba(202, 251, 12, 0.2);
+}
+
+.exp-list li:first-child {
+  padding-top: 0.4rem;
+}
+
+.exp-list h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 0.3rem;
+}
+
+.exp-list p {
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: var(--grey);
+  line-height: 1.7;
+}
+
+/* Audiences */
+#get-involved {
+  max-width: 1200px;
+}
+
+.audience-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.audience-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--black2);
+  border: 1px solid rgba(202, 251, 12, 0.18);
+  border-radius: 16px;
+  padding: 2.2rem 2rem;
+  transition: border-color 0.4s ease, transform 0.4s ease, background 0.4s ease;
+}
+
+.audience-card:hover {
+  border-color: rgba(202, 251, 12, 0.55);
+  background: var(--black3);
+  transform: translateY(-4px);
+}
+
+.audience-tag {
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 1rem;
+}
+
+.audience-card h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.2;
+  margin-bottom: 0.9rem;
+}
+
+.audience-card p:not(.audience-tag) {
+  font-size: 0.83rem;
+  font-weight: 300;
+  line-height: 1.8;
+  color: var(--grey);
+  margin-bottom: 1.8rem;
+  flex: 1;
+}
+
+.audience-cta {
+  align-self: flex-start;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--black);
+  background: var(--green);
+  padding: 0.8rem 1.2rem;
+  border-radius: 3px;
+  text-decoration: none;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.audience-cta:hover {
+  box-shadow: 0 0 25px rgba(202, 251, 12, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Model & roadmap */
+.model-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid rgba(202, 251, 12, 0.25);
+  border-bottom: 1px solid rgba(202, 251, 12, 0.25);
+  margin-top: 1.5rem;
+}
+
+.model-cell {
+  padding: 1.8rem 1.5rem;
+}
+
+.model-cell + .model-cell {
+  border-left: 1px solid rgba(202, 251, 12, 0.25);
+}
+
+.model-cell h3 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 0.5rem;
+}
+
+.model-cell p {
+  font-size: 0.82rem;
+  font-weight: 300;
+  color: var(--grey);
+}
+
+.roadmap-title {
+  margin-top: 6rem;
+}
+
+.roadmap {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2rem;
+  margin-top: 2.5rem;
+  position: relative;
+}
+
+.roadmap::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, var(--green), rgba(202, 251, 12, 0.15));
+}
+
+.roadmap li {
+  position: relative;
+  padding-top: 2.2rem;
+  font-size: 0.85rem;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--grey);
+}
+
+.roadmap li::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 14px rgba(202, 251, 12, 0.5);
+}
+
+.roadmap li span {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 0.3rem;
+}
+
+/* Partner form fields */
+.field-group textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+.field-group label small {
+  color: var(--grey-dark);
+  letter-spacing: 0.08em;
+  text-transform: none;
+}
+
+#joinGroup {
+  margin-bottom: 1.6rem;
+}
+
+@media (max-width: 900px) {
+  .nav-links {
+    display: none;
+  }
+
+  .split {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  #about .features-grid,
+  .lead-to,
+  .model-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .model-cell:nth-child(3) {
+    border-left: 0;
+  }
+
+  .model-cell:nth-child(n + 3) {
+    border-top: 1px solid rgba(202, 251, 12, 0.25);
+  }
+}
+
+@media (max-width: 640px) {
+  .section {
+    padding: 5rem 1.5rem;
+  }
+
+  .nav-logo {
+    font-size: 0.95rem;
+    letter-spacing: 0.15em;
+  }
+
+  .nav-cta {
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
+  }
+
+  .hero-eyebrow {
+    letter-spacing: 0.22em;
+    font-size: 0.6rem;
+  }
+
+  .hero-eyebrow::before,
+  .hero-eyebrow::after {
+    content: none;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-actions a {
+    width: 100%;
+    max-width: 320px;
+    text-align: center;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .roadmap,
+  #about .features-grid {
+    grid-template-columns: 1fr;
+    gap: 1.8rem;
+  }
+
+  .roadmap::before {
+    top: 0;
+    bottom: 0;
+    left: 6px;
+    right: auto;
+    width: 1px;
+    height: auto;
+    background: linear-gradient(to bottom, var(--green), rgba(202, 251, 12, 0.15));
+  }
+
+  .roadmap li {
+    padding-top: 0;
+    padding-left: 2.2rem;
+  }
+
+  .roadmap-title {
+    margin-top: 4.5rem;
+  }
 }
 
 /* ===================== RESPONSIVE ===================== */
