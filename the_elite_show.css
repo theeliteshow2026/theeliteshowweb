@@ -1795,42 +1795,7 @@ footer {
   transform: translateY(-1px);
 }
 
-/* Model & roadmap */
-.model-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-top: 1px solid rgba(202, 251, 12, 0.25);
-  border-bottom: 1px solid rgba(202, 251, 12, 0.25);
-  margin-top: 1.5rem;
-}
-
-.model-cell {
-  padding: 1.8rem 1.5rem;
-}
-
-.model-cell + .model-cell {
-  border-left: 1px solid rgba(202, 251, 12, 0.25);
-}
-
-.model-cell h3 {
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--green);
-  margin-bottom: 0.5rem;
-}
-
-.model-cell p {
-  font-size: 0.82rem;
-  font-weight: 300;
-  color: var(--grey);
-}
-
-.roadmap-title {
-  margin-top: 6rem;
-}
-
+/* Roadmap */
 .roadmap {
   list-style: none;
   display: grid;
@@ -1908,17 +1873,8 @@ footer {
   }
 
   #about .features-grid,
-  .lead-to,
-  .model-grid {
+  .lead-to {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .model-cell:nth-child(3) {
-    border-left: 0;
-  }
-
-  .model-cell:nth-child(n + 3) {
-    border-top: 1px solid rgba(202, 251, 12, 0.25);
   }
 }
 
@@ -1979,10 +1935,6 @@ footer {
   .roadmap li {
     padding-top: 0;
     padding-left: 2.2rem;
-  }
-
-  .roadmap-title {
-    margin-top: 4.5rem;
   }
 }
 
