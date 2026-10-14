@@ -1,20 +1,78 @@
 // ===== SATURDAY MENTOR SESSIONS =====
 // To add a session: copy one entry, fill it in, and drop the poster image into
-// the posters/ folder. Newest sessions show first automatically. Leave `poster`
-// empty to show a generated poster until the real one is ready.
-//
-// PLACEHOLDERS: the entries below stand in for the real sessions. Replace the
-// titles, mentors, dates and summaries, and add each poster.
+// the posters/ folder (portrait, about 900px wide). Newest sessions show first
+// automatically. Leave `poster` empty to show a generated poster until the
+// real one is ready. `number` is only used on that generated poster.
 const MENTOR_SESSIONS = [
-  { number: 1, date: '2026-08-15', title: 'Saturday Mentor Session #1', mentor: 'Mentor name', summary: 'One line about what the session covered.', poster: '' },
-  { number: 2, date: '2026-08-22', title: 'Saturday Mentor Session #2', mentor: 'Mentor name', summary: 'One line about what the session covered.', poster: '' },
-  { number: 3, date: '2026-08-29', title: 'Saturday Mentor Session #3', mentor: 'Mentor name', summary: 'One line about what the session covered.', poster: '' },
-  { number: 4, date: '2026-09-05', title: 'Saturday Mentor Session #4', mentor: 'Mentor name', summary: 'One line about what the session covered.', poster: '' },
-  { number: 5, date: '2026-09-12', title: 'Saturday Mentor Session #5', mentor: 'Mentor name', summary: 'One line about what the session covered.', poster: '' },
-  { number: 6, date: '2026-09-19', title: 'Saturday Mentor Session #6', mentor: 'Mentor name', summary: 'One line about what the session covered.', poster: '' },
-  { number: 7, date: '2026-09-26', title: 'Saturday Mentor Session #7', mentor: 'Mentor name', summary: 'One line about what the session covered.', poster: '' },
-  { number: 8, date: '2026-10-03', title: 'Saturday Mentor Session #8', mentor: 'Mentor name', summary: 'One line about what the session covered.', poster: '' },
-  { number: 9, date: '2026-10-10', title: 'Saturday Mentor Session #9', mentor: 'Mentor name', summary: 'One line about what the session covered.', poster: '' }
+  {
+    label: 'Community Session',
+    date: '2026-07-11',
+    title: 'How to Find a Good Co-Founder',
+    mentor: 'AIMER Business School × NextGen Founders',
+    summary: 'Find the right partner. Build the right startup.',
+    poster: 'posters/2026-07-11-co-founder-session.jpg'
+  },
+  {
+    label: 'Community Session',
+    date: '2026-08-16',
+    title: 'Dream, Design, Do: The Route Map to Achieve Anything',
+    mentor: 'Azvan Sait',
+    summary: 'Author, co-founder of Purelink and India Book of Records holder.',
+    poster: 'posters/2026-08-16-dream-design-do.jpg'
+  },
+  {
+    label: 'Mentor Session #06',
+    number: 6,
+    date: '2026-09-05',
+    title: 'How Brands Are Using AI to Create, Market & Sell Better',
+    mentor: 'Muhammed Mazin KP',
+    summary: 'AI Content Architect, Desgro Media.',
+    poster: 'posters/2026-09-05-mentor-session-06.jpg'
+  },
+  {
+    label: 'Mentor Session #07',
+    number: 7,
+    date: '2026-09-12',
+    title: 'Emerging Trends in the Healthy Food Space',
+    mentor: 'Akash Akhilesh',
+    summary: 'Director, Morfuel India Pvt Ltd.',
+    poster: 'posters/2026-09-12-mentor-session-07.jpg'
+  },
+  {
+    label: 'Workshop #01',
+    date: '2026-09-13',
+    title: 'Placement Workshop: How to Crack Interviews',
+    mentor: 'Irfan TT',
+    summary: 'Senior Finance Analyst, Johnson & Johnson. Placement coach and career mentor.',
+    poster: 'posters/2026-09-13-placement-workshop-01.jpg'
+  },
+  {
+    label: 'Mentor Session #08',
+    number: 8,
+    date: '2026-09-19',
+    title: 'The Future of AI: Where Are We Heading?',
+    mentor: 'Mohammed Sami',
+    summary: 'Founder, OffWare.',
+    poster: 'posters/2026-09-19-mentor-session-08.jpg'
+  },
+  {
+    label: 'Mentor Session #09',
+    number: 9,
+    date: '2026-10-03',
+    title: 'The Psychological Game Behind Every Sale',
+    mentor: 'Aflah C P',
+    summary: 'Corporate sales strategist and life skills trainer.',
+    poster: 'posters/2026-10-03-mentor-session-09.jpg'
+  },
+  {
+    label: 'Mentor Session #10',
+    number: 10,
+    date: '2026-10-10',
+    title: 'The Social Media Advantage: Turning Your Online Presence Into Opportunities',
+    mentor: 'Yasir Muhammed',
+    summary: 'Founder & CEO, Whoyer.',
+    poster: 'posters/2026-10-10-mentor-session-10.jpg'
+  }
 ];
 
 (function () {
@@ -36,10 +94,10 @@ const MENTOR_SESSIONS = [
 
   // A poster in the community's style, used until the real poster is uploaded
   function generatedPoster(session) {
-    const poster = el('div', 'gen-poster' + (session.number % 2 ? '' : ' gen-poster--dark'));
+    const poster = el('div', 'gen-poster' + ((session.number || 0) % 2 ? '' : ' gen-poster--dark'));
     poster.append(
-      el('span', 'gen-poster-eyebrow', 'Saturday Mentor Session'),
-      el('span', 'gen-poster-number', '#' + String(session.number).padStart(2, '0')),
+      el('span', 'gen-poster-eyebrow', session.label),
+      el('span', 'gen-poster-number', session.number ? '#' + String(session.number).padStart(2, '0') : ''),
       el('span', 'gen-poster-title', session.title),
       el('span', 'gen-poster-mentor', session.mentor),
       el('span', 'gen-poster-foot', formatDate(session.date))
@@ -64,7 +122,7 @@ const MENTOR_SESSIONS = [
     frame.append(posterFor(session));
     const meta = el('div', 'session-meta');
     meta.append(
-      el('time', 'session-date', formatDate(session.date)),
+      el('time', 'session-date', `${session.label} · ${formatDate(session.date)}`),
       el('h3', 'session-title', session.title),
       el('p', 'session-mentor', session.mentor),
       el('p', 'session-summary', session.summary)
@@ -105,7 +163,7 @@ const MENTOR_SESSIONS = [
     if (!lightbox) buildLightbox();
     lastFocus = opener;
     lightbox.querySelector('.poster-lightbox-poster').replaceChildren(posterFor(session));
-    lightbox.querySelector('.session-date').textContent = formatDate(session.date);
+    lightbox.querySelector('.session-date').textContent = `${session.label} · ${formatDate(session.date)}`;
     lightbox.querySelector('.session-title').textContent = session.title;
     lightbox.querySelector('.session-mentor').textContent = session.mentor;
     lightbox.querySelector('.session-summary').textContent = session.summary;
@@ -124,8 +182,5 @@ const MENTOR_SESSIONS = [
   document.querySelectorAll('[data-sessions]').forEach(grid => {
     const limit = Number(grid.dataset.limit) || sessions.length;
     grid.replaceChildren(...sessions.slice(0, limit).map(card));
-  });
-  document.querySelectorAll('[data-sessions-count]').forEach(node => {
-    node.textContent = sessions.length;
   });
 })();
