@@ -54,16 +54,24 @@ function clearFieldError(inputId, errorId) {
   err.classList.remove('visible');
 }
 
-function clearAllErrors() {
-  ['fullname', 'phone', 'email', 'state', 'city'].forEach(id => {
-    document.getElementById(id).classList.remove('invalid', 'valid');
-  });
-  ['nameError', 'phoneError', 'emailError', 'stateError', 'cityError'].forEach(id => {
-    const el = document.getElementById(id);
-    el.textContent = '';
-    el.classList.remove('visible');
+function resetFieldErrors(fields) {
+  fields.forEach(([inputId, errorId]) => {
+    document.getElementById(inputId).classList.remove('invalid', 'valid');
+    const err = document.getElementById(errorId);
+    err.textContent = '';
+    err.classList.remove('visible');
   });
   document.getElementById('formError').style.display = 'none';
+}
+
+function clearAllErrors() {
+  resetFieldErrors([
+    ['fullname', 'nameError'],
+    ['phone', 'phoneError'],
+    ['email', 'emailError'],
+    ['state', 'stateError'],
+    ['city', 'cityError']
+  ]);
 }
 
 function showGroupError(groupId, errorId, msg) {
@@ -146,7 +154,8 @@ document.getElementById('email').addEventListener('input', function () {
 });
 
 // State & City: clear error on input
-['state', 'city'].forEach(id => {
+// Clear a field's error as soon as it has a value
+['state', 'city', 'organisation', 'profileLink', 'message'].forEach(id => {
   document.getElementById(id).addEventListener('input', function () {
     if (this.value.trim()) clearFieldError(id, id + 'Error');
   });
@@ -217,24 +226,40 @@ function goToContactDetails() {
 }
 
 // ===== JOINING AS (member / mentor / investor / partner) =====
+const PARTNER_MODAL = {
+  modalTitle: 'Thank you for reaching out 🤝',
+  modalMsg: "We've received your details and <strong>someone from the team will reach out personally</strong>. " +
+    'In the meantime, you are welcome to join the WhatsApp community and see the room for yourself.'
+};
+
 const JOIN_COPY = {
   Member: {
     step2: 'About Me',
-    submit: 'Join the Community'
+    progress: 'About Me',
+    submit: 'Join the Community',
+    modalTitle: 'Welcome to The Elite Show Community 🎉',
+    modalMsg: "You're officially on the list.<br><br>You've just taken your <strong>first step into the room</strong>. " +
+      'Join our WhatsApp community to hear about the next mentor session, Elite Brew and workshop first.'
   },
   Mentor: {
+    ...PARTNER_MODAL,
+    progress: 'Your Interest',
     step2: 'Mentoring With Us',
     submit: 'Apply as a Mentor',
     label: 'What could you share with the community?',
     placeholder: 'Your area of expertise, and whether you would host a mentor session, an Elite Brew or a workshop.'
   },
   Investor: {
+    ...PARTNER_MODAL,
+    progress: 'Your Interest',
     step2: 'Investing With Us',
     submit: 'Start the Conversation',
     label: 'What would you like to explore with us?',
     placeholder: 'A little about you or your fund, and what you would like to know about The Elite Show Community.'
   },
   Collaborator: {
+    ...PARTNER_MODAL,
+    progress: 'Your Interest',
     step2: 'Partnering With Us',
     submit: 'Partner With Us',
     label: 'How would you like to collaborate?',
@@ -242,32 +267,52 @@ const JOIN_COPY = {
   }
 };
 
-function getJoiningAs() {
-  const checked = document.querySelector('input[name="joiningAs"]:checked');
-  return checked ? checked.value : 'Member';
+function checkedValue(name) {
+  return document.querySelector(`input[name="${name}"]:checked`)?.value || '';
 }
 
-function isMemberSignup() {
-  return getJoiningAs() === 'Member';
+function getJoiningAs() {
+  return checkedValue('joiningAs') || 'Member';
+}
+
+// One submission per audience, so a member can still apply as a mentor later.
+// Members keep the original key so earlier signups stay recognised.
+function submittedKey(joiningAs) {
+  return joiningAs === 'Member' ? 'eliteWaitlistSubmitted' : `eliteWaitlistSubmitted:${joiningAs}`;
+}
+
+function hasSubmitted(joiningAs) {
+  try {
+    return localStorage.getItem(submittedKey(joiningAs)) === 'true';
+  } catch (e) {
+    return false;
+  }
+}
+
+function markSubmitted(joiningAs) {
+  try {
+    localStorage.setItem(submittedKey(joiningAs), 'true');
+  } catch (e) { /* storage blocked: nothing to remember */ }
 }
 
 function updateJoinMode() {
   const joiningAs = getJoiningAs();
-  const copy = JOIN_COPY[joiningAs] || JOIN_COPY.Member;
+  const copy = JOIN_COPY[joiningAs];
   const isMember = joiningAs === 'Member';
 
   document.getElementById('memberFields').hidden = !isMember;
   document.getElementById('partnerFields').hidden = isMember;
   document.getElementById('step2Title').textContent = copy.step2;
-  document.querySelector('#progressStep2 strong').textContent = isMember ? 'About Me' : 'Your Interest';
-  document.getElementById('nextBtnText').textContent = isMember ? 'Next: About Me' : 'Next: Your Interest';
+  document.querySelector('#progressStep2 strong').textContent = copy.progress;
+  document.getElementById('nextBtnText').textContent = `Next: ${copy.progress}`;
   if (!isMember) {
     document.getElementById('messageLabel').textContent = copy.label;
     document.getElementById('message').placeholder = copy.placeholder;
   }
 
-  const btn = document.getElementById('submitBtn');
-  if (!btn.disabled) document.getElementById('btnText').textContent = copy.submit;
+  const submitted = hasSubmitted(joiningAs);
+  document.getElementById('submitBtn').disabled = submitted;
+  document.getElementById('btnText').textContent = submitted ? 'Already Joined' : copy.submit;
 }
 
 document.querySelectorAll('input[name="joiningAs"]').forEach(input => {
@@ -278,24 +323,18 @@ document.querySelectorAll('input[name="joiningAs"]').forEach(input => {
 document.querySelectorAll('[data-join]').forEach(link => {
   link.addEventListener('click', () => {
     const option = document.querySelector(`input[name="joiningAs"][value="${link.dataset.join}"]`);
-    if (option) option.checked = true;
-    setFormStep(1);
+    if (!option || option.checked) return;
+    option.checked = true;
     updateJoinMode();
   });
 });
 
 function validatePartnerDetails() {
-  [
+  resetFieldErrors([
     ['organisation', 'organisationError'],
     ['profileLink', 'profileLinkError'],
     ['message', 'messageError']
-  ].forEach(([inputId, errorId]) => {
-    document.getElementById(inputId).classList.remove('invalid', 'valid');
-    const err = document.getElementById(errorId);
-    err.textContent = '';
-    err.classList.remove('visible');
-  });
-  document.getElementById('formError').style.display = 'none';
+  ]);
 
   const organisation = document.getElementById('organisation').value.trim();
   const profileLink = document.getElementById('profileLink').value.trim();
@@ -306,7 +345,7 @@ function validatePartnerDetails() {
     showFieldError('organisation', 'organisationError', 'Tell us your organisation or what you do.');
     hasError = true;
   }
-  if (profileLink && !/^(https?:\/\/)?[^\s.]+\.[^\s]{2,}$/i.test(profileLink)) {
+  if (profileLink && !/^(https?:\/\/)?[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}(\/\S*)?$/i.test(profileLink)) {
     showFieldError('profileLink', 'profileLinkError', 'Enter a valid link, or leave this blank.');
     hasError = true;
   }
@@ -318,14 +357,8 @@ function validatePartnerDetails() {
   return !hasError;
 }
 
-['organisation', 'profileLink', 'message'].forEach(id => {
-  document.getElementById(id).addEventListener('input', function () {
-    if (this.value.trim()) clearFieldError(id, id + 'Error');
-  });
-});
-
 function validateAboutMe() {
-  if (!isMemberSignup()) return validatePartnerDetails();
+  if (getJoiningAs() !== 'Member') return validatePartnerDetails();
   clearAboutMeErrors();
 
   const age = document.querySelector('input[name="age"]:checked');
@@ -387,7 +420,8 @@ document.getElementById('paymentConsent').addEventListener('change', function ()
 
 // ===== FORM SUBMIT =====
 async function handleSubmit() {
-  if (localStorage.getItem('eliteWaitlistSubmitted') === 'true') return;
+  const joiningAs = getJoiningAs();
+  if (hasSubmitted(joiningAs)) return;
   if (!validateContactDetails()) {
     setFormStep(1);
     return;
@@ -399,14 +433,6 @@ async function handleSubmit() {
   const email = document.getElementById('email').value.trim();
   const state = document.getElementById('state').value.trim();
   const city = document.getElementById('city').value.trim();
-  const joiningAs = getJoiningAs();
-  const isMember = joiningAs === 'Member';
-  const checkedValue = name => document.querySelector(`input[name="${name}"]:checked`)?.value || '';
-  const age = isMember ? checkedValue('age') : '';
-  const role = isMember ? checkedValue('role') : '';
-  const topics = isMember ? [...document.querySelectorAll('input[name="topics"]:checked')].map(input => input.value) : [];
-  const involvement = isMember ? checkedValue('involvement') : '';
-  const paymentConsent = isMember && document.getElementById('paymentConsent').checked;
   const errEl = document.getElementById('formError');
   const btn = document.getElementById('submitBtn');
   const btnTxt = document.getElementById('btnText');
@@ -414,24 +440,24 @@ async function handleSubmit() {
   btn.disabled = true;
   btnTxt.textContent = 'Submitting...';
 
-  const payload = {
-    name,
-    phone,
-    email,
-    state,
-    city,
-    age,
-    role,
-    topics: topics.join(', '),
-    involvement,
-    paymentConsent,
-    accessFee: isMember ? 299 : 0,
-    joiningAs,
-    organisation: isMember ? '' : document.getElementById('organisation').value.trim(),
-    profileLink: isMember ? '' : document.getElementById('profileLink').value.trim(),
-    message: isMember ? '' : document.getElementById('message').value.trim()
-  };
-  let isSuccess = false;
+  // Only the visible half of step 2 is sent; the Apps Script fills blanks for the rest.
+  const payload = { name, phone, email, state, city, joiningAs };
+  if (joiningAs === 'Member') {
+    Object.assign(payload, {
+      age: checkedValue('age'),
+      role: checkedValue('role'),
+      topics: [...document.querySelectorAll('input[name="topics"]:checked')].map(input => input.value).join(', '),
+      involvement: checkedValue('involvement'),
+      paymentConsent: document.getElementById('paymentConsent').checked,
+      accessFee: 299
+    });
+  } else {
+    Object.assign(payload, {
+      organisation: document.getElementById('organisation').value.trim(),
+      profileLink: document.getElementById('profileLink').value.trim(),
+      message: document.getElementById('message').value.trim()
+    });
+  }
 
   try {
     if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL") {
@@ -445,19 +471,13 @@ async function handleSubmit() {
       const result = await res.json();
       if (!result.success) throw new Error(result.message || 'Unable to save registration.');
     }
+    markSubmitted(joiningAs);
     openModal(joiningAs);
-    localStorage.setItem('eliteWaitlistSubmitted', 'true');
-    isSuccess = true;
   } catch (err) {
     errEl.textContent = 'Something went wrong. Please try again.';
     errEl.style.display = 'block';
   } finally {
-    if (!isSuccess) {
-      btn.disabled = false;
-      btnTxt.textContent = (JOIN_COPY[joiningAs] || JOIN_COPY.Member).submit;
-    } else {
-      btnTxt.textContent = 'Already Joined';
-    }
+    updateJoinMode();
   }
 }
 
@@ -468,23 +488,9 @@ document.getElementById('waitlistForm').addEventListener('submit', function (e) 
 
 updateJoinMode();
 
-// Check on page load
-if (localStorage.getItem('eliteWaitlistSubmitted') === 'true') {
-  const btn = document.getElementById('submitBtn');
-  const btnTxt = document.getElementById('btnText');
-  if (btn && btnTxt) {
-    btn.disabled = true;
-    btnTxt.textContent = 'Already Joined';
-  }
-}
-
 function openModal(joiningAs = 'Member') {
-  if (joiningAs !== 'Member') {
-    document.getElementById('modalTitle').textContent = 'Thank you for reaching out 🤝';
-    document.getElementById('modalMsg').innerHTML =
-      "We've received your details and <strong>someone from the team will reach out personally</strong>. " +
-      'In the meantime, you are welcome to join the WhatsApp community and see the room for yourself.';
-  }
+  document.getElementById('modalTitle').textContent = JOIN_COPY[joiningAs].modalTitle;
+  document.getElementById('modalMsg').innerHTML = JOIN_COPY[joiningAs].modalMsg;
   document.getElementById('modalOverlay').classList.add('active');
   document.body.style.overflow = 'hidden';
   launchConfetti();
@@ -796,7 +802,10 @@ function animateCounter(el) {
   requestAnimationFrame(step);
 }
 
-const counters = document.querySelectorAll('.stat-number[data-count]');
+// Reduced-motion users get the final numbers straight away
+const counters = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  ? []
+  : document.querySelectorAll('.stat-number[data-count]');
 const statsObserver = new IntersectionObserver(entries => {
   if (entries.some(entry => entry.isIntersecting)) {
     counters.forEach(animateCounter);

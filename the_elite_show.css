@@ -27,6 +27,10 @@ html {
   scroll-behavior: smooth;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   background: var(--black);
   color: var(--white);
@@ -593,14 +597,6 @@ a.nav-logo {
 }
 
 /* ===================== FEATURES ===================== */
-#about {
-  position: relative;
-  z-index: 2;
-  padding: 7rem 2rem;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
 .section-label {
   font-size: 0.6rem;
   font-weight: 600;
@@ -627,7 +623,7 @@ a.nav-logo {
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1.5rem;
   background: transparent;
   border: none;
@@ -635,7 +631,7 @@ a.nav-logo {
 
 .feature-card {
   background: var(--black2);
-  padding: 2.5rem;
+  padding: 2.2rem 1.8rem;
   border-radius: 16px;
   border: 1px solid rgba(0, 200, 83, 0.15);
   box-shadow: 0 0 18px rgba(0, 200, 83, 0.05);
@@ -1554,10 +1550,6 @@ footer {
 }
 
 /* ===================== CONTENT SECTIONS ===================== */
-[hidden] {
-  display: none !important;
-}
-
 .section {
   position: relative;
   z-index: 2;
@@ -1594,14 +1586,6 @@ footer {
 
 #about .section-title {
   margin-bottom: 3.5rem;
-}
-
-#about .features-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-#about .feature-card {
-  padding: 2.2rem 1.8rem;
 }
 
 .hero-actions {
@@ -1847,6 +1831,7 @@ footer {
 
 /* Partner form fields */
 .field-group textarea {
+  transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
   resize: vertical;
   min-height: 120px;
   line-height: 1.6;
@@ -1872,7 +1857,7 @@ footer {
     gap: 2.5rem;
   }
 
-  #about .features-grid,
+  .features-grid,
   .lead-to {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1917,7 +1902,7 @@ footer {
   }
 
   .roadmap,
-  #about .features-grid {
+  .features-grid {
     grid-template-columns: 1fr;
     gap: 1.8rem;
   }

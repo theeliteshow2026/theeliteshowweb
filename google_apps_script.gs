@@ -42,8 +42,7 @@ function doPost(e) {
     const sheet = getOrCreateSheet(spreadsheet);
     ensureHeaders(sheet);
 
-    sheet.appendRow([
-      new Date(),
+    const row = [
       payload.name,
       payload.phone,
       payload.email,
@@ -54,12 +53,13 @@ function doPost(e) {
       payload.topics,
       payload.involvement,
       payload.paymentConsent ? 'Yes' : 'No',
-      isMember(payload) ? Number(payload.accessFee) || 299 : '',
+      isMember(payload) ? 299 : '',
       payload.joiningAs || 'Member',
-      payload.organisation || '',
-      payload.profileLink || '',
-      payload.message || ''
-    ]);
+      payload.organisation,
+      payload.profileLink,
+      payload.message
+    ].map(cell);
+    sheet.appendRow([new Date()].concat(row));
 
     return jsonResponse({
       success: true,
@@ -115,10 +115,21 @@ function getOrCreateSheet(spreadsheet) {
 
 function ensureHeaders(sheet) {
   const headerRange = sheet.getRange(1, 1, 1, HEADERS.length);
+  // Skip the rewrite (and the slow column resize) once the headers are in place
+  if (headerRange.getValues()[0].join('|') === HEADERS.join('|')) return;
   headerRange.setValues([HEADERS]);
   headerRange.setFontWeight('bold');
   sheet.setFrozenRows(1);
   sheet.autoResizeColumns(1, HEADERS.length);
+}
+
+const JOINING_AS = ['Member', 'Mentor', 'Investor', 'Collaborator'];
+
+// Text that starts with = + - or @ would run as a formula when the sheet is
+// opened, so store it as plain text instead.
+function cell(value) {
+  const text = value == null ? '' : String(value);
+  return /^[=+\-@]/.test(text) ? "'" + text : text;
 }
 
 // Mentors, investors and collaborators skip the member questions and the
@@ -128,6 +139,10 @@ function isMember(payload) {
 }
 
 function validatePayload(payload) {
+  if (payload.joiningAs && JOINING_AS.indexOf(payload.joiningAs) === -1) {
+    throw new Error('Unknown joiningAs value.');
+  }
+
   const contactFields = ['name', 'phone', 'email', 'state', 'city'];
   const requiredFields = isMember(payload)
     ? contactFields.concat(['age', 'role', 'topics', 'involvement'])
