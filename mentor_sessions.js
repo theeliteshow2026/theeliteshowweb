@@ -17,7 +17,7 @@ const MENTOR_SESSIONS = [
     date: '2026-08-16',
     title: 'Dream, Design, Do: The Route Map to Achieve Anything',
     mentor: 'Azvan Sait',
-    summary: 'Author, co-founder of Purelink and India Book of Records holder.',
+    summary: 'Author, co-founder of The Elite Show Community and India Book of Records holder.',
     poster: 'posters/2026-08-16-dream-design-do.jpg'
   },
   {
