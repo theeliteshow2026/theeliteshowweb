@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saturday Mentor Sessions — The Elite Show Community</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <meta name="description"
+    content="Every Saturday mentor session hosted by The Elite Show Community, with the poster from each one.">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="the_elite_show.css">
+</head>
+
+<body class="plain-cursor">
+
+  <div class="grid-bg"></div>
+
+  <nav>
+    <a class="nav-logo" href="index.html">The Elite Show <span>Community</span></a>
+    <div class="nav-links">
+      <a href="index.html#why">Why</a>
+      <a href="index.html#experiences">Experiences</a>
+      <a href="index.html#get-involved">Get Involved</a>
+    </div>
+    <a class="nav-cta" href="index.html#waitlist">Join Us</a>
+  </nav>
+
+  <main class="section sessions-page">
+    <a class="sessions-back" href="index.html#sessions">← Back to home</a>
+    <p class="section-label">Every Saturday</p>
+    <h1 class="section-title">Saturday <em>mentor sessions</em></h1>
+    <p class="section-lead"><span data-sessions-count></span> sessions so far. Every Saturday, someone a few steps
+      ahead shares what they've learned with the community. Tap a poster to see it larger.</p>
+    <div class="sessions-grid" data-sessions></div>
+    <p class="section-kicker">Want to lead a Saturday session? <a href="index.html#get-involved">Become a mentor →</a></p>
+  </main>
+
+  <footer>
+    <div class="footer-logo">The Elite Show <span>Community</span></div>
+    <div class="footer-tagline">Where people meet ideas. And ideas meet opportunity.</div>
+    <div class="footer-copy">© <span id="footerYear">2026</span> The Elite Show Community. All rights reserved.</div>
+  </footer>
+
+  <script src="mentor_sessions.js"></script>
+  <script>
+    document.getElementById('footerYear').textContent = new Date().getFullYear();
+  </script>
+</body>
+
+</html>

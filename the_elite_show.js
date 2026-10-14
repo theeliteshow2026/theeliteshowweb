@@ -658,7 +658,7 @@ if (supportsPointerEffects) {
   };
   animateRing();
 
-  const interactables = document.querySelectorAll('a, button, input, textarea, .feature-card, .audience-card, .scramble-target');
+  const interactables = document.querySelectorAll('a, button, input, textarea, .feature-card, .audience-card, .session-card, .scramble-target');
   interactables.forEach(el => {
     el.addEventListener('mouseenter', () => {
       cursorRing?.classList.add('hovered');

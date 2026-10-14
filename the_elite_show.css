@@ -1829,6 +1829,298 @@ footer {
   margin-bottom: 0.3rem;
 }
 
+/* Saturday mentor sessions */
+.sessions-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 2.5rem;
+}
+
+.sessions-head .section-lead {
+  margin-bottom: 0;
+}
+
+.sessions-all,
+.sessions-back {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--green);
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(202, 251, 12, 0.4);
+  padding-bottom: 0.3rem;
+  transition: border-color 0.3s ease;
+}
+
+.sessions-all:hover,
+.sessions-back:hover {
+  border-color: var(--green);
+}
+
+.sessions-back {
+  display: inline-block;
+  margin-bottom: 2.5rem;
+}
+
+.section.sessions-page {
+  padding-top: 9rem;
+  min-height: 80vh;
+}
+
+.sessions-page .section-lead {
+  margin-bottom: 3rem;
+}
+
+.sessions-page .section-kicker a {
+  color: var(--white);
+}
+
+.sessions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.session-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.session-poster {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid rgba(202, 251, 12, 0.18);
+  transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.session-card:hover .session-poster,
+.session-card:focus-visible .session-poster {
+  transform: translateY(-4px);
+  border-color: rgba(202, 251, 12, 0.6);
+  box-shadow: 0 12px 40px rgba(202, 251, 12, 0.12);
+}
+
+.session-card:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+
+.session-poster-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gen-poster {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 1.4rem 1.3rem;
+  background: var(--green);
+  color: var(--black);
+}
+
+.gen-poster--dark {
+  background: var(--black3);
+  color: var(--green);
+}
+
+.gen-poster-eyebrow,
+.gen-poster-foot {
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.gen-poster-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(3rem, 6vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1;
+  margin-top: auto;
+}
+
+.gen-poster-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.15;
+  margin-top: 0.4rem;
+}
+
+.gen-poster-mentor {
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin: 0.4rem 0 1.4rem;
+  opacity: 0.8;
+}
+
+.gen-poster-foot {
+  border-top: 1px solid currentColor;
+  padding-top: 0.7rem;
+  opacity: 0.85;
+}
+
+.session-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.session-date {
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+.session-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--white);
+}
+
+.session-mentor {
+  font-size: 0.78rem;
+  color: var(--white);
+  opacity: 0.8;
+}
+
+.session-summary {
+  font-size: 0.78rem;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--grey);
+}
+
+.poster-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(7, 7, 7, 0.9);
+  backdrop-filter: blur(6px);
+}
+
+.poster-lightbox-inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 420px) minmax(0, 280px);
+  gap: 2rem;
+  align-items: end;
+  max-height: 100%;
+}
+
+.poster-lightbox-poster {
+  aspect-ratio: 4 / 5;
+  max-height: 80vh;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid rgba(202, 251, 12, 0.3);
+}
+
+.poster-lightbox-poster .session-poster-img {
+  object-fit: contain;
+  background: var(--black);
+}
+
+.poster-lightbox-poster .gen-poster-title {
+  font-size: 1.8rem;
+}
+
+.poster-lightbox-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.poster-lightbox-close {
+  position: absolute;
+  top: -2.6rem;
+  right: 0;
+  background: none;
+  border: 0;
+  color: var(--white);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.4rem;
+}
+
+.poster-lightbox-close:focus-visible {
+  outline: 2px solid var(--green);
+}
+
+/* Pages without the custom cursor script keep the normal pointer */
+body.plain-cursor {
+  cursor: auto !important;
+}
+
+body.plain-cursor a,
+body.plain-cursor button {
+  cursor: pointer !important;
+}
+
+@media (max-width: 900px) {
+  .sessions-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .poster-lightbox-inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    max-width: 420px;
+  }
+
+  .poster-lightbox-poster {
+    max-height: 62vh;
+  }
+}
+
+@media (max-width: 640px) {
+  .sessions-grid {
+    gap: 1rem;
+  }
+
+  .section.sessions-page {
+    padding-top: 7rem;
+  }
+
+  .gen-poster {
+    padding: 1rem 0.9rem;
+  }
+
+  .gen-poster-title {
+    font-size: 1rem;
+  }
+}
+
 /* Partner form fields */
 .field-group textarea {
   transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
