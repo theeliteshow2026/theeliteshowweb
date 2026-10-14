@@ -2003,6 +2003,14 @@ footer {
   color: var(--white);
 }
 
+/* Cards show at most two lines of title; the poster viewer shows it in full */
+.session-card .session-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .session-mentor {
   font-size: 0.78rem;
   color: var(--white);
