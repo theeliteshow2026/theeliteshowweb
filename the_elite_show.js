@@ -2,6 +2,9 @@
 // 🔧 REPLACE THESE TWO VALUES BEFORE GOING LIVE:
 const WHATSAPP_LINK = "https://chat.whatsapp.com/ItDdTXKakan01FUREdRxar";
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbylsTW9H43fY6-Mzuz6F9E19jeKf8vu6N7Wrn1IB1o2uwDU6mfHLVx1rFWePnczknDR/exec";
+// Premium Community payment page (e.g. a Razorpay Payment Page link). While it
+// is empty, new members are told the payment link will be sent to them.
+const PAYMENT_LINK = "";
 
 // Update WhatsApp button dynamically
 document.querySelector('.btn-whatsapp').href = WHATSAPP_LINK;
@@ -234,12 +237,15 @@ const PARTNER_MODAL = {
 
 const JOIN_COPY = {
   Member: {
-    step2: 'About Me',
-    progress: 'About Me',
-    submit: 'Join the Community',
-    modalTitle: 'Welcome to The Elite Show Community 🎉',
-    modalMsg: "You're officially on the list.<br><br>You've just taken your <strong>first step into the room</strong>. " +
-      'Join our WhatsApp community to hear about the next mentor session, Elite Brew and workshop first.'
+    step2: 'Your Membership',
+    progress: 'Membership',
+    submit: 'Join for ₹299',
+    modalTitle: 'Welcome to The Elite Show Premium Community 🎉',
+    modalMsg: "Your spot is reserved.<br><br><strong>One last step: complete your ₹299 payment.</strong> " +
+      (PAYMENT_LINK
+        ? 'Tap the button below to pay and confirm your membership.'
+        : "We'll send your payment link to your WhatsApp and email shortly.") +
+      '<br><br>Meanwhile, join our WhatsApp community to hear about the next mentor session, Elite Brew and workshop first.'
   },
   Mentor: {
     ...PARTNER_MODAL,
@@ -385,7 +391,7 @@ function validateAboutMe() {
     hasError = true;
   }
   if (!paymentConsent) {
-    showGroupError('paymentGroup', 'paymentError', 'You must confirm the ₹299 access fee to submit.');
+    showGroupError('paymentGroup', 'paymentError', 'Please agree to the ₹299 membership fee to join.');
     hasError = true;
   }
 
@@ -411,6 +417,13 @@ document.querySelectorAll('input[name="topics"]').forEach(input => {
 ].forEach(([name, groupId, errorId]) => {
   document.querySelectorAll(`input[name="${name}"]`).forEach(input => {
     input.addEventListener('change', () => clearGroupError(groupId, errorId));
+  });
+});
+
+// Members under 18 get a reminder to involve a parent before paying
+document.querySelectorAll('input[name="age"]').forEach(input => {
+  input.addEventListener('change', () => {
+    document.getElementById('minorNote').hidden = checkedValue('age') !== '13-17';
   });
 });
 
@@ -491,6 +504,9 @@ updateJoinMode();
 function openModal(joiningAs = 'Member') {
   document.getElementById('modalTitle').textContent = JOIN_COPY[joiningAs].modalTitle;
   document.getElementById('modalMsg').innerHTML = JOIN_COPY[joiningAs].modalMsg;
+  const payBtn = document.getElementById('payBtn');
+  payBtn.hidden = !(joiningAs === 'Member' && PAYMENT_LINK);
+  if (PAYMENT_LINK) payBtn.href = PAYMENT_LINK;
   document.getElementById('modalOverlay').classList.add('active');
   document.body.style.overflow = 'hidden';
   launchConfetti();

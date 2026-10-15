@@ -31,6 +31,11 @@ html {
   display: none !important;
 }
 
+/* Stop off-screen animations from widening the page on phones */
+html {
+  overflow-x: clip;
+}
+
 body {
   background: var(--black);
   color: var(--white);
@@ -1777,6 +1782,106 @@ footer {
 .audience-cta:hover {
   box-shadow: 0 0 25px rgba(202, 251, 12, 0.35);
   transform: translateY(-1px);
+}
+
+/* Premium Community */
+.premium-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 2.5rem;
+  align-items: center;
+  background: var(--black2);
+  border: 1px solid rgba(202, 251, 12, 0.35);
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 0 60px rgba(202, 251, 12, 0.06);
+}
+
+.premium-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.premium-amount {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--green);
+}
+
+.premium-price-note {
+  font-size: 0.8rem;
+  font-weight: 300;
+  color: var(--grey);
+  margin: 0.6rem 0 1.6rem;
+}
+
+.premium-perks {
+  list-style: none;
+  display: grid;
+  gap: 1.1rem;
+}
+
+.premium-perks li {
+  position: relative;
+  padding-left: 1.8rem;
+  font-size: 0.88rem;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--grey);
+}
+
+.premium-perks li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--green);
+  font-weight: 700;
+}
+
+.premium-perks strong {
+  color: var(--white);
+  font-weight: 600;
+}
+
+@media (max-width: 760px) {
+  .premium-card {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 2rem 1.5rem;
+  }
+}
+
+.field-hint {
+  font-size: 0.72rem;
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--grey);
+  margin-top: 0.6rem;
+}
+
+.btn-pay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 0.8rem;
+  padding: 1.1rem 2.5rem;
+  background: var(--green);
+  color: var(--black);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: box-shadow 0.3s ease;
+}
+
+.btn-pay:hover {
+  box-shadow: 0 0 30px rgba(202, 251, 12, 0.35);
 }
 
 /* Roadmap */

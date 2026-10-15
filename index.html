@@ -7,7 +7,7 @@
   <title>The Elite Show Community — Where People Meet Ideas</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="description"
-    content="The Elite Show Community brings Kerala's students, founders, creators and professionals together through mentor sessions, Elite Brew meetups and workshops. Join as a member, mentor, investor or partner.">
+    content="The Elite Show Community brings Kerala's students, founders, creators and professionals together through mentor sessions, Elite Brew meetups and workshops. Join The Elite Show Premium Community, or mentor, invest or partner with us.">
   <meta property="og:title" content="The Elite Show Community">
   <meta property="og:description" content="Where people meet ideas. And ideas meet opportunity.">
   <link
@@ -38,9 +38,10 @@
       <a href="#why">Why</a>
       <a href="#experiences">Experiences</a>
       <a href="#sessions">Sessions</a>
+      <a href="#premium">Premium</a>
       <a href="#get-involved">Get Involved</a>
     </div>
-    <a class="nav-cta" href="#waitlist">Join Us</a>
+    <a class="nav-cta" href="#waitlist" data-join="Member">Join Premium</a>
   </nav>
 
   <!-- HERO -->
@@ -61,7 +62,7 @@
       right time. <strong>We create the rooms where connections happen</strong>, so ideas meet opportunity.
     </p>
     <div class="hero-actions">
-      <a class="btn-primary" href="#waitlist" data-join="Member"><span>Join the Community</span></a>
+      <a class="btn-primary" href="#waitlist" data-join="Member"><span>Join Our Paid Community</span></a>
       <a class="btn-ghost" href="#get-involved"><span>Mentor, Invest or Partner</span></a>
     </div>
 
@@ -209,6 +210,29 @@
   </section>
 
   <!-- AUDIENCES -->
+  <!-- PREMIUM COMMUNITY -->
+  <section id="premium" class="section">
+    <p class="section-label reveal">Now Open</p>
+    <h2 class="section-title reveal">The Elite Show <em>Premium Community</em></h2>
+    <p class="section-lead reveal">Our paid community for people who want more than a seat in the audience. One
+      membership opens every room we create.</p>
+
+    <div class="premium-card reveal-scale">
+      <div class="premium-price">
+        <p class="audience-tag">Membership</p>
+        <p class="premium-amount">₹299</p>
+        <p class="premium-price-note">One fee to join the Premium Community</p>
+        <a class="audience-cta" href="#waitlist" data-join="Member">Join Our Paid Community →</a>
+      </div>
+      <ul class="premium-perks">
+        <li><strong>Saturday mentor sessions</strong> with people a few steps ahead of you</li>
+        <li><strong>Elite Brew meetups and workshops</strong> where ideas turn into plans</li>
+        <li><strong>A close circle of ambitious people</strong> who grow together</li>
+        <li><strong>Direct connections</strong> to mentors, founders, creators and collaborators</li>
+      </ul>
+    </div>
+  </section>
+
   <section id="get-involved" class="section">
     <p class="section-label reveal">Get Involved</p>
     <h2 class="section-title reveal">Help us build <em>the room</em></h2>
@@ -218,10 +242,10 @@
     <div class="audience-grid">
       <article class="audience-card reveal-scale">
         <p class="audience-tag">For new members</p>
-        <h3>Join the community</h3>
-        <p>Meet ambitious people near you, learn from those ahead of you and find your next mentor, collaborator or
-          opportunity.</p>
-        <a class="audience-cta" href="#waitlist" data-join="Member">Join the Community →</a>
+        <h3>Join our paid community</h3>
+        <p>Become a member of The Elite Show Premium Community for ₹299. Meet ambitious people near you, learn from
+          those ahead of you and find your next mentor, collaborator or opportunity.</p>
+        <a class="audience-cta" href="#waitlist" data-join="Member">Join Our Paid Community →</a>
       </article>
       <article class="audience-card reveal-scale">
         <p class="audience-tag">For mentors</p>
@@ -263,9 +287,10 @@
   <section id="waitlist">
     <div class="waitlist-inner">
       <p class="section-label reveal">Take Your Seat</p>
-      <h2 class="section-title reveal">Join The Elite Show <em>Community</em></h2>
+      <h2 class="section-title reveal">Join Our <em>Paid Community</em></h2>
       <p class="waitlist-sub reveal">
-        Joining as a member, mentor, investor or partner? Tell us who you are and we'll reach out personally.
+        Become a member of The Elite Show Premium Community for ₹299. Coming as a mentor, investor or partner
+        instead? Pick that below and we'll reach out personally.
       </p>
 
       <div class="reveal-scale">
@@ -289,11 +314,11 @@
             </div>
 
             <fieldset class="choice-group" id="joinGroup">
-              <legend>I'm joining as</legend>
+              <legend>I'd like to</legend>
               <div class="option-grid compact">
-                <label class="choice-option"><input type="radio" name="joiningAs" value="Member" checked><span>Member</span></label>
+                <label class="choice-option"><input type="radio" name="joiningAs" value="Member" checked><span>Join the Paid Community</span></label>
                 <label class="choice-option"><input type="radio" name="joiningAs" value="Mentor"><span>Mentor</span></label>
-                <label class="choice-option"><input type="radio" name="joiningAs" value="Investor"><span>Investor</span></label>
+                <label class="choice-option"><input type="radio" name="joiningAs" value="Investor"><span>Invest</span></label>
                 <label class="choice-option"><input type="radio" name="joiningAs" value="Collaborator"><span>Partner</span></label>
               </div>
             </fieldset>
@@ -368,6 +393,8 @@
                 <label class="choice-option"><input type="radio" name="age" value="25-34"><span>25-34</span></label>
                 <label class="choice-option"><input type="radio" name="age" value="35+"><span>35+</span></label>
               </div>
+              <p class="field-hint" id="minorNote" hidden>Under 18? Please check with a parent or guardian before you
+                pay the membership fee.</p>
               <span class="field-error" id="ageError"></span>
             </fieldset>
 
@@ -415,8 +442,9 @@
               <label class="payment-consent">
                 <input type="checkbox" id="paymentConsent" name="paymentConsent">
                 <span class="checkmark" aria-hidden="true"></span>
-                <span>I am willing to pay <strong>₹299</strong> for community access.</span>
+                <span>I agree to pay <strong>₹299</strong> to join The Elite Show Premium Community.</span>
               </label>
+              <p class="field-hint">We'll send your payment link right after you sign up.</p>
               <span class="field-error" id="paymentError"></span>
             </div>
             </div>
@@ -428,7 +456,7 @@
                 <span>Back</span>
               </button>
               <button class="btn-submit" id="submitBtn" type="submit">
-                <span id="btnText">Join the Community</span>
+                <span id="btnText">Join for ₹299</span>
               </button>
             </div>
           </div>
@@ -464,6 +492,7 @@
         You've just taken your <strong>first step into the room</strong>. Join our WhatsApp community to hear about
         the next mentor session, Elite Brew and workshop first.
       </p>
+      <a class="btn-pay" id="payBtn" href="#" target="_blank" rel="noopener" hidden>Pay ₹299 to Complete Joining</a>
       <a class="btn-whatsapp" href="YOUR_WHATSAPP_INVITE_LINK" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path
