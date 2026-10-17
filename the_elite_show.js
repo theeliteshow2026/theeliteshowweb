@@ -228,7 +228,8 @@ function goToContactDetails() {
   document.getElementById('formStep1').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ===== JOINING AS (member / mentor / investor / partner) =====
+// ===== JOINING AS (free member / premium member / mentor / investor / partner) =====
+// 'Member' is the paid Premium Community; the value is kept so earlier signups still match.
 const PARTNER_MODAL = {
   modalTitle: 'Thank you for reaching out 🤝',
   modalMsg: "We've received your details and <strong>someone from the team will reach out personally</strong>. " +
@@ -236,6 +237,14 @@ const PARTNER_MODAL = {
 };
 
 const JOIN_COPY = {
+  'Free Member': {
+    step2: 'About Me',
+    progress: 'About Me',
+    submit: 'Join for Free',
+    modalTitle: 'Welcome to The Elite Show Community 🎉',
+    modalMsg: "You're officially in.<br><br>You've just taken your <strong>first step into the room</strong>. " +
+      'Join our WhatsApp community to hear about the next mentor session, Elite Brew and workshop first.'
+  },
   Member: {
     step2: 'Your Membership',
     progress: 'Membership',
@@ -278,7 +287,7 @@ function checkedValue(name) {
 }
 
 function getJoiningAs() {
-  return checkedValue('joiningAs') || 'Member';
+  return checkedValue('joiningAs') || 'Free Member';
 }
 
 // One submission per audience, so a member can still apply as a mentor later.
@@ -301,13 +310,24 @@ function markSubmitted(joiningAs) {
   } catch (e) { /* storage blocked: nothing to remember */ }
 }
 
+// Free and Premium members answer the same questions; only Premium pays
+function isMemberType(joiningAs) {
+  return joiningAs === 'Member' || joiningAs === 'Free Member';
+}
+
+function updateMinorNote() {
+  document.getElementById('minorNote').hidden = !(getJoiningAs() === 'Member' && checkedValue('age') === '13-17');
+}
+
 function updateJoinMode() {
   const joiningAs = getJoiningAs();
   const copy = JOIN_COPY[joiningAs];
-  const isMember = joiningAs === 'Member';
+  const isMember = isMemberType(joiningAs);
 
   document.getElementById('memberFields').hidden = !isMember;
   document.getElementById('partnerFields').hidden = isMember;
+  document.getElementById('paymentGroup').hidden = joiningAs !== 'Member';
+  updateMinorNote();
   document.getElementById('step2Title').textContent = copy.step2;
   document.querySelector('#progressStep2 strong').textContent = copy.progress;
   document.getElementById('nextBtnText').textContent = `Next: ${copy.progress}`;
@@ -364,7 +384,7 @@ function validatePartnerDetails() {
 }
 
 function validateAboutMe() {
-  if (getJoiningAs() !== 'Member') return validatePartnerDetails();
+  if (!isMemberType(getJoiningAs())) return validatePartnerDetails();
   clearAboutMeErrors();
 
   const age = document.querySelector('input[name="age"]:checked');
@@ -390,7 +410,7 @@ function validateAboutMe() {
     showGroupError('involvementGroup', 'involvementError', 'Please select how you would like to be involved.');
     hasError = true;
   }
-  if (!paymentConsent) {
+  if (getJoiningAs() === 'Member' && !paymentConsent) {
     showGroupError('paymentGroup', 'paymentError', 'Please agree to the ₹299 membership fee to join.');
     hasError = true;
   }
@@ -422,9 +442,7 @@ document.querySelectorAll('input[name="topics"]').forEach(input => {
 
 // Members under 18 get a reminder to involve a parent before paying
 document.querySelectorAll('input[name="age"]').forEach(input => {
-  input.addEventListener('change', () => {
-    document.getElementById('minorNote').hidden = checkedValue('age') !== '13-17';
-  });
+  input.addEventListener('change', updateMinorNote);
 });
 
 document.getElementById('paymentConsent').addEventListener('change', function () {
@@ -455,15 +473,16 @@ async function handleSubmit() {
 
   // Only the visible half of step 2 is sent; the Apps Script fills blanks for the rest.
   const payload = { name, phone, email, state, city, joiningAs };
-  if (joiningAs === 'Member') {
+  if (isMemberType(joiningAs)) {
     Object.assign(payload, {
       age: checkedValue('age'),
       role: checkedValue('role'),
       topics: [...document.querySelectorAll('input[name="topics"]:checked')].map(input => input.value).join(', '),
-      involvement: checkedValue('involvement'),
-      paymentConsent: document.getElementById('paymentConsent').checked,
-      accessFee: 299
+      involvement: checkedValue('involvement')
     });
+    if (joiningAs === 'Member') {
+      Object.assign(payload, { paymentConsent: document.getElementById('paymentConsent').checked, accessFee: 299 });
+    }
   } else {
     Object.assign(payload, {
       organisation: document.getElementById('organisation').value.trim(),
@@ -501,7 +520,7 @@ document.getElementById('waitlistForm').addEventListener('submit', function (e) 
 
 updateJoinMode();
 
-function openModal(joiningAs = 'Member') {
+function openModal(joiningAs = 'Free Member') {
   document.getElementById('modalTitle').textContent = JOIN_COPY[joiningAs].modalTitle;
   document.getElementById('modalMsg').innerHTML = JOIN_COPY[joiningAs].modalMsg;
   const payBtn = document.getElementById('payBtn');

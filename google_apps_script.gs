@@ -53,7 +53,7 @@ function doPost(e) {
       payload.topics,
       payload.involvement,
       payload.paymentConsent ? 'Yes' : 'No',
-      isMember(payload) ? 299 : '',
+      isPremium(payload) ? 299 : '',
       payload.joiningAs || 'Member',
       payload.organisation,
       payload.profileLink,
@@ -123,7 +123,7 @@ function ensureHeaders(sheet) {
   sheet.autoResizeColumns(1, HEADERS.length);
 }
 
-const JOINING_AS = ['Member', 'Mentor', 'Investor', 'Collaborator'];
+const JOINING_AS = ['Member', 'Free Member', 'Mentor', 'Investor', 'Collaborator'];
 
 // Text that starts with = + - or @ would run as a formula when the sheet is
 // opened, so store it as plain text instead.
@@ -134,7 +134,13 @@ function cell(value) {
 
 // Mentors, investors and collaborators skip the member questions and the
 // access fee, and tell us about themselves in organisation + message instead.
+// 'Member' is the paid Premium Community; 'Free Member' answers the same
+// questions without the fee.
 function isMember(payload) {
+  return isPremium(payload) || payload.joiningAs === 'Free Member';
+}
+
+function isPremium(payload) {
   return !payload.joiningAs || payload.joiningAs === 'Member';
 }
 
@@ -154,7 +160,7 @@ function validatePayload(payload) {
     }
   });
 
-  if (isMember(payload) && payload.paymentConsent !== true) {
+  if (isPremium(payload) && payload.paymentConsent !== true) {
     throw new Error('Payment consent is required.');
   }
 }

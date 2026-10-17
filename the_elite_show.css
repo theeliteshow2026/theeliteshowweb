@@ -1784,56 +1784,76 @@ footer {
   transform: translateY(-1px);
 }
 
-/* Premium Community */
-.premium-card {
+/* Membership: free and premium */
+.tier-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
-  gap: 2.5rem;
-  align-items: center;
-  background: var(--black2);
-  border: 1px solid rgba(202, 251, 12, 0.35);
-  border-radius: 16px;
-  padding: 2.5rem;
-  box-shadow: 0 0 60px rgba(202, 251, 12, 0.06);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  align-items: stretch;
 }
 
-.premium-price {
+.tier-card {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  background: var(--black2);
+  border: 1px solid rgba(202, 251, 12, 0.18);
+  border-radius: 16px;
+  padding: 2.5rem 2.2rem;
 }
 
-.premium-amount {
+.tier-card--premium {
+  border-color: rgba(202, 251, 12, 0.45);
+  box-shadow: 0 0 60px rgba(202, 251, 12, 0.07);
+}
+
+.tier-badge {
+  display: inline-block;
+  margin-left: 0.6rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--green);
+  color: var(--black);
+  letter-spacing: 0.15em;
+}
+
+.tier-amount {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 4rem;
+  font-size: 3.6rem;
   font-weight: 700;
   line-height: 1;
+  color: var(--white);
+}
+
+.tier-card--premium .tier-amount {
   color: var(--green);
 }
 
-.premium-price-note {
+.tier-note {
   font-size: 0.8rem;
   font-weight: 300;
   color: var(--grey);
-  margin: 0.6rem 0 1.6rem;
+  margin: 0.6rem 0 1.8rem;
 }
 
-.premium-perks {
+.tier-perks {
   list-style: none;
   display: grid;
-  gap: 1.1rem;
+  gap: 1rem;
+  align-content: start;
+  margin-bottom: 2.2rem;
+  flex: 1;
 }
 
-.premium-perks li {
+.tier-perks li {
   position: relative;
   padding-left: 1.8rem;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   font-weight: 300;
   line-height: 1.7;
   color: var(--grey);
 }
 
-.premium-perks li::before {
+.tier-perks li::before {
   content: '✓';
   position: absolute;
   left: 0;
@@ -1841,15 +1861,60 @@ footer {
   font-weight: 700;
 }
 
-.premium-perks strong {
+.tier-perks strong {
   color: var(--white);
   font-weight: 600;
 }
 
+.tier-cta {
+  align-self: flex-start;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--black);
+  background: var(--green);
+  border: 1px solid var(--green);
+  padding: 0.85rem 1.3rem;
+  border-radius: 3px;
+  text-decoration: none;
+  transition: box-shadow 0.3s ease, transform 0.3s ease, background 0.3s ease, color 0.3s ease;
+}
+
+.tier-cta:hover {
+  box-shadow: 0 0 25px rgba(202, 251, 12, 0.35);
+  transform: translateY(-1px);
+}
+
+.tier-cta--ghost {
+  color: var(--green);
+  background: transparent;
+}
+
+.tier-cta--ghost:hover {
+  color: var(--black);
+  background: var(--green);
+}
+
+/* Join choice: the two memberships on top, the three partner roles below */
+.option-grid.join-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.join-grid .choice-option {
+  grid-column: span 2;
+}
+
+.join-grid .choice-option:nth-child(-n + 2) {
+  grid-column: span 3;
+}
+
 @media (max-width: 760px) {
-  .premium-card {
+  .tier-grid {
     grid-template-columns: 1fr;
-    gap: 2rem;
+  }
+
+  .tier-card {
     padding: 2rem 1.5rem;
   }
 }
