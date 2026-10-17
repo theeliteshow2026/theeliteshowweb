@@ -248,9 +248,9 @@ const JOIN_COPY = {
   Member: {
     step2: 'Your Membership',
     progress: 'Membership',
-    submit: 'Join for ₹299',
+    submit: 'Join for ₹199/month',
     modalTitle: 'Welcome to The Elite Show Premium Community 🎉',
-    modalMsg: "Your spot is reserved.<br><br><strong>One last step: complete your ₹299 payment.</strong> " +
+    modalMsg: "Your spot is reserved.<br><br><strong>One last step: pay your first month's ₹199.</strong> " +
       (PAYMENT_LINK
         ? 'Tap the button below to pay and confirm your membership.'
         : "We'll send your payment link to your WhatsApp and email shortly.") +
@@ -411,7 +411,7 @@ function validateAboutMe() {
     hasError = true;
   }
   if (getJoiningAs() === 'Member' && !paymentConsent) {
-    showGroupError('paymentGroup', 'paymentError', 'Please agree to the ₹299 membership fee to join.');
+    showGroupError('paymentGroup', 'paymentError', 'Please agree to the ₹199 monthly membership fee to join.');
     hasError = true;
   }
 
@@ -481,7 +481,7 @@ async function handleSubmit() {
       involvement: checkedValue('involvement')
     });
     if (joiningAs === 'Member') {
-      Object.assign(payload, { paymentConsent: document.getElementById('paymentConsent').checked, accessFee: 299 });
+      Object.assign(payload, { paymentConsent: document.getElementById('paymentConsent').checked, accessFee: 199 });
     }
   } else {
     Object.assign(payload, {

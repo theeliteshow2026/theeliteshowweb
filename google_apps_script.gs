@@ -53,7 +53,7 @@ function doPost(e) {
       payload.topics,
       payload.involvement,
       payload.paymentConsent ? 'Yes' : 'No',
-      isPremium(payload) ? 299 : '',
+      isPremium(payload) ? 199 : '',
       payload.joiningAs || 'Member',
       payload.organisation,
       payload.profileLink,

@@ -1824,6 +1824,14 @@ footer {
   color: var(--white);
 }
 
+.tier-period {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 400;
+  margin-left: 0.3rem;
+  color: var(--grey);
+}
+
 .tier-card--premium .tier-amount {
   color: var(--green);
 }
