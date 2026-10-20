@@ -866,12 +866,11 @@ if (hero && heroCrowd && typeof MENTOR_SESSIONS !== 'undefined') {
 }
 
 // ===== BRAND BAND: TITLE SCRAMBLE =====
-// Letters shuffle, flip to ₹, then settle one by one. Plays when the band
+// Letters shuffle, flip to $, then settle one by one. Plays when the band
 // scrolls into view, and again on hover where there is a mouse.
 const scrambleTarget = document.querySelector('.scramble-target');
 if (scrambleTarget) {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const rupee = String.fromCharCode(8377);
   const targetText = scrambleTarget.dataset.value;
   let interval = null;
   const scramble = () => {
@@ -881,7 +880,7 @@ if (scrambleTarget) {
       scrambleTarget.textContent = [...targetText].map((letter, index) => {
         if (letter === ' ') return ' ';
         if (step < 12) return letters[Math.floor(Math.random() * 26)];
-        return step >= 24 + index * 2 ? letter : rupee;
+        return step >= 24 + index * 2 ? letter : '$';
       }).join('');
       step++;
       if (step >= 24 + targetText.length * 2) {
