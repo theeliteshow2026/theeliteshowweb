@@ -283,7 +283,7 @@ a.nav-logo {
 /* Keeps the headline and buttons readable wherever the beam is */
 .hero-copy {
   position: relative;
-  max-width: 1200px;
+  width: 100%;
 }
 
 .hero-copy::before {
@@ -310,16 +310,22 @@ a.nav-logo {
   font-family: 'Archivo', 'Arial Black', sans-serif;
   font-weight: 900;
   font-stretch: 125%;
-  font-size: clamp(2.3rem, 6.2vw, 6.6rem);
+  /* Sized from the viewport so "when you walk in" always fits on one line */
+  font-size: min(6.6rem, calc((100vw - 4rem) / 13.4));
   line-height: 0.9;
   letter-spacing: -0.01em;
   text-transform: uppercase;
   color: var(--white);
   text-shadow: 0 0 40px #000;
-  text-wrap: balance;
   margin-bottom: 2rem;
   opacity: 0;
   animation: fadeSlideUp 1s ease 0.6s forwards;
+}
+
+/* Exactly two lines: "The show starts" / "when you walk in" */
+.hero-line {
+  display: block;
+  white-space: nowrap;
 }
 
 .hero-title em {
@@ -333,6 +339,15 @@ a.nav-logo {
 }
 
 @media (max-width: 700px) {
+  #hero {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .hero-title {
+    font-size: calc((100vw - 2rem) / 13.4);
+  }
+
   .hero-crowd {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(4, 1fr);
