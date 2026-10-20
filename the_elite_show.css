@@ -1957,6 +1957,43 @@ footer {
   box-shadow: 0 0 30px rgba(202, 251, 12, 0.35);
 }
 
+/* Closing screen: heavy extended type, tilted like a poster */
+.rise {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1.5rem;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 55%, rgba(202, 251, 12, 0.08), transparent 60%),
+    var(--black);
+}
+
+.rise-title {
+  font-family: 'Archivo', 'Arial Black', sans-serif;
+  font-stretch: 125%;
+  font-variation-settings: 'wdth' 125;
+  font-weight: 900;
+  font-size: clamp(2.4rem, 13vw, 13.5rem);
+  line-height: 0.86;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--white);
+  transform: rotate(-7deg) skewX(-4deg);
+}
+
+.rise-line {
+  display: block;
+  white-space: nowrap;
+}
+
+.rise-line--accent {
+  color: var(--green);
+}
+
 /* Roadmap */
 .roadmap {
   list-style: none;
