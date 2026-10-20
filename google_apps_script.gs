@@ -15,7 +15,11 @@ const HEADERS = [
   'Topics',
   'Community Involvement',
   'Payment Consent',
-  'Access Fee (INR)'
+  'Access Fee (INR)',
+  'Joining As',
+  'Organisation',
+  'Profile Link',
+  'Message'
 ];
 
 function doPost(e) {
@@ -38,8 +42,7 @@ function doPost(e) {
     const sheet = getOrCreateSheet(spreadsheet);
     ensureHeaders(sheet);
 
-    sheet.appendRow([
-      new Date(),
+    const row = [
       payload.name,
       payload.phone,
       payload.email,
@@ -50,8 +53,13 @@ function doPost(e) {
       payload.topics,
       payload.involvement,
       payload.paymentConsent ? 'Yes' : 'No',
-      Number(payload.accessFee) || 299
-    ]);
+      isPremium(payload) ? 199 : '',
+      payload.joiningAs || 'Member',
+      payload.organisation,
+      payload.profileLink,
+      payload.message
+    ].map(cell);
+    sheet.appendRow([new Date()].concat(row));
 
     return jsonResponse({
       success: true,
@@ -81,7 +89,7 @@ function setupSheet() {
 function doGet() {
   return jsonResponse({
     success: true,
-    message: 'The Elite Show waitlist endpoint is active.'
+    message: 'The Elite Show Community waitlist endpoint is active.'
   });
 }
 
@@ -107,24 +115,44 @@ function getOrCreateSheet(spreadsheet) {
 
 function ensureHeaders(sheet) {
   const headerRange = sheet.getRange(1, 1, 1, HEADERS.length);
+  // Skip the rewrite (and the slow column resize) once the headers are in place
+  if (headerRange.getValues()[0].join('|') === HEADERS.join('|')) return;
   headerRange.setValues([HEADERS]);
   headerRange.setFontWeight('bold');
   sheet.setFrozenRows(1);
   sheet.autoResizeColumns(1, HEADERS.length);
 }
 
+const JOINING_AS = ['Member', 'Free Member', 'Mentor', 'Investor', 'Collaborator'];
+
+// Text that starts with = + - or @ would run as a formula when the sheet is
+// opened, so store it as plain text instead.
+function cell(value) {
+  const text = value == null ? '' : String(value);
+  return /^[=+\-@]/.test(text) ? "'" + text : text;
+}
+
+// Mentors, investors and collaborators skip the member questions and the
+// access fee, and tell us about themselves in organisation + message instead.
+// 'Member' is the paid Premium Community; 'Free Member' answers the same
+// questions without the fee.
+function isMember(payload) {
+  return isPremium(payload) || payload.joiningAs === 'Free Member';
+}
+
+function isPremium(payload) {
+  return !payload.joiningAs || payload.joiningAs === 'Member';
+}
+
 function validatePayload(payload) {
-  const requiredFields = [
-    'name',
-    'phone',
-    'email',
-    'state',
-    'city',
-    'age',
-    'role',
-    'topics',
-    'involvement'
-  ];
+  if (payload.joiningAs && JOINING_AS.indexOf(payload.joiningAs) === -1) {
+    throw new Error('Unknown joiningAs value.');
+  }
+
+  const contactFields = ['name', 'phone', 'email', 'state', 'city'];
+  const requiredFields = isMember(payload)
+    ? contactFields.concat(['age', 'role', 'topics', 'involvement'])
+    : contactFields.concat(['organisation', 'message']);
 
   requiredFields.forEach(field => {
     if (!payload[field] || String(payload[field]).trim() === '') {
@@ -132,7 +160,7 @@ function validatePayload(payload) {
     }
   });
 
-  if (payload.paymentConsent !== true) {
+  if (isPremium(payload) && payload.paymentConsent !== true) {
     throw new Error('Payment consent is required.');
   }
 }

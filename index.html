@@ -4,12 +4,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Elite Show — Coming Soon</title>
+  <title>The Elite Show Community — Where People Meet Ideas</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="description"
-    content="The Elite Show is a premium wealth community where high-achievers share real experiences, expert advice and case studies. Join the waitlist.">
+    content="The Elite Show Community brings Kerala's students, founders, creators and professionals together through mentor sessions, Elite Brew meetups and workshops. Join the free community or The Elite Show Premium Community, or mentor, invest or partner with us.">
+  <meta property="og:title" content="The Elite Show Community">
+  <meta property="og:description" content="Where people meet ideas. And ideas meet opportunity.">
   <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,900&family=Cormorant+Garamond:wght@300;400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="the_elite_show.css">
 </head>
@@ -31,65 +33,72 @@
 
   <!-- NAV -->
   <nav>
-    <div class="nav-logo">The Elite <span>Show</span></div>
-    <a class="nav-cta" href="#waitlist">Join Waitlist</a>
+    <a class="nav-logo" href="#hero">The Elite Show <span>Community</span></a>
+    <div class="nav-links">
+      <a href="#why">Why</a>
+      <a href="#experiences">Experiences</a>
+      <a href="#sessions">Sessions</a>
+      <a href="#membership">Membership</a>
+      <a href="#get-involved">Get Involved</a>
+    </div>
+    <a class="nav-cta" href="#membership">Join Us</a>
   </nav>
 
   <!-- HERO -->
   <section id="hero">
-    <p class="hero-eyebrow">Exclusive Community</p>
-    <div class="hero-name-wrap">
-      <div class="hero-film"></div>
-      <div class="hero-film-scanlines"></div>
-      <h1 class="hero-name">
-        <span class="scramble-target" data-value="The Elite">The Elite</span>
-        <span class="highlight">Show</span>
-      </h1>
-    </div>
-    <p class="coming-soon" data-text="— Coming Soon —"><span>—</span> Coming Soon <span>—</span></p>
-    <div class="divider"></div>
-    <p class="hero-desc">
-      We are a <strong>premium wealth community</strong> where high-achievers share real experiences, expert advice, and
-      in-depth case studies of the world's most successful individuals.<br><br>
-      <strong>Success leaves clues — and we follow them.</strong>
-    </p>
-    <a class="btn-primary" href="#waitlist"><span>Join the Waitlist</span></a>
-
-    <div class="scroll-hint">
-      <span>Scroll</span>
-      <div class="scroll-line"></div>
+    <div class="hero-crowd" aria-hidden="true"></div>
+    <div class="hero-dark"></div>
+    <div class="hero-beam"></div>
+    <div class="hero-copy">
+      <p class="hero-kicker">The Elite Show Community</p>
+      <h1 class="hero-title">The show <em>starts</em><br>when you walk in</h1>
+      <div class="hero-actions">
+        <a class="btn-primary" href="#membership"><span>Join the Community</span></a>
+        <a class="btn-ghost" href="#get-involved"><span>Mentor, Invest or Partner</span></a>
+      </div>
     </div>
   </section>
 
   <!-- STATS -->
   <div class="stats-strip">
     <div class="stat">
-      <div class="stat-number">100%</div>
-      <div class="stat-label">Premium Content</div>
+      <div class="stat-number" data-count="9" data-pad="2" data-suffix="+">09+</div>
+      <div class="stat-label">Mentor Sessions</div>
     </div>
     <div class="stat">
-      <div class="stat-number">∞</div>
-      <div class="stat-label">Real Case Studies</div>
+      <div class="stat-number" data-count="2" data-pad="2" data-suffix="+">02+</div>
+      <div class="stat-label">Elite Brew Meetups</div>
     </div>
     <div class="stat">
-      <div class="stat-number">Elite</div>
-      <div class="stat-label">Network Access</div>
-    </div>
-    <div class="stat">
-      <div class="stat-number">24/7</div>
-      <div class="stat-label">Community Support</div>
+      <div class="stat-number">1</div>
+      <div class="stat-label">Growing Community</div>
     </div>
   </div>
 
-  <!-- ABOUT -->
-  <section id="about">
-    <p class="section-label reveal">What We Offer</p>
-    <h2 class="section-title reveal">Inside <em>The Elite</em> Circle</h2>
+  <!-- WHY -->
+  <section id="why" class="section">
+    <p class="section-label reveal">Why We Exist</p>
+    <h2 class="section-title reveal">Talent isn't the problem. <em>Proximity is.</em></h2>
+    <p class="section-lead reveal">
+      The missing layer is connection. What if the right people met more often? One conversation can lead to:
+    </p>
+    <ol class="lead-to">
+      <li class="reveal"><span>01</span>A Mentor</li>
+      <li class="reveal"><span>02</span>A Collaborator</li>
+      <li class="reveal"><span>03</span>A Project</li>
+      <li class="reveal"><span>04</span>An Opportunity</li>
+    </ol>
+    <p class="section-kicker reveal">Meaningful relationships are an infrastructure for growth.</p>
+  </section>
+
+  <!-- WHAT WE DO -->
+  <section id="about" class="section">
+    <p class="section-label reveal">What We Do</p>
+    <h2 class="section-title reveal">We create the rooms where <em>connections</em> happen</h2>
 
     <div class="features-grid">
       <div class="feature-card reveal-left">
         <div class="feature-icon-wrap">
-          <!-- Users / Shared Experiences -->
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
             <circle cx="9" cy="7" r="4" />
@@ -97,56 +106,190 @@
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
         </div>
-        <h3 class="feature-title">Shared Experiences</h3>
-        <p class="feature-text">Real stories from real people who've built wealth, navigated setbacks, and come out on
-          top. No fluff — only raw, actionable truth.</p>
+        <h3 class="feature-title">Meet</h3>
+        <p class="feature-text">Real people, in real rooms. Students, founders, creators and professionals who are
+          building something.</p>
       </div>
       <div class="feature-card reveal-scale">
         <div class="feature-icon-wrap">
-          <!-- Trending Up / Expert Advice -->
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
             <polyline points="17 6 23 6 23 12" />
           </svg>
         </div>
-        <h3 class="feature-title">Expert Advice</h3>
-        <p class="feature-text">Access to curated financial, business, and lifestyle guidance from practitioners who
-          have walked the path you're on.</p>
+        <h3 class="feature-title">Learn</h3>
+        <p class="feature-text">From people a few steps ahead of you, through honest conversations about what they
+          actually did.</p>
       </div>
       <div class="feature-card reveal-scale">
         <div class="feature-icon-wrap">
-          <!-- Award / Case Studies -->
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="8" r="6" />
-            <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" />
-          </svg>
-        </div>
-        <h3 class="feature-title">Success Case Studies</h3>
-        <p class="feature-text">Deep-dives into the strategies, mindsets, and moves of the world's most successful
-          individuals — decoded for you.</p>
-      </div>
-      <div class="feature-card reveal-right">
-        <div class="feature-icon-wrap">
-          <!-- Link / Elite Network -->
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
           </svg>
         </div>
-        <h3 class="feature-title">Elite Network</h3>
-        <p class="feature-text">Surround yourself with driven, forward-thinking individuals who raise the standard of
-          what you believe is possible.</p>
+        <h3 class="feature-title">Connect</h3>
+        <p class="feature-text">Beyond the event. The relationships you start in the room keep going in the
+          community.</p>
+      </div>
+      <div class="feature-card reveal-right">
+        <div class="feature-icon-wrap">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2 2 7l10 5 10-5-10-5z" />
+            <path d="m2 17 10 5 10-5" />
+            <path d="m2 12 10 5 10-5" />
+          </svg>
+        </div>
+        <h3 class="feature-title">Build</h3>
+        <p class="feature-text">Something together. Projects, teams and ideas that only happen when the right people
+          meet.</p>
       </div>
     </div>
+  </section>
+
+  <!-- EXPERIENCES -->
+  <section id="experiences" class="section">
+    <div class="split">
+      <div class="split-intro">
+        <p class="section-label reveal">The Experience</p>
+        <h2 class="section-title reveal">A community you can <em>experience</em></h2>
+        <p class="split-motto reveal">Online keeps it alive.<br><strong>Offline makes it real.</strong></p>
+        <ul class="not-list reveal">
+          <li>Not another content page</li>
+          <li>Not another WhatsApp group</li>
+          <li>Not another networking event</li>
+        </ul>
+      </div>
+      <ul class="exp-list">
+        <li class="reveal-right">
+          <h3>Mentor Sessions</h3>
+          <p>Learn directly from people who are building.</p>
+        </li>
+        <li class="reveal-right">
+          <h3>Elite Brew</h3>
+          <p>Small, meaningful offline conversations over coffee.</p>
+        </li>
+        <li class="reveal-right">
+          <h3>Workshops</h3>
+          <p>Practical skills. Real experiences.</p>
+        </li>
+        <li class="reveal-right">
+          <h3>Community</h3>
+          <p>The conversation continues after the event.</p>
+        </li>
+      </ul>
+    </div>
+    <p class="section-kicker reveal">We're already building the habit. Most importantly, people keep showing up.</p>
+  </section>
+
+  <!-- MENTOR SESSIONS -->
+  <section id="sessions" class="section">
+    <div class="sessions-head">
+      <div>
+        <p class="section-label reveal">Every Saturday</p>
+        <h2 class="section-title reveal">Saturday <em>mentor sessions</em></h2>
+        <p class="section-lead reveal">Each week someone a few steps ahead shares what they've learned. Here are the
+          latest rooms we've opened.</p>
+      </div>
+      <a class="sessions-all reveal" href="sessions.html">See all sessions →</a>
+    </div>
+    <div class="sessions-grid" data-sessions data-limit="4"></div>
+  </section>
+
+  <!-- AUDIENCES -->
+  <!-- MEMBERSHIP: FREE AND PREMIUM -->
+  <section id="membership" class="section">
+    <p class="section-label reveal">Membership</p>
+    <h2 class="section-title reveal">Two ways to <em>join</em></h2>
+    <p class="section-lead reveal">Start free with The Elite Show Community, or go further with The Elite Show Premium
+      Community, now open.</p>
+
+    <div class="tier-grid">
+      <article class="tier-card reveal-scale">
+        <p class="audience-tag">Free Community</p>
+        <p class="tier-amount">Free</p>
+        <p class="tier-note">Open to everyone</p>
+        <ul class="tier-perks">
+          <li><strong>Our WhatsApp community</strong>, open to anyone who wants in</li>
+          <li><strong>First news</strong> of every mentor session, Elite Brew and workshop</li>
+          <li><strong>Ambitious people near you</strong> to meet and learn from</li>
+        </ul>
+        <a class="tier-cta tier-cta--ghost" href="#waitlist" data-join="Free Member">Join for Free →</a>
+      </article>
+      <article class="tier-card tier-card--premium reveal-scale">
+        <p class="audience-tag">Premium Community <span class="tier-badge">Now Open</span></p>
+        <p class="tier-amount">₹199<span class="tier-period">/month</span></p>
+        <p class="tier-note">Monthly membership of the Premium Community</p>
+        <ul class="tier-perks">
+          <li><strong>Everything in the free community</strong></li>
+          <li><strong>Saturday mentor sessions</strong> with people a few steps ahead of you</li>
+          <li><strong>Elite Brew meetups and workshops</strong> where ideas turn into plans</li>
+          <li><strong>A close circle of ambitious people</strong> who grow together</li>
+          <li><strong>Direct connections</strong> to mentors, founders, creators and collaborators</li>
+        </ul>
+        <a class="tier-cta" href="#waitlist" data-join="Member">Join Premium for ₹199/month →</a>
+      </article>
+    </div>
+  </section>
+
+  <section id="get-involved" class="section">
+    <p class="section-label reveal">Get Involved</p>
+    <h2 class="section-title reveal">Help us build <em>the room</em></h2>
+    <p class="section-lead reveal">Whoever you are, there's a seat for you. Pick the one that fits and tell us a bit
+      about yourself.</p>
+
+    <div class="audience-grid">
+      <article class="audience-card reveal-scale">
+        <p class="audience-tag">For new members</p>
+        <h3>Join the community</h3>
+        <p>Join free, or go further with The Elite Show Premium Community for ₹199 a month. Meet ambitious people near you,
+          learn from those ahead of you and find your next mentor, collaborator or opportunity.</p>
+        <a class="audience-cta" href="#membership">Choose Your Membership →</a>
+      </article>
+      <article class="audience-card reveal-scale">
+        <p class="audience-tag">For mentors</p>
+        <h3>Strengthen the network</h3>
+        <p>Share what you've learned in a mentor session or an Elite Brew. A single conversation with you can change
+          someone's direction.</p>
+        <a class="audience-cta" href="#waitlist" data-join="Mentor">Become a Mentor →</a>
+      </article>
+      <article class="audience-card reveal-scale">
+        <p class="audience-tag">For investors</p>
+        <h3>Back the infrastructure</h3>
+        <p>Capital to build the infrastructure and scale the community. The event can be copied. The network
+          can't.</p>
+        <a class="audience-cta" href="#waitlist" data-join="Investor">Talk to Us →</a>
+      </article>
+      <article class="audience-card reveal-scale">
+        <p class="audience-tag">For collaborators &amp; partners</p>
+        <h3>Expand the ecosystem</h3>
+        <p>Brands, organisations and builders who want to host, sponsor or co-create experiences, and open new doors
+          for young talent.</p>
+        <a class="audience-cta" href="#waitlist" data-join="Collaborator">Partner With Us →</a>
+      </article>
+    </div>
+  </section>
+
+  <!-- VISION -->
+  <section id="vision" class="section">
+    <p class="section-label reveal">The Vision</p>
+    <h2 class="section-title reveal">Start with a community. <em>Build an ecosystem.</em></h2>
+    <ol class="roadmap">
+      <li class="reveal"><span>2026</span>Build the strongest community in Kerala</li>
+      <li class="reveal"><span>2027</span>Expand experiences across Kerala</li>
+      <li class="reveal"><span>2028+</span>Build a wider network of young builders</li>
+    </ol>
+    <p class="section-kicker reveal">The ambition: become the network where Kerala's next generation meets.</p>
   </section>
 
   <!-- WAITLIST -->
   <section id="waitlist">
     <div class="waitlist-inner">
-      <p class="section-label reveal">Limited Spots Available</p>
-      <h2 class="section-title reveal">Secure Your <em>Spot</em></h2>
+      <p class="section-label reveal">Take Your Seat</p>
+      <h2 class="section-title reveal">Join The Elite Show <em>Community</em></h2>
       <p class="waitlist-sub reveal">
-        Be among the first to gain access when we launch. Fill in your details below and we'll reach out personally.
+        Join free, or become a Premium member for ₹199 a month. Coming as a mentor, investor or partner instead? Pick that
+        below and we'll reach out personally.
       </p>
 
       <div class="reveal-scale">
@@ -169,6 +312,17 @@
               <h3>Contact Details</h3>
             </div>
 
+            <fieldset class="choice-group" id="joinGroup">
+              <legend>I'd like to</legend>
+              <div class="option-grid join-grid">
+                <label class="choice-option"><input type="radio" name="joiningAs" value="Free Member" checked><span>Join Free</span></label>
+                <label class="choice-option"><input type="radio" name="joiningAs" value="Member"><span>Premium · ₹199/mo</span></label>
+                <label class="choice-option"><input type="radio" name="joiningAs" value="Mentor"><span>Mentor</span></label>
+                <label class="choice-option"><input type="radio" name="joiningAs" value="Investor"><span>Invest</span></label>
+                <label class="choice-option"><input type="radio" name="joiningAs" value="Collaborator"><span>Partner</span></label>
+              </div>
+            </fieldset>
+
             <div class="form-grid">
               <div class="field-group full">
                 <label for="fullname">Full Name</label>
@@ -188,26 +342,48 @@
               </div>
               <div class="field-group">
                 <label for="state">State</label>
-                <input type="text" id="state" name="state" placeholder="e.g. Maharashtra" required>
+                <input type="text" id="state" name="state" placeholder="e.g. Kerala" required>
                 <span class="field-error" id="stateError"></span>
               </div>
               <div class="field-group">
                 <label for="city">City</label>
-                <input type="text" id="city" name="city" placeholder="e.g. Mumbai" required>
+                <input type="text" id="city" name="city" placeholder="e.g. Kochi" required>
                 <span class="field-error" id="cityError"></span>
               </div>
             </div>
 
             <button class="btn-submit" id="nextBtn" type="button" onclick="goToAboutMe()">
-              <span>Next: About Me</span>
+              <span id="nextBtnText">Next: About Me</span>
             </button>
           </div>
 
           <div class="form-step" id="formStep2">
             <div class="form-step-heading">
               <span>Step 2 of 2</span>
-              <h3>About Me</h3>
+              <h3 id="step2Title">About Me</h3>
             </div>
+
+            <div class="partner-fields" id="partnerFields" hidden>
+              <div class="form-grid">
+                <div class="field-group">
+                  <label for="organisation">Organisation or What You Do</label>
+                  <input type="text" id="organisation" name="organisation" placeholder="e.g. Founder, Acme Labs" autocomplete="organization">
+                  <span class="field-error" id="organisationError"></span>
+                </div>
+                <div class="field-group">
+                  <label for="profileLink">LinkedIn or Website <small>(optional)</small></label>
+                  <input type="url" id="profileLink" name="profileLink" placeholder="https://" autocomplete="url">
+                  <span class="field-error" id="profileLinkError"></span>
+                </div>
+                <div class="field-group full">
+                  <label for="message" id="messageLabel">How would you like to be involved?</label>
+                  <textarea id="message" name="message" rows="4" placeholder="Tell us a little about what you'd like to do with us."></textarea>
+                  <span class="field-error" id="messageError"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="member-fields" id="memberFields">
 
             <fieldset class="choice-group" id="ageGroup">
               <legend>Age</legend>
@@ -217,6 +393,8 @@
                 <label class="choice-option"><input type="radio" name="age" value="25-34"><span>25-34</span></label>
                 <label class="choice-option"><input type="radio" name="age" value="35+"><span>35+</span></label>
               </div>
+              <p class="field-hint" id="minorNote" hidden>Under 18? Please check with a parent or guardian before you
+                pay the membership fee.</p>
               <span class="field-error" id="ageError"></span>
             </fieldset>
 
@@ -260,13 +438,15 @@
               <span class="field-error" id="involvementError"></span>
             </fieldset>
 
-            <div class="consent-group" id="paymentGroup">
+            <div class="consent-group" id="paymentGroup" hidden>
               <label class="payment-consent">
                 <input type="checkbox" id="paymentConsent" name="paymentConsent">
                 <span class="checkmark" aria-hidden="true"></span>
-                <span>I am willing to pay <strong>₹299</strong> for community access.</span>
+                <span>I agree to pay <strong>₹199 a month</strong> to join The Elite Show Premium Community.</span>
               </label>
+              <p class="field-hint">You'll pay securely with Razorpay by UPI or card. Your membership renews every month.</p>
               <span class="field-error" id="paymentError"></span>
+            </div>
             </div>
 
             <div class="form-error" id="formError">Something went wrong. Please try again.</div>
@@ -276,7 +456,7 @@
                 <span>Back</span>
               </button>
               <button class="btn-submit" id="submitBtn" type="submit">
-                <span id="btnText">Join The Elite</span>
+                <span id="btnText">Join for Free</span>
               </button>
             </div>
           </div>
@@ -287,11 +467,20 @@
     </div>
   </section>
 
+  <!-- CLOSING -->
+  <section id="rise" class="rise" aria-label="Think Big, Rise Together">
+    <h2 class="rise-title">
+      <span style="--i: 2" class="rise-line">Think Big</span>
+      <span style="--i: 1" class="rise-line rise-line--accent">Rise</span>
+      <span style="--i: 0" class="rise-line rise-line--accent">Together</span>
+    </h2>
+  </section>
+
   <!-- FOOTER -->
   <footer>
-    <div class="footer-logo">The Elite <span>Show</span></div>
-    <div class="footer-tagline">Where Excellence Meets Opportunity</div>
-    <div class="footer-copy">© <span id="footerYear">2026</span> The Elite Show. All rights reserved.</div>
+    <div class="footer-logo">The Elite Show <span>Community</span></div>
+    <div class="footer-tagline">Where people meet ideas. And ideas meet opportunity.</div>
+    <div class="footer-copy">© <span id="footerYear">2026</span> The Elite Show Community. All rights reserved.</div>
   </footer>
 
   <!-- MODAL -->
@@ -306,12 +495,13 @@
             stroke-linejoin="round" class="modal-check" />
         </svg>
       </div>
-      <h2 class="modal-title" id="modalTitle">Welcome to The Elite Show 🎉</h2>
-      <p class="modal-msg">
+      <h2 class="modal-title" id="modalTitle">Welcome to The Elite Show Community 🎉</h2>
+      <p class="modal-msg" id="modalMsg">
         You're officially on the list.<br><br>
-        You've just taken your <strong>first step into a circle of excellence</strong>. Click below to join our
-        exclusive WhatsApp community and stay ahead of the curve.
+        You've just taken your <strong>first step into the room</strong>. Join our WhatsApp community to hear about
+        the next mentor session, Elite Brew and workshop first.
       </p>
+      <a class="btn-pay" id="premiumBtn" href="#" target="_blank" rel="noopener" hidden>Join Our Premium Community</a>
       <a class="btn-whatsapp" href="YOUR_WHATSAPP_INVITE_LINK" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path
@@ -322,6 +512,7 @@
     </div>
   </div>
 
+  <script src="mentor_sessions.js"></script>
   <script src="the_elite_show.js"></script>
 </body>
 

@@ -2,6 +2,9 @@
 // 🔧 REPLACE THESE TWO VALUES BEFORE GOING LIVE:
 const WHATSAPP_LINK = "https://chat.whatsapp.com/ItDdTXKakan01FUREdRxar";
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbylsTW9H43fY6-Mzuz6F9E19jeKf8vu6N7Wrn1IB1o2uwDU6mfHLVx1rFWePnczknDR/exec";
+// Premium Community payments: Razorpay Checkout, backed by Supabase Edge Functions
+const PAYMENTS_API = "https://mlrzeqekvhbzwnblzzlv.supabase.co/functions/v1";
+const RAZORPAY_CHECKOUT_JS = "https://checkout.razorpay.com/v1/checkout.js";
 
 // Update WhatsApp button dynamically
 document.querySelector('.btn-whatsapp').href = WHATSAPP_LINK;
@@ -54,16 +57,24 @@ function clearFieldError(inputId, errorId) {
   err.classList.remove('visible');
 }
 
-function clearAllErrors() {
-  ['fullname', 'phone', 'email', 'state', 'city'].forEach(id => {
-    document.getElementById(id).classList.remove('invalid', 'valid');
-  });
-  ['nameError', 'phoneError', 'emailError', 'stateError', 'cityError'].forEach(id => {
-    const el = document.getElementById(id);
-    el.textContent = '';
-    el.classList.remove('visible');
+function resetFieldErrors(fields) {
+  fields.forEach(([inputId, errorId]) => {
+    document.getElementById(inputId).classList.remove('invalid', 'valid');
+    const err = document.getElementById(errorId);
+    err.textContent = '';
+    err.classList.remove('visible');
   });
   document.getElementById('formError').style.display = 'none';
+}
+
+function clearAllErrors() {
+  resetFieldErrors([
+    ['fullname', 'nameError'],
+    ['phone', 'phoneError'],
+    ['email', 'emailError'],
+    ['state', 'stateError'],
+    ['city', 'cityError']
+  ]);
 }
 
 function showGroupError(groupId, errorId, msg) {
@@ -146,7 +157,8 @@ document.getElementById('email').addEventListener('input', function () {
 });
 
 // State & City: clear error on input
-['state', 'city'].forEach(id => {
+// Clear a field's error as soon as it has a value
+['state', 'city', 'organisation', 'profileLink', 'message'].forEach(id => {
   document.getElementById(id).addEventListener('input', function () {
     if (this.value.trim()) clearFieldError(id, id + 'Error');
   });
@@ -216,7 +228,164 @@ function goToContactDetails() {
   document.getElementById('formStep1').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+// ===== JOINING AS (free member / premium member / mentor / investor / partner) =====
+// 'Member' is the paid Premium Community; the value is kept so earlier signups still match.
+const PARTNER_MODAL = {
+  modalTitle: 'Thank you for reaching out 🤝',
+  modalMsg: "We've received your details and <strong>someone from the team will reach out personally</strong>. " +
+    'In the meantime, you are welcome to join the WhatsApp community and see the room for yourself.'
+};
+
+const JOIN_COPY = {
+  'Free Member': {
+    step2: 'About Me',
+    progress: 'About Me',
+    submit: 'Join for Free',
+    modalTitle: 'Welcome to The Elite Show Community 🎉',
+    modalMsg: "You're officially in.<br><br>You've just taken your <strong>first step into the room</strong>. " +
+      'Join our WhatsApp community to hear about the next mentor session, Elite Brew and workshop first.'
+  },
+  Member: {
+    step2: 'Your Membership',
+    progress: 'Membership',
+    submit: 'Join for ₹199/month',
+    // Shown only if online payment is unavailable; a paid member sees openPremiumWelcome instead
+    modalTitle: 'Welcome to The Elite Show Premium Community 🎉',
+    modalMsg: "Your spot is reserved.<br><br><strong>One last step: pay your first month's ₹199.</strong> " +
+      "We'll send your payment link to your WhatsApp and email shortly." +
+      '<br><br>Meanwhile, join our WhatsApp community to hear about the next mentor session, Elite Brew and workshop first.'
+  },
+  Mentor: {
+    ...PARTNER_MODAL,
+    progress: 'Your Interest',
+    step2: 'Mentoring With Us',
+    submit: 'Apply as a Mentor',
+    label: 'What could you share with the community?',
+    placeholder: 'Your area of expertise, and whether you would host a mentor session, an Elite Brew or a workshop.'
+  },
+  Investor: {
+    ...PARTNER_MODAL,
+    progress: 'Your Interest',
+    step2: 'Investing With Us',
+    submit: 'Start the Conversation',
+    label: 'What would you like to explore with us?',
+    placeholder: 'A little about you or your fund, and what you would like to know about The Elite Show Community.'
+  },
+  Collaborator: {
+    ...PARTNER_MODAL,
+    progress: 'Your Interest',
+    step2: 'Partnering With Us',
+    submit: 'Partner With Us',
+    label: 'How would you like to collaborate?',
+    placeholder: 'Hosting, sponsoring or co-creating an event, a workshop, a program or something else.'
+  }
+};
+
+function checkedValue(name) {
+  return document.querySelector(`input[name="${name}"]:checked`)?.value || '';
+}
+
+function getJoiningAs() {
+  return checkedValue('joiningAs') || 'Free Member';
+}
+
+// One submission per audience, so a member can still apply as a mentor later.
+// Members keep the original key so earlier signups stay recognised.
+function submittedKey(joiningAs) {
+  return joiningAs === 'Member' ? 'eliteWaitlistSubmitted' : `eliteWaitlistSubmitted:${joiningAs}`;
+}
+
+function hasSubmitted(joiningAs) {
+  try {
+    return localStorage.getItem(submittedKey(joiningAs)) === 'true';
+  } catch (e) {
+    return false;
+  }
+}
+
+function markSubmitted(joiningAs) {
+  try {
+    localStorage.setItem(submittedKey(joiningAs), 'true');
+  } catch (e) { /* storage blocked: nothing to remember */ }
+}
+
+// Free and Premium members answer the same questions; only Premium pays
+function isMemberType(joiningAs) {
+  return joiningAs === 'Member' || joiningAs === 'Free Member';
+}
+
+function updateMinorNote() {
+  document.getElementById('minorNote').hidden = !(getJoiningAs() === 'Member' && checkedValue('age') === '13-17');
+}
+
+function updateJoinMode() {
+  const joiningAs = getJoiningAs();
+  const copy = JOIN_COPY[joiningAs];
+  const isMember = isMemberType(joiningAs);
+
+  document.getElementById('memberFields').hidden = !isMember;
+  document.getElementById('partnerFields').hidden = isMember;
+  document.getElementById('paymentGroup').hidden = joiningAs !== 'Member';
+  updateMinorNote();
+  document.getElementById('step2Title').textContent = copy.step2;
+  document.querySelector('#progressStep2 strong').textContent = copy.progress;
+  document.getElementById('nextBtnText').textContent = `Next: ${copy.progress}`;
+  if (!isMember) {
+    document.getElementById('messageLabel').textContent = copy.label;
+    document.getElementById('message').placeholder = copy.placeholder;
+  }
+
+  const submitted = hasSubmitted(joiningAs);
+  const awaitingPayment = joiningAs === 'Member' && pendingPremium && !submitted;
+  document.getElementById('submitBtn').disabled = submitted;
+  document.getElementById('btnText').textContent =
+    submitted ? 'Already Joined' : awaitingPayment ? 'Complete Payment · ₹199/month' : copy.submit;
+}
+
+document.querySelectorAll('input[name="joiningAs"]').forEach(input => {
+  input.addEventListener('change', updateJoinMode);
+});
+
+// Audience buttons pre-select who is joining before jumping to the form
+document.querySelectorAll('[data-join]').forEach(link => {
+  link.addEventListener('click', () => {
+    const option = document.querySelector(`input[name="joiningAs"][value="${link.dataset.join}"]`);
+    if (!option || option.checked) return;
+    option.checked = true;
+    updateJoinMode();
+  });
+});
+
+function validatePartnerDetails() {
+  resetFieldErrors([
+    ['organisation', 'organisationError'],
+    ['profileLink', 'profileLinkError'],
+    ['message', 'messageError']
+  ]);
+
+  const organisation = document.getElementById('organisation').value.trim();
+  const profileLink = document.getElementById('profileLink').value.trim();
+  const message = document.getElementById('message').value.trim();
+  let hasError = false;
+
+  if (!organisation) {
+    showFieldError('organisation', 'organisationError', 'Tell us your organisation or what you do.');
+    hasError = true;
+  }
+  if (profileLink && !/^(https?:\/\/)?[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}(\/\S*)?$/i.test(profileLink)) {
+    showFieldError('profileLink', 'profileLinkError', 'Enter a valid link, or leave this blank.');
+    hasError = true;
+  }
+  if (message.length < 10) {
+    showFieldError('message', 'messageError', 'Please add a few words so we know how to reach out.');
+    hasError = true;
+  }
+
+  return !hasError;
+}
+
 function validateAboutMe() {
+  if (!isMemberType(getJoiningAs())) return validatePartnerDetails();
   clearAboutMeErrors();
 
   const age = document.querySelector('input[name="age"]:checked');
@@ -242,8 +411,8 @@ function validateAboutMe() {
     showGroupError('involvementGroup', 'involvementError', 'Please select how you would like to be involved.');
     hasError = true;
   }
-  if (!paymentConsent) {
-    showGroupError('paymentGroup', 'paymentError', 'You must confirm the ₹299 access fee to submit.');
+  if (getJoiningAs() === 'Member' && !paymentConsent) {
+    showGroupError('paymentGroup', 'paymentError', 'Please agree to the ₹199 monthly membership fee to join.');
     hasError = true;
   }
 
@@ -272,13 +441,106 @@ document.querySelectorAll('input[name="topics"]').forEach(input => {
   });
 });
 
+// Members under 18 get a reminder to involve a parent before paying
+document.querySelectorAll('input[name="age"]').forEach(input => {
+  input.addEventListener('change', updateMinorNote);
+});
+
 document.getElementById('paymentConsent').addEventListener('change', function () {
   if (this.checked) clearGroupError('paymentGroup', 'paymentError');
 });
 
+// ===== PREMIUM PAYMENT (Razorpay Checkout) =====
+// Set once a Premium signup is saved, so closing the payment window and trying
+// again goes straight back to payment.
+let pendingPremium = null;
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`) && window.Razorpay) return resolve();
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = resolve;
+    script.onerror = () => reject(new Error(`Could not load ${src}`));
+    document.head.append(script);
+  });
+}
+
+async function postPayments(path, body) {
+  const res = await fetch(`${PAYMENTS_API}/${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok && data.success, data };
+}
+
+// Resolves with { status: 'paid' | 'unavailable' | 'dismissed' | 'error', ... }
+async function startPremiumPayment(contact) {
+  const tryAgain = "We couldn't start the payment. Please check your connection and try again.";
+  let start;
+  try {
+    start = await postPayments('create-subscription', contact);
+    await loadScript(RAZORPAY_CHECKOUT_JS);
+  } catch (err) {
+    return { status: 'error', message: tryAgain };
+  }
+  // Payments not switched on yet: the member is told the link will be sent
+  if (start.data.code === 'not_configured') return { status: 'unavailable' };
+  if (!start.ok) return { status: 'error', message: start.data.message || tryAgain };
+
+  return new Promise(resolve => {
+    const checkout = new window.Razorpay({
+      key: start.data.keyId,
+      subscription_id: start.data.subscriptionId,
+      name: 'The Elite Show Community',
+      description: 'Premium Community · ₹199/month',
+      prefill: { name: contact.name, email: contact.email, contact: contact.phone },
+      theme: { color: '#CAFB0C' },
+      handler: async response => {
+        const notConfirmed = "Your payment went through but we couldn't confirm it yet. " +
+          "Please don't pay again. We'll check it and reach out to you.";
+        try {
+          const verified = await postPayments('verify-payment', response);
+          resolve(verified.ok ? { status: 'paid', ...verified.data } : { status: 'error', message: notConfirmed });
+        } catch (err) {
+          resolve({ status: 'error', message: notConfirmed });
+        }
+      },
+      modal: {
+        ondismiss: () => resolve({
+          status: 'dismissed',
+          message: 'Payment not completed. Tap "Complete Payment" whenever you are ready.'
+        })
+      }
+    });
+    checkout.open();
+  });
+}
+
+function escapeHtml(text) {
+  return String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function openPremiumWelcome({ memberCode, communityLink }) {
+  openModal('Member');
+  document.getElementById('modalMsg').innerHTML =
+    "Your payment is confirmed. <strong>You're now a Premium member.</strong>" +
+    (memberCode ? `<br><br>Your member ID is <strong>${escapeHtml(memberCode)}</strong>. Keep it handy.` : '') +
+    (communityLink
+      ? '<br><br>Tap below to join the Premium community.'
+      : "<br><br>We'll add you to the Premium community shortly.");
+  const premiumBtn = document.getElementById('premiumBtn');
+  premiumBtn.hidden = !communityLink;
+  if (communityLink) premiumBtn.href = communityLink;
+  document.querySelector('.btn-whatsapp').hidden = Boolean(communityLink);
+}
+
 // ===== FORM SUBMIT =====
 async function handleSubmit() {
-  if (localStorage.getItem('eliteWaitlistSubmitted') === 'true') return;
+  const joiningAs = getJoiningAs();
+  if (hasSubmitted(joiningAs)) return;
   if (!validateContactDetails()) {
     setFormStep(1);
     return;
@@ -290,11 +552,6 @@ async function handleSubmit() {
   const email = document.getElementById('email').value.trim();
   const state = document.getElementById('state').value.trim();
   const city = document.getElementById('city').value.trim();
-  const age = document.querySelector('input[name="age"]:checked').value;
-  const role = document.querySelector('input[name="role"]:checked').value;
-  const topics = [...document.querySelectorAll('input[name="topics"]:checked')].map(input => input.value);
-  const involvement = document.querySelector('input[name="involvement"]:checked').value;
-  const paymentConsent = document.getElementById('paymentConsent').checked;
   const errEl = document.getElementById('formError');
   const btn = document.getElementById('submitBtn');
   const btnTxt = document.getElementById('btnText');
@@ -302,23 +559,30 @@ async function handleSubmit() {
   btn.disabled = true;
   btnTxt.textContent = 'Submitting...';
 
-  const payload = {
-    name,
-    phone,
-    email,
-    state,
-    city,
-    age,
-    role,
-    topics: topics.join(', '),
-    involvement,
-    paymentConsent,
-    accessFee: 299
-  };
-  let isSuccess = false;
+  // Only the visible half of step 2 is sent; the Apps Script fills blanks for the rest.
+  const payload = { name, phone, email, state, city, joiningAs };
+  if (isMemberType(joiningAs)) {
+    Object.assign(payload, {
+      age: checkedValue('age'),
+      role: checkedValue('role'),
+      topics: [...document.querySelectorAll('input[name="topics"]:checked')].map(input => input.value).join(', '),
+      involvement: checkedValue('involvement')
+    });
+    if (joiningAs === 'Member') {
+      Object.assign(payload, { paymentConsent: document.getElementById('paymentConsent').checked, accessFee: 199 });
+    }
+  } else {
+    Object.assign(payload, {
+      organisation: document.getElementById('organisation').value.trim(),
+      profileLink: document.getElementById('profileLink').value.trim(),
+      message: document.getElementById('message').value.trim()
+    });
+  }
 
   try {
-    if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL") {
+    // A Premium member who closed the payment window is already in the sheet
+    const resumingPayment = joiningAs === 'Member' && pendingPremium;
+    if (!resumingPayment && GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL") {
       // text/plain keeps this a "simple" CORS request, so Apps Script's JSON
       // reply is readable and a failed save is no longer shown as a success.
       const res = await fetch(GOOGLE_SCRIPT_URL, {
@@ -329,19 +593,27 @@ async function handleSubmit() {
       const result = await res.json();
       if (!result.success) throw new Error(result.message || 'Unable to save registration.');
     }
-    openModal();
-    localStorage.setItem('eliteWaitlistSubmitted', 'true');
-    isSuccess = true;
+    if (joiningAs === 'Member') {
+      pendingPremium = pendingPremium || { name, email, phone };
+      btnTxt.textContent = 'Opening Payment...';
+      const outcome = await startPremiumPayment(pendingPremium);
+      if (outcome.status === 'paid' || outcome.status === 'unavailable') {
+        pendingPremium = null;
+        markSubmitted(joiningAs);
+        outcome.status === 'paid' ? openPremiumWelcome(outcome) : openModal(joiningAs);
+      } else {
+        errEl.textContent = outcome.message;
+        errEl.style.display = 'block';
+      }
+      return;
+    }
+    markSubmitted(joiningAs);
+    openModal(joiningAs);
   } catch (err) {
     errEl.textContent = 'Something went wrong. Please try again.';
     errEl.style.display = 'block';
   } finally {
-    if (!isSuccess) {
-      btn.disabled = false;
-      btnTxt.textContent = 'Join The Elite';
-    } else {
-      btnTxt.textContent = 'Already Joined';
-    }
+    updateJoinMode();
   }
 }
 
@@ -350,17 +622,13 @@ document.getElementById('waitlistForm').addEventListener('submit', function (e) 
   handleSubmit();
 });
 
-// Check on page load
-if (localStorage.getItem('eliteWaitlistSubmitted') === 'true') {
-  const btn = document.getElementById('submitBtn');
-  const btnTxt = document.getElementById('btnText');
-  if (btn && btnTxt) {
-    btn.disabled = true;
-    btnTxt.textContent = 'Already Joined';
-  }
-}
+updateJoinMode();
 
-function openModal() {
+function openModal(joiningAs = 'Free Member') {
+  document.getElementById('modalTitle').textContent = JOIN_COPY[joiningAs].modalTitle;
+  document.getElementById('modalMsg').innerHTML = JOIN_COPY[joiningAs].modalMsg;
+  document.getElementById('premiumBtn').hidden = true;
+  document.querySelector('.btn-whatsapp').hidden = false;
   document.getElementById('modalOverlay').classList.add('active');
   document.body.style.overflow = 'hidden';
   launchConfetti();
@@ -528,7 +796,7 @@ if (supportsPointerEffects) {
   };
   animateRing();
 
-  const interactables = document.querySelectorAll('a, button, input, textarea, .feature-card, .scramble-target');
+  const interactables = document.querySelectorAll('a, button, input, textarea, .feature-card, .audience-card, .session-card');
   interactables.forEach(el => {
     el.addEventListener('mouseenter', () => {
       cursorRing?.classList.add('hovered');
@@ -556,75 +824,45 @@ if (supportsPointerEffects) {
   });
 }
 
-// ===== HERO TITLE TEXT SCRAMBLE =====
-const scrambleTarget = document.querySelector('.scramble-target');
-if (scrambleTarget && supportsPointerEffects) {
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let interval = null;
+// ===== HERO SPOTLIGHT =====
+// Session posters sit under a dark stage; the cursor (or a tap) moves the spotlight.
+// When nobody is steering, the beam drifts on its own.
+const hero = document.getElementById('hero');
+const heroCrowd = document.querySelector('.hero-crowd');
+if (hero && heroCrowd && typeof MENTOR_SESSIONS !== 'undefined') {
+  const posters = MENTOR_SESSIONS.filter(s => s.poster)
+    .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
+    .map(s => s.poster);
+  if (posters.length) {
+    heroCrowd.innerHTML = Array.from({ length: 8 }, (_, i) =>
+      `<img src="${posters[i % posters.length]}" alt="" loading="${i < 4 ? 'eager' : 'lazy'}">`).join('');
+  }
 
-  scrambleTarget.addEventListener('mouseenter', e => {
-    let step = 0;
-    clearInterval(interval);
-    const targetText = e.target.dataset.value;
-    
-    interval = setInterval(() => {
-      e.target.innerText = targetText
-        .split("")
-        .map((letter, index) => {
-          if (letter === " ") return " ";
-          
-          if (step < 12) {
-            return letters[Math.floor(Math.random() * 26)];
-          } else if (step < 24) {
-            return "₹";
-          } else {
-            const resolveThreshold = 24 + index * 2;
-            if (step >= resolveThreshold) {
-              return letter;
-            }
-            return "₹";
-          }
-        })
-        .join("");
-      
-      step++;
-      
-      if (step >= 24 + targetText.length * 2) {
-        clearInterval(interval);
-        e.target.innerText = targetText;
-      }
-    }, 30);
-  });
-}
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let steeredAt = 0;
+  let heroVisible = true;
+  let t = 0;
+  const moveSpot = e => {
+    const rect = hero.getBoundingClientRect();
+    hero.style.setProperty('--spot-x', (e.clientX - rect.left) + 'px');
+    hero.style.setProperty('--spot-y', (e.clientY - rect.top) + 'px');
+    steeredAt = performance.now();
+  };
+  hero.addEventListener('pointermove', moveSpot);
+  hero.addEventListener('pointerdown', moveSpot);
+  // A finger lifting also fires pointerleave; only a mouse leaving hands the beam back to the drift
+  hero.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') steeredAt = 0; });
 
-if (scrambleTarget && !supportsPointerEffects) {
-  window.addEventListener('load', () => {
-    const targetText = scrambleTarget.dataset.value;
-    const rupee = String.fromCharCode(8377);
-    let step = 0;
+  new IntersectionObserver(entries => { heroVisible = entries[0].isIntersecting; }).observe(hero);
 
-    setTimeout(() => {
-      const interval = setInterval(() => {
-        scrambleTarget.innerText = targetText
-          .split("")
-          .map((letter, index) => {
-            if (letter === " ") return " ";
-
-            const resolveThreshold = 12 + index * 2;
-            if (step < resolveThreshold) return rupee;
-            return letter;
-          })
-          .join("");
-
-        step++;
-
-        if (step >= 12 + targetText.length * 2) {
-          clearInterval(interval);
-          scrambleTarget.innerText = targetText;
-        }
-      }, 42);
-    }, 600);
-  }, { once: true });
+  const drift = now => {
+    requestAnimationFrame(drift);
+    if (reduceMotion || !heroVisible || now - steeredAt < 2500) return;
+    t += 0.008;
+    hero.style.setProperty('--spot-x', (50 + Math.cos(t) * 32) + '%');
+    hero.style.setProperty('--spot-y', (38 + Math.sin(t * 1.7) * 20) + '%');
+  };
+  requestAnimationFrame(drift);
 }
 
 // ===== 3D CARD TILT & SPOTLIGHT =====
@@ -657,36 +895,33 @@ if (supportsPointerEffects) {
 }
 
 // ===== ANIMATED STAT COUNTERS =====
-const statTargets = [
-  { el: document.querySelectorAll('.stat-number')[0], target: 100, suffix: '%', prefix: '' },
-  { el: document.querySelectorAll('.stat-number')[2], target: null, suffix: '', prefix: 'Elite' },
-  { el: document.querySelectorAll('.stat-number')[3], target: null, suffix: '', prefix: '24/7' },
-];
-
-function animateCounter(el, target, suffix, prefix) {
-  if (target === null) return;
-  let start = 0;
-  const duration = 1800;
+function animateCounter(el) {
+  const target = Number(el.dataset.count);
+  const pad = Number(el.dataset.pad || 0);
+  const suffix = el.dataset.suffix || '';
+  const duration = 1400;
   const startTime = performance.now();
   function step(now) {
     const progress = Math.min((now - startTime) / duration, 1);
     const ease = 1 - Math.pow(1 - progress, 3);
-    el.textContent = Math.floor(ease * target) + suffix;
+    el.textContent = String(Math.round(ease * target)).padStart(pad, '0') + suffix;
     if (progress < 1) requestAnimationFrame(step);
   }
   requestAnimationFrame(step);
 }
 
+// Reduced-motion users get the final numbers straight away
+const counters = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  ? []
+  : document.querySelectorAll('.stat-number[data-count]');
 const statsObserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      animateCounter(statTargets[0].el, 100, '%', '');
-      statsObserver.disconnect();
-    }
-  });
+  if (entries.some(entry => entry.isIntersecting)) {
+    counters.forEach(animateCounter);
+    statsObserver.disconnect();
+  }
 }, { threshold: 0.5 });
 
-if (statTargets[0].el) statsObserver.observe(statTargets[0].el);
+if (counters.length) statsObserver.observe(counters[0]);
 
 // ===== MAGNETIC EFFECT ON JOIN WAITLIST BUTTON =====
 const magBtn = document.querySelector('.btn-primary');
@@ -707,20 +942,6 @@ if (magBtn && supportsPointerEffects) {
     magBtn.style.opacity = '1';
     magBtn.style.transition = 'transform 0.15s ease, box-shadow 0.3s ease';
   });
-}
-
-// ===== TYPEWRITER EFFECT on hero eyebrow =====
-const eyebrow = document.querySelector('.hero-eyebrow');
-if (eyebrow) {
-  const originalText = eyebrow.textContent.trim();
-  eyebrow.textContent = '';
-  let i = 0;
-  setTimeout(() => {
-    const type = setInterval(() => {
-      eyebrow.textContent = originalText.slice(0, ++i);
-      if (i >= originalText.length) clearInterval(type);
-    }, 45);
-  }, 400);
 }
 
 // ===== RIPPLE on submit button =====
@@ -761,22 +982,40 @@ window.addEventListener('scroll', () => {
   const progressBar = document.getElementById('scrollProgress');
   if (progressBar) progressBar.style.width = (scrollRatio * 100) + '%';
 
-  // 3. Hero Parallax
-  const heroWrap = document.querySelector('.hero-name-wrap');
-  if (heroWrap) {
-    heroWrap.style.transform = `translateY(${winScroll * 0.4}px) scale(${1 - winScroll * 0.0003})`;
-    heroWrap.style.opacity = 1 - winScroll * 0.0015;
-  }
-  
-  const heroDesc = document.querySelector('.hero-desc');
-  if (heroDesc) {
-    heroDesc.style.transform = `translateY(${winScroll * 0.2}px)`;
-    heroDesc.style.opacity = 1 - winScroll * 0.002;
-  }
-
-  // 4. Grid BG Parallax
+  // 3. Grid BG Parallax
   const gridBg = document.querySelector('.grid-bg');
   if (gridBg) {
     gridBg.style.backgroundPositionY = `${winScroll * 0.3}px`;
   }
 });
+
+// ===== THINK BIG: HARD DROP =====
+// Lines fall bottom line first, so each lands on the one below, and slam down when the closing screen scrolls
+// into view: shake and flash on every impact. Runs once.
+(function () {
+  const section = document.getElementById('rise');
+  if (!section || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const title = section.querySelector('.rise-title');
+  const lines = section.querySelectorAll('.rise-line');
+  const IMPACT_AT = 0.52 * 1150; // ms into each line's drop, matches rise-drop's 52% frame
+  const STAGGER = 320;
+
+  section.classList.add('rise--armed');
+
+  function impact() {
+    title.classList.remove('is-shaking');
+    section.classList.remove('is-impact');
+    void title.offsetWidth; // restart the animations
+    title.classList.add('is-shaking');
+    section.classList.add('is-impact');
+  }
+
+  const watcher = new IntersectionObserver(entries => {
+    if (!entries[0].isIntersecting) return;
+    watcher.disconnect();
+    section.classList.add('rise--dropped');
+    lines.forEach((_, i) => setTimeout(impact, i * STAGGER + IMPACT_AT));
+  }, { threshold: 0.55 });
+  watcher.observe(section);
+})();
+
