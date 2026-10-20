@@ -796,7 +796,7 @@ if (supportsPointerEffects) {
   };
   animateRing();
 
-  const interactables = document.querySelectorAll('a, button, input, textarea, .feature-card, .audience-card, .session-card, .scramble-target');
+  const interactables = document.querySelectorAll('a, button, input, textarea, .feature-card, .audience-card, .session-card');
   interactables.forEach(el => {
     el.addEventListener('mouseenter', () => {
       cursorRing?.classList.add('hovered');
@@ -824,75 +824,45 @@ if (supportsPointerEffects) {
   });
 }
 
-// ===== HERO TITLE TEXT SCRAMBLE =====
-const scrambleTarget = document.querySelector('.scramble-target');
-if (scrambleTarget && supportsPointerEffects) {
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let interval = null;
+// ===== HERO SPOTLIGHT =====
+// Session posters sit under a dark stage; the cursor (or a tap) moves the spotlight.
+// When nobody is steering, the beam drifts on its own.
+const hero = document.getElementById('hero');
+const heroCrowd = document.querySelector('.hero-crowd');
+if (hero && heroCrowd && typeof MENTOR_SESSIONS !== 'undefined') {
+  const posters = MENTOR_SESSIONS.filter(s => s.poster)
+    .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
+    .map(s => s.poster);
+  if (posters.length) {
+    heroCrowd.innerHTML = Array.from({ length: 8 }, (_, i) =>
+      `<img src="${posters[i % posters.length]}" alt="" loading="${i < 4 ? 'eager' : 'lazy'}">`).join('');
+  }
 
-  scrambleTarget.addEventListener('mouseenter', e => {
-    let step = 0;
-    clearInterval(interval);
-    const targetText = e.target.dataset.value;
-    
-    interval = setInterval(() => {
-      e.target.innerText = targetText
-        .split("")
-        .map((letter, index) => {
-          if (letter === " ") return " ";
-          
-          if (step < 12) {
-            return letters[Math.floor(Math.random() * 26)];
-          } else if (step < 24) {
-            return "₹";
-          } else {
-            const resolveThreshold = 24 + index * 2;
-            if (step >= resolveThreshold) {
-              return letter;
-            }
-            return "₹";
-          }
-        })
-        .join("");
-      
-      step++;
-      
-      if (step >= 24 + targetText.length * 2) {
-        clearInterval(interval);
-        e.target.innerText = targetText;
-      }
-    }, 30);
-  });
-}
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let steeredAt = 0;
+  let heroVisible = true;
+  let t = 0;
+  const moveSpot = e => {
+    const rect = hero.getBoundingClientRect();
+    hero.style.setProperty('--spot-x', (e.clientX - rect.left) + 'px');
+    hero.style.setProperty('--spot-y', (e.clientY - rect.top) + 'px');
+    steeredAt = performance.now();
+  };
+  hero.addEventListener('pointermove', moveSpot);
+  hero.addEventListener('pointerdown', moveSpot);
+  // A finger lifting also fires pointerleave; only a mouse leaving hands the beam back to the drift
+  hero.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') steeredAt = 0; });
 
-if (scrambleTarget && !supportsPointerEffects) {
-  window.addEventListener('load', () => {
-    const targetText = scrambleTarget.dataset.value;
-    const rupee = String.fromCharCode(8377);
-    let step = 0;
+  new IntersectionObserver(entries => { heroVisible = entries[0].isIntersecting; }).observe(hero);
 
-    setTimeout(() => {
-      const interval = setInterval(() => {
-        scrambleTarget.innerText = targetText
-          .split("")
-          .map((letter, index) => {
-            if (letter === " ") return " ";
-
-            const resolveThreshold = 12 + index * 2;
-            if (step < resolveThreshold) return rupee;
-            return letter;
-          })
-          .join("");
-
-        step++;
-
-        if (step >= 12 + targetText.length * 2) {
-          clearInterval(interval);
-          scrambleTarget.innerText = targetText;
-        }
-      }, 42);
-    }, 600);
-  }, { once: true });
+  const drift = now => {
+    requestAnimationFrame(drift);
+    if (reduceMotion || !heroVisible || now - steeredAt < 2500) return;
+    t += 0.008;
+    hero.style.setProperty('--spot-x', (50 + Math.cos(t) * 32) + '%');
+    hero.style.setProperty('--spot-y', (38 + Math.sin(t * 1.7) * 20) + '%');
+  };
+  requestAnimationFrame(drift);
 }
 
 // ===== 3D CARD TILT & SPOTLIGHT =====
@@ -974,20 +944,6 @@ if (magBtn && supportsPointerEffects) {
   });
 }
 
-// ===== TYPEWRITER EFFECT on hero eyebrow =====
-const eyebrow = document.querySelector('.hero-eyebrow');
-if (eyebrow) {
-  const originalText = eyebrow.textContent.trim();
-  eyebrow.textContent = '';
-  let i = 0;
-  setTimeout(() => {
-    const type = setInterval(() => {
-      eyebrow.textContent = originalText.slice(0, ++i);
-      if (i >= originalText.length) clearInterval(type);
-    }, 45);
-  }, 400);
-}
-
 // ===== RIPPLE on submit button =====
 document.querySelectorAll('.btn-submit').forEach(button => button.addEventListener('click', function (e) {
   const rect = this.getBoundingClientRect();
@@ -1026,20 +982,7 @@ window.addEventListener('scroll', () => {
   const progressBar = document.getElementById('scrollProgress');
   if (progressBar) progressBar.style.width = (scrollRatio * 100) + '%';
 
-  // 3. Hero Parallax
-  const heroWrap = document.querySelector('.hero-name-wrap');
-  if (heroWrap) {
-    heroWrap.style.transform = `translateY(${winScroll * 0.4}px) scale(${1 - winScroll * 0.0003})`;
-    heroWrap.style.opacity = 1 - winScroll * 0.0015;
-  }
-  
-  const heroDesc = document.querySelector('.hero-desc');
-  if (heroDesc) {
-    heroDesc.style.transform = `translateY(${winScroll * 0.2}px)`;
-    heroDesc.style.opacity = 1 - winScroll * 0.002;
-  }
-
-  // 4. Grid BG Parallax
+  // 3. Grid BG Parallax
   const gridBg = document.querySelector('.grid-bg');
   if (gridBg) {
     gridBg.style.backgroundPositionY = `${winScroll * 0.3}px`;
