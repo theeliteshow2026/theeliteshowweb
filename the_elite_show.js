@@ -2,9 +2,9 @@
 // 🔧 REPLACE THESE TWO VALUES BEFORE GOING LIVE:
 const WHATSAPP_LINK = "https://chat.whatsapp.com/ItDdTXKakan01FUREdRxar";
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbylsTW9H43fY6-Mzuz6F9E19jeKf8vu6N7Wrn1IB1o2uwDU6mfHLVx1rFWePnczknDR/exec";
-// Premium Community payment page (e.g. a Razorpay Payment Page link). While it
-// is empty, new members are told the payment link will be sent to them.
-const PAYMENT_LINK = "";
+// Premium Community payments: Razorpay Checkout, backed by Supabase Edge Functions
+const PAYMENTS_API = "https://mlrzeqekvhbzwnblzzlv.supabase.co/functions/v1";
+const RAZORPAY_CHECKOUT_JS = "https://checkout.razorpay.com/v1/checkout.js";
 
 // Update WhatsApp button dynamically
 document.querySelector('.btn-whatsapp').href = WHATSAPP_LINK;
@@ -249,11 +249,10 @@ const JOIN_COPY = {
     step2: 'Your Membership',
     progress: 'Membership',
     submit: 'Join for ₹199/month',
+    // Shown only if online payment is unavailable; a paid member sees openPremiumWelcome instead
     modalTitle: 'Welcome to The Elite Show Premium Community 🎉',
     modalMsg: "Your spot is reserved.<br><br><strong>One last step: pay your first month's ₹199.</strong> " +
-      (PAYMENT_LINK
-        ? 'Tap the button below to pay and confirm your membership.'
-        : "We'll send your payment link to your WhatsApp and email shortly.") +
+      "We'll send your payment link to your WhatsApp and email shortly." +
       '<br><br>Meanwhile, join our WhatsApp community to hear about the next mentor session, Elite Brew and workshop first.'
   },
   Mentor: {
@@ -337,8 +336,10 @@ function updateJoinMode() {
   }
 
   const submitted = hasSubmitted(joiningAs);
+  const awaitingPayment = joiningAs === 'Member' && pendingPremium && !submitted;
   document.getElementById('submitBtn').disabled = submitted;
-  document.getElementById('btnText').textContent = submitted ? 'Already Joined' : copy.submit;
+  document.getElementById('btnText').textContent =
+    submitted ? 'Already Joined' : awaitingPayment ? 'Complete Payment · ₹199/month' : copy.submit;
 }
 
 document.querySelectorAll('input[name="joiningAs"]').forEach(input => {
@@ -449,6 +450,93 @@ document.getElementById('paymentConsent').addEventListener('change', function ()
   if (this.checked) clearGroupError('paymentGroup', 'paymentError');
 });
 
+// ===== PREMIUM PAYMENT (Razorpay Checkout) =====
+// Set once a Premium signup is saved, so closing the payment window and trying
+// again goes straight back to payment.
+let pendingPremium = null;
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`) && window.Razorpay) return resolve();
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = resolve;
+    script.onerror = () => reject(new Error(`Could not load ${src}`));
+    document.head.append(script);
+  });
+}
+
+async function postPayments(path, body) {
+  const res = await fetch(`${PAYMENTS_API}/${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok && data.success, data };
+}
+
+// Resolves with { status: 'paid' | 'unavailable' | 'dismissed' | 'error', ... }
+async function startPremiumPayment(contact) {
+  const tryAgain = "We couldn't start the payment. Please check your connection and try again.";
+  let start;
+  try {
+    start = await postPayments('create-subscription', contact);
+    await loadScript(RAZORPAY_CHECKOUT_JS);
+  } catch (err) {
+    return { status: 'error', message: tryAgain };
+  }
+  // Payments not switched on yet: the member is told the link will be sent
+  if (start.data.code === 'not_configured') return { status: 'unavailable' };
+  if (!start.ok) return { status: 'error', message: start.data.message || tryAgain };
+
+  return new Promise(resolve => {
+    const checkout = new window.Razorpay({
+      key: start.data.keyId,
+      subscription_id: start.data.subscriptionId,
+      name: 'The Elite Show Community',
+      description: 'Premium Community · ₹199/month',
+      prefill: { name: contact.name, email: contact.email, contact: contact.phone },
+      theme: { color: '#CAFB0C' },
+      handler: async response => {
+        const notConfirmed = "Your payment went through but we couldn't confirm it yet. " +
+          "Please don't pay again. We'll check it and reach out to you.";
+        try {
+          const verified = await postPayments('verify-payment', response);
+          resolve(verified.ok ? { status: 'paid', ...verified.data } : { status: 'error', message: notConfirmed });
+        } catch (err) {
+          resolve({ status: 'error', message: notConfirmed });
+        }
+      },
+      modal: {
+        ondismiss: () => resolve({
+          status: 'dismissed',
+          message: 'Payment not completed. Tap "Complete Payment" whenever you are ready.'
+        })
+      }
+    });
+    checkout.open();
+  });
+}
+
+function escapeHtml(text) {
+  return String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function openPremiumWelcome({ memberCode, communityLink }) {
+  openModal('Member');
+  document.getElementById('modalMsg').innerHTML =
+    "Your payment is confirmed. <strong>You're now a Premium member.</strong>" +
+    (memberCode ? `<br><br>Your member ID is <strong>${escapeHtml(memberCode)}</strong>. Keep it handy.` : '') +
+    (communityLink
+      ? '<br><br>Tap below to join the Premium community.'
+      : "<br><br>We'll add you to the Premium community shortly.");
+  const premiumBtn = document.getElementById('premiumBtn');
+  premiumBtn.hidden = !communityLink;
+  if (communityLink) premiumBtn.href = communityLink;
+  document.querySelector('.btn-whatsapp').hidden = Boolean(communityLink);
+}
+
 // ===== FORM SUBMIT =====
 async function handleSubmit() {
   const joiningAs = getJoiningAs();
@@ -492,7 +580,9 @@ async function handleSubmit() {
   }
 
   try {
-    if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL") {
+    // A Premium member who closed the payment window is already in the sheet
+    const resumingPayment = joiningAs === 'Member' && pendingPremium;
+    if (!resumingPayment && GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL") {
       // text/plain keeps this a "simple" CORS request, so Apps Script's JSON
       // reply is readable and a failed save is no longer shown as a success.
       const res = await fetch(GOOGLE_SCRIPT_URL, {
@@ -502,6 +592,20 @@ async function handleSubmit() {
       });
       const result = await res.json();
       if (!result.success) throw new Error(result.message || 'Unable to save registration.');
+    }
+    if (joiningAs === 'Member') {
+      pendingPremium = pendingPremium || { name, email, phone };
+      btnTxt.textContent = 'Opening Payment...';
+      const outcome = await startPremiumPayment(pendingPremium);
+      if (outcome.status === 'paid' || outcome.status === 'unavailable') {
+        pendingPremium = null;
+        markSubmitted(joiningAs);
+        outcome.status === 'paid' ? openPremiumWelcome(outcome) : openModal(joiningAs);
+      } else {
+        errEl.textContent = outcome.message;
+        errEl.style.display = 'block';
+      }
+      return;
     }
     markSubmitted(joiningAs);
     openModal(joiningAs);
@@ -523,9 +627,8 @@ updateJoinMode();
 function openModal(joiningAs = 'Free Member') {
   document.getElementById('modalTitle').textContent = JOIN_COPY[joiningAs].modalTitle;
   document.getElementById('modalMsg').innerHTML = JOIN_COPY[joiningAs].modalMsg;
-  const payBtn = document.getElementById('payBtn');
-  payBtn.hidden = !(joiningAs === 'Member' && PAYMENT_LINK);
-  if (PAYMENT_LINK) payBtn.href = PAYMENT_LINK;
+  document.getElementById('premiumBtn').hidden = true;
+  document.querySelector('.btn-whatsapp').hidden = false;
   document.getElementById('modalOverlay').classList.add('active');
   document.body.style.overflow = 'hidden';
   launchConfetti();
