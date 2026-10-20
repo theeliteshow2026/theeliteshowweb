@@ -796,7 +796,7 @@ if (supportsPointerEffects) {
   };
   animateRing();
 
-  const interactables = document.querySelectorAll('a, button, input, textarea, .feature-card, .audience-card, .session-card');
+  const interactables = document.querySelectorAll('a, button, input, textarea, .feature-card, .audience-card, .session-card, .scramble-target');
   interactables.forEach(el => {
     el.addEventListener('mouseenter', () => {
       cursorRing?.classList.add('hovered');
@@ -863,6 +863,40 @@ if (hero && heroCrowd && typeof MENTOR_SESSIONS !== 'undefined') {
     hero.style.setProperty('--spot-y', (38 + Math.sin(t * 1.7) * 20) + '%');
   };
   requestAnimationFrame(drift);
+}
+
+// ===== BRAND BAND: TITLE SCRAMBLE =====
+// Letters shuffle, flip to ₹, then settle one by one. Plays when the band
+// scrolls into view, and again on hover where there is a mouse.
+const scrambleTarget = document.querySelector('.scramble-target');
+if (scrambleTarget) {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const rupee = String.fromCharCode(8377);
+  const targetText = scrambleTarget.dataset.value;
+  let interval = null;
+  const scramble = () => {
+    let step = 0;
+    clearInterval(interval);
+    interval = setInterval(() => {
+      scrambleTarget.textContent = [...targetText].map((letter, index) => {
+        if (letter === ' ') return ' ';
+        if (step < 12) return letters[Math.floor(Math.random() * 26)];
+        return step >= 24 + index * 2 ? letter : rupee;
+      }).join('');
+      step++;
+      if (step >= 24 + targetText.length * 2) {
+        clearInterval(interval);
+        scrambleTarget.textContent = targetText;
+      }
+    }, 34);
+  };
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const bandWatcher = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) { scramble(); bandWatcher.disconnect(); }
+    }, { threshold: 0.6 });
+    bandWatcher.observe(scrambleTarget);
+    if (supportsPointerEffects) scrambleTarget.addEventListener('mouseenter', scramble);
+  }
 }
 
 // ===== 3D CARD TILT & SPOTLIGHT =====

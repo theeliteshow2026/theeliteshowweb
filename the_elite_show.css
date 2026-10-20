@@ -431,6 +431,184 @@ a.nav-logo {
   transform: translateY(-2px) scale(1.02);
 }
 
+/* ===================== BRAND BAND ===================== */
+/* Short strip under the hero: the original title, scrambling through ₹ into place when it scrolls into view */
+.brand-band {
+  position: relative;
+  z-index: 2;
+  padding: 3.5rem 1.5rem 3rem;
+  text-align: center;
+  background: var(--black);
+}
+
+.brand-name-wrap {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  padding: 1.8rem 3.5rem 2rem;
+  isolation: isolate;
+}
+
+.brand-film {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(0, 200, 83, 0.22) 0%, transparent 70%),
+    radial-gradient(ellipse at 50% 100%, rgba(0, 160, 60, 0.12) 0%, transparent 60%),
+    linear-gradient(135deg, rgba(0, 200, 83, 0.13) 0%, rgba(0, 80, 30, 0.18) 50%, rgba(0, 200, 83, 0.10) 100%);
+  border: 1px solid rgba(0, 200, 83, 0.18);
+  box-shadow:
+    0 0 40px rgba(0, 200, 83, 0.18),
+    0 0 90px rgba(0, 200, 83, 0.08),
+    inset 0 0 30px rgba(0, 200, 83, 0.06);
+  animation: filmBreath 4s ease-in-out infinite;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.brand-film::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg,
+      transparent 30%,
+      rgba(0, 220, 90, 0.08) 45%,
+      rgba(0, 255, 100, 0.13) 50%,
+      rgba(0, 220, 90, 0.08) 55%,
+      transparent 70%);
+  background-size: 200% 100%;
+  animation: filmSheen 5s ease-in-out infinite;
+}
+
+.brand-film-scanlines {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  background: repeating-linear-gradient(to bottom,
+      transparent,
+      transparent 3px,
+      rgba(0, 200, 83, 0.025) 3px,
+      rgba(0, 200, 83, 0.025) 4px);
+  pointer-events: none;
+  z-index: 1;
+  animation: scanlinesDrift 8s linear infinite;
+}
+
+@keyframes filmBreath {
+
+  0%,
+  100% {
+    box-shadow:
+      0 0 35px rgba(0, 200, 83, 0.16),
+      0 0 80px rgba(0, 200, 83, 0.07),
+      inset 0 0 25px rgba(0, 200, 83, 0.05);
+    border-color: rgba(0, 200, 83, 0.16);
+  }
+
+  50% {
+    box-shadow:
+      0 0 55px rgba(0, 200, 83, 0.28),
+      0 0 120px rgba(0, 200, 83, 0.13),
+      inset 0 0 40px rgba(0, 200, 83, 0.09);
+    border-color: rgba(0, 200, 83, 0.30);
+  }
+}
+
+@keyframes filmSheen {
+  0% {
+    background-position: -200% 0;
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    background-position: 200% 0;
+    opacity: 0;
+  }
+}
+
+@keyframes scanlinesDrift {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 0 40px;
+  }
+}
+
+.brand-name-wrap .brand-name {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 0;
+}
+
+
+.brand-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.6rem, 8vw, 6.5rem);
+  font-weight: 700;
+  line-height: 0.9;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 0 40px rgba(0, 200, 83, 0.35), 0 0 80px rgba(0, 200, 83, 0.15);
+}
+
+.brand-name .highlight {
+  display: block;
+  color: var(--white);
+  text-shadow: 0 0 30px rgba(245, 245, 240, 0.12);
+}
+
+.brand-tag {
+  font-size: clamp(0.6rem, 2vw, 0.85rem);
+  font-weight: 600;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--green);
+  margin-bottom: 0;
+  position: relative;
+}
+
+.brand-tag::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  right: 0;
+  color: var(--green);
+  filter: blur(8px);
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@media (max-width: 700px) {
+  .brand-name-wrap {
+    padding: 1.4rem 1.6rem 1.6rem;
+  }
+}
+
 /* ===================== STATS STRIP ===================== */
 .stats-strip {
   position: relative;
