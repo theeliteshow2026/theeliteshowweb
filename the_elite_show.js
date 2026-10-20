@@ -942,3 +942,34 @@ window.addEventListener('scroll', () => {
     gridBg.style.backgroundPositionY = `${winScroll * 0.3}px`;
   }
 });
+
+// ===== THINK BIG: HARD DROP =====
+// Lines fall bottom line first, so each lands on the one below, and slam down when the closing screen scrolls
+// into view: shake and flash on every impact. Runs once.
+(function () {
+  const section = document.getElementById('rise');
+  if (!section || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const title = section.querySelector('.rise-title');
+  const lines = section.querySelectorAll('.rise-line');
+  const IMPACT_AT = 0.52 * 1150; // ms into each line's drop, matches rise-drop's 52% frame
+  const STAGGER = 320;
+
+  section.classList.add('rise--armed');
+
+  function impact() {
+    title.classList.remove('is-shaking');
+    section.classList.remove('is-impact');
+    void title.offsetWidth; // restart the animations
+    title.classList.add('is-shaking');
+    section.classList.add('is-impact');
+  }
+
+  const watcher = new IntersectionObserver(entries => {
+    if (!entries[0].isIntersecting) return;
+    watcher.disconnect();
+    section.classList.add('rise--dropped');
+    lines.forEach((_, i) => setTimeout(impact, i * STAGGER + IMPACT_AT));
+  }, { threshold: 0.55 });
+  watcher.observe(section);
+})();
+

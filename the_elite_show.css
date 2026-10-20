@@ -1994,6 +1994,105 @@ footer {
   color: var(--green);
 }
 
+/* Hard drop: the script arms the lines (hidden above) and drops them in one
+   by one when the screen comes into view. Without the script they just show. */
+.rise-line {
+  position: relative;
+  transform-origin: 50% 100%;
+}
+
+.rise--armed .rise-line {
+  opacity: 0;
+}
+
+.rise--dropped .rise-line {
+  animation: rise-drop 1.15s both;
+  animation-delay: calc(var(--i, 0) * 0.32s);
+}
+
+/* Free fall (accelerating), slam, squash, two shrinking bounces, settle */
+@keyframes rise-drop {
+  0% {
+    opacity: 1;
+    transform: translateY(-115vh) rotate(-5deg) scale(1.12);
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+  52% {
+    transform: translateY(0) rotate(0) scale(1, 1);
+    animation-timing-function: cubic-bezier(0, 0, 0.3, 1);
+  }
+  58% {
+    opacity: 1;
+    transform: translateY(3%) scale(1.07, 0.84);
+    animation-timing-function: cubic-bezier(0.3, 0, 0.3, 1);
+  }
+  70% {
+    transform: translateY(-11%) rotate(0.6deg) scale(0.97, 1.04);
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+  80% {
+    transform: translateY(0) scale(1.03, 0.95);
+    animation-timing-function: cubic-bezier(0, 0, 0.3, 1);
+  }
+  89% {
+    transform: translateY(-3%) scale(0.995, 1.01);
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Dust kicked up where each line lands */
+.rise-line::after {
+  content: '';
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: -0.04em;
+  height: 0.22em;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(245, 245, 240, 0.35), rgba(202, 251, 12, 0.12) 45%, transparent 70%);
+  filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.rise--dropped .rise-line::after {
+  animation: rise-dust 1.4s ease-out both;
+  animation-delay: calc(var(--i, 0) * 0.32s + 0.6s);
+}
+
+@keyframes rise-dust {
+  0% { opacity: 0.9; transform: scale(0.4, 0.6); }
+  100% { opacity: 0; transform: scale(1.6, 2.2) translateY(-20%); }
+}
+
+/* Camera shake on each impact, added by the script */
+.rise-title.is-shaking {
+  animation: rise-shake 0.38s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes rise-shake {
+  10% { translate: -1px 6px; }
+  25% { translate: 3px -5px; }
+  40% { translate: -4px 4px; }
+  55% { translate: 3px -2px; }
+  70% { translate: -2px 2px; }
+  85% { translate: 1px -1px; }
+  100% { translate: 0 0; }
+}
+
+.rise.is-impact {
+  animation: rise-flash 0.5s ease-out;
+}
+
+@keyframes rise-flash {
+  0% { box-shadow: inset 0 0 160px rgba(202, 251, 12, 0.18); }
+  100% { box-shadow: inset 0 0 160px rgba(202, 251, 12, 0); }
+}
+
 /* Roadmap */
 .roadmap {
   list-style: none;
