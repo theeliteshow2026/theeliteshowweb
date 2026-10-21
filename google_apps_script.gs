@@ -1,7 +1,4 @@
 const SHEET_NAME = 'Waitlist';
-// Short sign-ups from coming-soon.html (name + WhatsApp number only)
-const COMING_SOON_SHEET = 'Coming Soon';
-const COMING_SOON_HEADERS = ['Submitted At', 'Full Name', 'WhatsApp Number'];
 // Leave blank when this script was opened from Extensions > Apps Script
 // inside the target Google Sheet. Otherwise, paste the spreadsheet ID here.
 const SPREADSHEET_ID = '';
@@ -39,9 +36,6 @@ function doPost(e) {
     lock.waitLock(10000);
 
     const payload = JSON.parse(e.postData.contents);
-    if (payload.joiningAs === COMING_SOON) {
-      return saveComingSoon(payload);
-    }
     validatePayload(payload);
 
     const spreadsheet = getSpreadsheet();
@@ -81,29 +75,6 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
-}
-
-function saveComingSoon(payload) {
-  ['name', 'phone'].forEach(field => {
-    if (!payload[field] || String(payload[field]).trim() === '') {
-      throw new Error(`Missing required field: ${field}`);
-    }
-  });
-
-  const spreadsheet = getSpreadsheet();
-  const sheet = spreadsheet.getSheetByName(COMING_SOON_SHEET) ||
-    spreadsheet.insertSheet(COMING_SOON_SHEET);
-  const headerRange = sheet.getRange(1, 1, 1, COMING_SOON_HEADERS.length);
-  if (headerRange.getValues()[0].join('|') !== COMING_SOON_HEADERS.join('|')) {
-    headerRange.setValues([COMING_SOON_HEADERS]).setFontWeight('bold');
-    sheet.setFrozenRows(1);
-  }
-  sheet.appendRow([new Date(), cell(payload.name), cell(payload.phone)]);
-
-  return jsonResponse({
-    success: true,
-    message: 'Coming soon sign-up saved.'
-  });
 }
 
 function setupSheet() {
@@ -153,7 +124,6 @@ function ensureHeaders(sheet) {
 }
 
 const JOINING_AS = ['Member', 'Free Member', 'Mentor', 'Investor', 'Collaborator'];
-const COMING_SOON = 'Coming Soon';
 
 // Text that starts with = + - or @ would run as a formula when the sheet is
 // opened, so store it as plain text instead.

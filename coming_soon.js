@@ -1,6 +1,6 @@
-// Same Apps Script web app as the main join form. "Coming Soon" sign-ups
-// are saved to their own "Coming Soon" sheet.
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbylsTW9H43fY6-Mzuz6F9E19jeKf8vu6N7Wrn1IB1o2uwDU6mfHLVx1rFWePnczknDR/exec";
+// Web app URL of coming_soon_apps_script.gs, which saves to its own
+// "Coming Soon Sign-ups" spreadsheet (not the Waitlist sheet).
+const COMING_SOON_SCRIPT_URL = "";
 
 const OPEN_MAX_DEG = 70;     // how far the door swings at a full peek
 const PEEK_AT = 0.6;         // fraction of the swing that counts as a peek
@@ -107,15 +107,20 @@ form.addEventListener('submit', async e => {
     return;
   }
 
+  if (!COMING_SOON_SCRIPT_URL) {
+    say('Sign-ups open shortly. Please try again soon.', 'error');
+    return;
+  }
+
   knockBtn.disabled = true;
   knock();
   say('Knocking...');
   try {
     // text/plain keeps this a "simple" CORS request, so the JSON reply is readable
-    const res = await fetch(GOOGLE_SCRIPT_URL, {
+    const res = await fetch(COMING_SOON_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ joiningAs: 'Coming Soon', name, phone })
+      body: JSON.stringify({ name, phone })
     });
     const result = await res.json();
     if (!result.success) throw new Error(result.message);
