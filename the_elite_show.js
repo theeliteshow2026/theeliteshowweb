@@ -519,15 +519,11 @@ async function startPremiumPayment(contact) {
   });
 }
 
-function escapeHtml(text) {
-  return String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-
-function openPremiumWelcome({ memberCode, communityLink }) {
+function openPremiumWelcome({ memberCode, communityLink, name }) {
   openModal('Member');
+  showMemberCard(name, memberCode);
   document.getElementById('modalMsg').innerHTML =
-    "Your payment is confirmed. <strong>You're now a Premium member.</strong>" +
-    (memberCode ? `<br><br>Your member ID is <strong>${escapeHtml(memberCode)}</strong>. Keep it handy.` : '') +
+    "Your payment is confirmed. <strong>You're now a Premium member.</strong> Your card above shows your member ID." +
     (communityLink
       ? '<br><br>Tap below to join the Premium community.'
       : "<br><br>We'll add you to the Premium community shortly.");
@@ -536,6 +532,35 @@ function openPremiumWelcome({ memberCode, communityLink }) {
   if (communityLink) premiumBtn.href = communityLink;
   document.querySelector('.btn-whatsapp').hidden = Boolean(communityLink);
 }
+
+// Only a paid Premium member sees their card: name, ESP number and join month.
+// It tilts and catches the light under the cursor.
+function showMemberCard(name, memberCode) {
+  const card = document.getElementById('memberCard');
+  document.getElementById('memberCardName').textContent = name || 'Premium Member';
+  document.getElementById('memberCardId').textContent = memberCode || 'ESP-····';
+  document.getElementById('memberCardSince').textContent =
+    new Date().toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }).toUpperCase();
+  document.querySelector('.modal-icon').hidden = true;
+  card.hidden = false;
+}
+
+(function () {
+  const card = document.getElementById('memberCard');
+  if (!card || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const modal = card.closest('.modal');
+  modal.addEventListener('pointermove', e => {
+    if (card.hidden) return;
+    const rect = card.getBoundingClientRect();
+    const x = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+    const y = Math.min(Math.max((e.clientY - rect.top) / rect.height, 0), 1);
+    card.style.transform = `perspective(900px) rotateY(${(x - 0.5) * 22}deg) rotateX(${(0.5 - y) * 18}deg)`;
+    card.style.setProperty('--sheen-x', x * 100 + '%');
+    card.style.setProperty('--sheen-y', y * 100 + '%');
+    card.style.setProperty('--sheen-a', x * 220 + 'deg');
+  });
+  modal.addEventListener('pointerleave', () => { card.style.transform = ''; });
+})();
 
 // ===== FORM SUBMIT =====
 async function handleSubmit() {
@@ -598,9 +623,10 @@ async function handleSubmit() {
       btnTxt.textContent = 'Opening Payment...';
       const outcome = await startPremiumPayment(pendingPremium);
       if (outcome.status === 'paid' || outcome.status === 'unavailable') {
+        const payer = pendingPremium;
         pendingPremium = null;
         markSubmitted(joiningAs);
-        outcome.status === 'paid' ? openPremiumWelcome(outcome) : openModal(joiningAs);
+        outcome.status === 'paid' ? openPremiumWelcome({ ...outcome, name: payer.name }) : openModal(joiningAs);
       } else {
         errEl.textContent = outcome.message;
         errEl.style.display = 'block';
@@ -629,6 +655,8 @@ function openModal(joiningAs = 'Free Member') {
   document.getElementById('modalMsg').innerHTML = JOIN_COPY[joiningAs].modalMsg;
   document.getElementById('premiumBtn').hidden = true;
   document.querySelector('.btn-whatsapp').hidden = false;
+  document.getElementById('memberCard').hidden = true;
+  document.querySelector('.modal-icon').hidden = false;
   document.getElementById('modalOverlay').classList.add('active');
   document.body.style.overflow = 'hidden';
   launchConfetti();
@@ -926,6 +954,35 @@ if (supportsPointerEffects) {
     });
   });
 }
+
+// ===== WHAT WE DO: LIGHT ONE VERB AT A TIME =====
+// The verb crossing the middle of the screen lights up; hovering or focusing one takes over.
+(function () {
+  const verbs = [...document.querySelectorAll('.verb')];
+  if (!verbs.length) return;
+  const light = verb => verbs.forEach(v => v.classList.toggle('is-lit', v === verb));
+  verbs.forEach(verb => {
+    verb.addEventListener('mouseenter', () => light(verb));
+    verb.addEventListener('focus', () => light(verb));
+  });
+  const middle = new IntersectionObserver(entries => {
+    entries.forEach(entry => { if (entry.isIntersecting) light(entry.target); });
+  }, { rootMargin: '-45% 0px -45% 0px' });
+  verbs.forEach(verb => middle.observe(verb));
+})();
+
+// ===== THE EXPERIENCE: LIVE / REAL LINES RISE IN =====
+(function () {
+  const lines = document.querySelector('.live-real');
+  if (!lines || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  lines.classList.add('is-armed');
+  const watcher = new IntersectionObserver(entries => {
+    if (!entries[0].isIntersecting) return;
+    watcher.disconnect();
+    lines.classList.add('is-in');
+  }, { threshold: 0.4 });
+  watcher.observe(lines);
+})();
 
 // ===== ANIMATED STAT COUNTERS =====
 function animateCounter(el) {

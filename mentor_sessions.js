@@ -5,6 +5,12 @@
 // real one is ready. `number` is only used on that generated poster.
 // `short` is the brief title shown on the cards; the full title shows when
 // the poster is opened.
+//
+// The home page counts down to the next Saturday session at this time (India time,
+// 24-hour clock; the posters say 7:30 PM).
+// Change it here if the sessions move.
+const SESSION_START_IST = '19:30';
+const SESSION_LENGTH_HOURS = 2;
 const MENTOR_SESSIONS = [
   {
     label: 'Community Session',
@@ -193,4 +199,172 @@ const MENTOR_SESSIONS = [
     const limit = Number(grid.dataset.limit) || sessions.length;
     grid.replaceChildren(...sessions.slice(0, limit).map(card));
   });
+
+  // ----- Home page: posters on an arc, countdown inside it -----
+  const arc = document.querySelector('[data-session-arc]');
+  if (arc && sessions.length) buildArc(arc);
+
+  function buildArc(stage) {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const ring = stage.querySelector('.arc-ring');
+    let cards = [];
+    let radius = 0, step = 0, centerX = 0, centerY = 0;
+    let angle = 0, target = null, hovering = false, visible = false, dragging = null, moved = false;
+
+    function stamp(iso) {
+      const [y, m, d] = iso.split('-').map(Number);
+      return new Date(y, m - 1, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase();
+    }
+
+    function arcCard(session) {
+      const button = el('button', 'arc-card');
+      button.type = 'button';
+      button.setAttribute('aria-label', `Open the poster for ${session.title}`);
+      const frame = el('div', 'session-poster');
+      frame.append(posterFor(session), el('span', 'arc-stamp', stamp(session.date)));
+      const caption = el('p', 'arc-caption', session.short || session.title);
+      caption.append(el('small', null, session.mentor));
+      button.append(frame, caption);
+      button.addEventListener('click', e => {
+        if (moved) { e.preventDefault(); return; }
+        openLightbox(session, button);
+      });
+      // Turn the shortest way round to bring a focused poster to the top
+      button.addEventListener('focus', () => {
+        const goal = -cards.indexOf(button) * step;
+        target = angle + (((goal - angle) % 360) + 540) % 360 - 180;
+      });
+      return button;
+    }
+
+    // The ring is filled with as many cards as fit around the whole circle, repeating sessions
+    function layout() {
+      const width = stage.clientWidth;
+      const cardWidth = width < 640 ? 104 : 168;
+      const cardHeight = cardWidth * 1.25 + 44;
+      // The countdown sits inside the ring, so the ring must clear it
+      const center = stage.querySelector('.arc-center');
+      const clearance = center.offsetHeight + parseFloat(getComputedStyle(center).bottom) + cardHeight / 2 + 28;
+      radius = Math.max(width < 640 ? width * 0.56 : Math.min(width * 0.4, 500), clearance);
+      stage.style.height = Math.round(radius + cardHeight / 2 + 28) + 'px';
+      centerX = width / 2;
+      centerY = stage.clientHeight;
+      const count = Math.max(sessions.length, Math.floor((2 * Math.PI * radius) / (cardWidth * 1.14)));
+      step = 360 / count;
+      if (cards.length !== count) {
+        cards.forEach(c => c.remove());
+        cards = Array.from({ length: count }, (_, i) => arcCard(sessions[i % sessions.length]));
+        cards.forEach((c, i) => { if (i >= sessions.length) c.tabIndex = -1; });
+        stage.prepend(...cards);
+      }
+      cards.forEach(c => { c.style.width = cardWidth + 'px'; });
+      ring.style.width = ring.style.height = radius * 2 + 'px';
+      ring.style.top = centerY + 'px';
+      place();
+    }
+
+    function place() {
+      let best = null, bestOff = 999;
+      cards.forEach((c, i) => {
+        let a = ((i * step + angle) % 360 + 540) % 360 - 180;
+        const off = Math.abs(a);
+        const rad = a * Math.PI / 180;
+        const x = centerX + radius * Math.sin(rad);
+        const y = centerY - radius * Math.cos(rad);
+        c.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) rotate(${a}deg) scale(${off < step / 2 ? 1.08 : 1})`;
+        c.style.opacity = off > 100 ? 0 : Math.max(0.3, 1 - off / 120).toFixed(2);
+        c.style.zIndex = String(200 - Math.round(off));
+        c.style.visibility = off > 100 ? 'hidden' : 'visible';
+        if (off < bestOff) { bestOff = off; best = c; }
+      });
+      cards.forEach(c => c.classList.toggle('is-active', c === best));
+    }
+
+    let last = performance.now();
+    function tick(now) {
+      requestAnimationFrame(tick);
+      const dt = Math.min(now - last, 64) / 1000;
+      last = now;
+      if (!visible || dragging) return;
+      if (target !== null) {
+        angle += (target - angle) * Math.min(1, dt * 7);
+        if (Math.abs(target - angle) < 0.05) { angle = target; target = null; }
+      } else if (!hovering && !reduceMotion) {
+        angle -= dt * 4;
+      } else {
+        return;
+      }
+      place();
+    }
+
+    stage.addEventListener('mouseenter', () => { hovering = true; });
+    stage.addEventListener('mouseleave', () => { hovering = false; target = Math.round(angle / step) * step; });
+    stage.addEventListener('pointerdown', e => {
+      if (e.target.closest('.arc-btn')) return;
+      dragging = { x: e.clientX, angle };
+      moved = false;
+    });
+    window.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      const dx = e.clientX - dragging.x;
+      if (Math.abs(dx) > 6) moved = true;
+      angle = dragging.angle + (dx / radius) * (180 / Math.PI);
+      place();
+    });
+    const release = () => {
+      if (!dragging) return;
+      dragging = null;
+      target = Math.round(angle / step) * step;
+      setTimeout(() => { moved = false; }, 0);
+    };
+    window.addEventListener('pointerup', release);
+    window.addEventListener('pointercancel', release);
+    stage.querySelectorAll('[data-arc-step]').forEach(btn => btn.addEventListener('click', () => {
+      const base = target ?? Math.round(angle / step) * step;
+      target = base - Number(btn.dataset.arcStep) * step;
+    }));
+
+    new IntersectionObserver(entries => { visible = entries[0].isIntersecting; }).observe(stage);
+    window.addEventListener('resize', layout);
+    layout();
+    requestAnimationFrame(tick);
+    startCountdown();
+  }
+
+  // Counts down to the next Saturday session; while one is on, it says so
+  function startCountdown() {
+    const IST = 5.5 * 3600e3;
+    const [hh, mm] = SESSION_START_IST.split(':').map(Number);
+    const kicker = document.getElementById('arcKicker');
+    const count = document.getElementById('arcCount');
+    const when = document.getElementById('arcWhen');
+    const pad = n => String(n).padStart(2, '0');
+
+    function nextStart(now) {
+      const ist = new Date(now + IST);
+      const daysAhead = (6 - ist.getUTCDay() + 7) % 7;
+      let start = Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate() + daysAhead, hh, mm) - IST;
+      if (now >= start + SESSION_LENGTH_HOURS * 3600e3) start += 7 * 864e5;
+      return start;
+    }
+
+    function update() {
+      const now = Date.now();
+      const start = nextStart(now);
+      const live = now >= start;
+      kicker.textContent = live ? 'Happening now' : 'Next room opens in';
+      count.hidden = live;
+      when.textContent = new Date(start).toLocaleString('en-IN', {
+        weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata'
+      });
+      if (live) return;
+      let s = Math.floor((start - now) / 1000);
+      document.getElementById('arcDays').textContent = Math.floor(s / 86400); s %= 86400;
+      document.getElementById('arcHours').textContent = pad(Math.floor(s / 3600)); s %= 3600;
+      document.getElementById('arcMins').textContent = pad(Math.floor(s / 60));
+      document.getElementById('arcSecs').textContent = pad(s % 60);
+    }
+    update();
+    setInterval(update, 1000);
+  }
 })();
