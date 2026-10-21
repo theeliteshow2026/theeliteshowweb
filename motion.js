@@ -161,3 +161,61 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(start);
   setTimeout(start, 1500);
 })();
+
+// ===== MOTION: VELOCITY RIBBON =====
+// Two rows of type drift in opposite directions, speed up and lean with the scroll speed,
+// and flip direction when the visitor scrolls back up. Runs only while the band is on screen.
+(function () {
+  const band = document.querySelector('.ribbon-band');
+  if (!band || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const DRIFT = 0.6; // px per frame at rest
+  const rows = [...band.querySelectorAll('.ribbon-row')].map(el => ({ el, dir: Number(el.dataset.dir), x: 0, set: 0, source: el.innerHTML }));
+
+  // Repeat each row's words until one set covers the screen, then add a second set for a seamless loop
+  function fill() {
+    rows.forEach(row => {
+      row.el.innerHTML = row.source;
+      while (row.el.scrollWidth < window.innerWidth) row.el.insertAdjacentHTML('beforeend', row.source);
+      row.set = row.el.scrollWidth;
+      row.el.insertAdjacentHTML('beforeend', row.el.innerHTML);
+      row.x = -row.set * (row.dir > 0 ? 0 : 0.5);
+    });
+  }
+
+  let lastY = window.scrollY, velocity = 0, sign = 1, lastT = 0, visible = false;
+  function frame(now) {
+    if (!visible) return;
+    const dt = lastT ? Math.min(now - lastT, 48) / 16.67 : 1;
+    lastT = now;
+    const delta = window.scrollY - lastY;
+    lastY = window.scrollY;
+    velocity += (delta - velocity) * 0.15;
+    if (Math.abs(delta) > 0.5) sign = delta > 0 ? 1 : -1;
+    const skew = Math.max(-12, Math.min(12, -velocity * 0.5));
+    rows.forEach(row => {
+      row.x -= (DRIFT * sign + velocity * 0.8) * row.dir * dt;
+      if (row.x <= -row.set) row.x += row.set;
+      if (row.x > 0) row.x -= row.set;
+      row.el.style.transform = `translate3d(${row.x}px, 0, 0) skewX(${skew}deg)`;
+    });
+    requestAnimationFrame(frame);
+  }
+
+  new IntersectionObserver(entries => {
+    visible = entries[0].isIntersecting;
+    if (visible) {
+      lastY = window.scrollY;
+      lastT = 0;
+      requestAnimationFrame(frame);
+    }
+  }).observe(band);
+
+  let lastWidth = window.innerWidth;
+  window.addEventListener('resize', () => {
+    if (window.innerWidth === lastWidth) return;
+    lastWidth = window.innerWidth;
+    fill();
+  });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fill);
+  fill();
+})();

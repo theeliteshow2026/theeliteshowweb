@@ -80,3 +80,52 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* ===================== MOTION: VELOCITY RIBBON ===================== */
+.ribbon-band {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 0.6rem;
+  padding: 2.2rem 0;
+  overflow: hidden;
+  background: var(--black);
+  border-top: 1px solid rgba(202, 251, 12, 0.15);
+  border-bottom: 1px solid rgba(202, 251, 12, 0.15);
+}
+
+.ribbon-row {
+  display: flex;
+  width: max-content;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.ribbon-row span {
+  font-family: 'Archivo', 'Arial Black', sans-serif;
+  font-stretch: 125%;
+  font-variation-settings: 'wdth' 125;
+  font-weight: 900;
+  font-size: clamp(2.2rem, 6vw, 5.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--white);
+  padding-right: 0.45em;
+}
+
+.ribbon-row span i {
+  font-style: normal;
+  color: var(--green);
+  padding-left: 0.45em;
+}
+
+.ribbon-row--outline span {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(245, 245, 240, 0.5);
+}
+
+/* At rest (reduced motion or before the script runs), offset the second row so the two don't line up */
+.ribbon-row--outline {
+  transform: translateX(-12%);
+}
