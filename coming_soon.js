@@ -1,6 +1,6 @@
 // Web app URL of coming_soon_apps_script.gs, which saves to its own
 // "Coming Soon Sign-ups" spreadsheet (not the Waitlist sheet).
-const COMING_SOON_SCRIPT_URL = "";
+const COMING_SOON_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxS_CBc-IMQaUI9zusVppKeWDNfqvcucaqKlA-uEnzEXaSIqlrFPGrtfP6hX1LqVAKgoA/exec";
 
 const OPEN_MAX_DEG = 70;     // how far the door swings at a full peek
 const PEEK_AT = 0.6;         // fraction of the swing that counts as a peek
