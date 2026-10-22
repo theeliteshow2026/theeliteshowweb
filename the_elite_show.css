@@ -2534,7 +2534,6 @@ body.plain-cursor button {
   pointer-events: none;
 }
 
-.cube-stage.is-sorted .cube-sorted,
 /* If three.js or WebGL can't run, a still picture of the solved cube stands in */
 .cube-stage.cube-fallback {
   background: url('images/cube-solved.jpg') center 42% / 70% no-repeat,
@@ -2545,6 +2544,7 @@ body.plain-cursor button {
   visibility: hidden;
 }
 
+.cube-stage.is-sorted .cube-sorted,
 .cube-stage.cube-fallback .cube-sorted {
   opacity: 1;
   transform: none;
