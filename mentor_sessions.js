@@ -324,7 +324,7 @@ const MENTOR_SESSIONS = [
       target = base - Number(btn.dataset.arcStep) * step;
     }));
 
-    new IntersectionObserver(entries => { visible = entries[0].isIntersecting; }).observe(stage);
+    new IntersectionObserver(entries => { visible = entries[entries.length - 1].isIntersecting; }).observe(stage);
     window.addEventListener('resize', layout);
     layout();
     requestAnimationFrame(tick);

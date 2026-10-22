@@ -7,9 +7,17 @@ const stage = document.querySelector('.cube-stage');
 const canvas = document.getElementById('cubeCanvas');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// An IntersectionObserver can hand over several entries at once when the page
+// shifts while loading; the last one is the current state, so every observer
+// here reads entries[entries.length - 1], never entries[0].
 if (stage && canvas) {
+  // Fetch three.js while the browser is idle, so it is ready before anyone scrolls here
+  const warmUp = () => import('three').catch(() => {});
+  if ('requestIdleCallback' in window) requestIdleCallback(warmUp, { timeout: 4000 });
+  else setTimeout(warmUp, 2500);
+
   const nearby = new IntersectionObserver(entries => {
-    if (!entries[0].isIntersecting) return;
+    if (!entries[entries.length - 1].isIntersecting) return;
     nearby.disconnect();
     start().catch(() => stage.classList.add('cube-fallback'));
   }, { rootMargin: '300px 0px' });
@@ -21,6 +29,11 @@ async function start() {
   const { RoundedBoxGeometry } = await import('./vendor/three/RoundedBoxGeometry.js');
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  // If the graphics card drops the 3D context, show the "All Sorted!" fallback instead of a blank box
+  canvas.addEventListener('webglcontextlost', e => {
+    e.preventDefault();
+    stage.classList.add('cube-fallback');
+  });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
@@ -163,7 +176,7 @@ async function start() {
   };
 
   new IntersectionObserver(entries => {
-    visible = entries[0].isIntersecting;
+    visible = entries[entries.length - 1].isIntersecting;
     if (visible && resumeVisible) { resumeVisible(); resumeVisible = null; }
   }).observe(stage);
 

@@ -881,7 +881,7 @@ if (hero && heroCrowd && typeof MENTOR_SESSIONS !== 'undefined') {
   // A finger lifting also fires pointerleave; only a mouse leaving hands the beam back to the drift
   hero.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') steeredAt = 0; });
 
-  new IntersectionObserver(entries => { heroVisible = entries[0].isIntersecting; }).observe(hero);
+  new IntersectionObserver(entries => { heroVisible = entries[entries.length - 1].isIntersecting; }).observe(hero);
 
   const drift = now => {
     requestAnimationFrame(drift);
@@ -919,7 +919,7 @@ if (scrambleTarget) {
   };
   if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     const bandWatcher = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) { scramble(); bandWatcher.disconnect(); }
+      if (entries[entries.length - 1].isIntersecting) { scramble(); bandWatcher.disconnect(); }
     }, { threshold: 0.6 });
     bandWatcher.observe(scrambleTarget);
     if (supportsPointerEffects) scrambleTarget.addEventListener('mouseenter', scramble);
@@ -977,7 +977,7 @@ if (supportsPointerEffects) {
   if (!lines || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   lines.classList.add('is-armed');
   const watcher = new IntersectionObserver(entries => {
-    if (!entries[0].isIntersecting) return;
+    if (!entries[entries.length - 1].isIntersecting) return;
     watcher.disconnect();
     lines.classList.add('is-in');
   }, { threshold: 0.4 });
@@ -1101,7 +1101,7 @@ window.addEventListener('scroll', () => {
   }
 
   const watcher = new IntersectionObserver(entries => {
-    if (!entries[0].isIntersecting) return;
+    if (!entries[entries.length - 1].isIntersecting) return;
     watcher.disconnect();
     section.classList.add('rise--dropped');
     lines.forEach((_, i) => setTimeout(impact, i * STAGGER + IMPACT_AT));

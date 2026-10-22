@@ -138,7 +138,7 @@ const REVIEWS = [
   let paused = false, visible = false;
   deck.addEventListener('mouseenter', () => { paused = true; });
   deck.addEventListener('mouseleave', () => { paused = false; });
-  new IntersectionObserver(entries => { visible = entries[0].isIntersecting; }).observe(deck);
+  new IntersectionObserver(entries => { visible = entries[entries.length - 1].isIntersecting; }).observe(deck);
   if (!reduceMotion) setInterval(() => { if (visible && !paused && !drag) advance(1); }, 7000);
 
   stack();
