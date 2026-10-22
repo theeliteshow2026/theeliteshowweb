@@ -202,7 +202,7 @@
   }
 
   new IntersectionObserver(entries => {
-    visible = entries[0].isIntersecting;
+    visible = entries[entries.length - 1].isIntersecting;
     if (visible) {
       lastY = window.scrollY;
       lastT = 0;
