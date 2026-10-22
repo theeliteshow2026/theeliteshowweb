@@ -34,7 +34,9 @@ async function start() {
     e.preventDefault();
     stage.classList.add('cube-fallback');
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  // Lighter on small or low-power phones (responsive.js sets data-motion="lite")
+  const lite = document.documentElement.dataset.motion === 'lite';
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 2));
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
   camera.position.set(0, 0, 12.5);

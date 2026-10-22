@@ -91,6 +91,27 @@ const MENTOR_SESSIONS = [
   }
 ];
 
+// Fills an <img> with a session poster: small and large WebP copies (posters/sm, posters/lg,
+// made by tools/poster_sizes.py) so each screen downloads the size it shows. `sizes` says how
+// wide the poster appears. If a copy is missing, the image falls back to the original file.
+function setPosterImage(img, path, sizes) {
+  const name = path.replace(/^posters\//, '').replace(/\.[a-z]+$/i, '');
+  img.src = path;
+  if (path.startsWith('posters/')) {
+    img.srcset = `posters/sm/${name}.webp 480w, posters/lg/${name}.webp 900w`;
+    img.sizes = sizes;
+    img.addEventListener('error', () => {
+      if (!img.srcset) return;
+      img.removeAttribute('srcset');
+      img.src = path;
+    }, { once: true });
+  }
+  img.width = 900;
+  img.height = 1125;
+  img.decoding = 'async';
+  return img;
+}
+
 (function () {
   const sessions = [...MENTOR_SESSIONS].sort((a, b) => b.date.localeCompare(a.date));
 
@@ -121,10 +142,9 @@ const MENTOR_SESSIONS = [
     return poster;
   }
 
-  function posterFor(session) {
+  function posterFor(session, sizes = '(max-width: 599px) 50vw, (max-width: 1023px) 33vw, 25vw') {
     if (!session.poster) return generatedPoster(session);
-    const img = el('img', 'session-poster-img');
-    img.src = session.poster;
+    const img = setPosterImage(el('img', 'session-poster-img'), session.poster, sizes);
     img.alt = `Poster for ${session.title} with ${session.mentor}`;
     img.loading = 'lazy';
     return img;
@@ -178,7 +198,7 @@ const MENTOR_SESSIONS = [
   function openLightbox(session, opener) {
     if (!lightbox) buildLightbox();
     lastFocus = opener;
-    lightbox.querySelector('.poster-lightbox-poster').replaceChildren(posterFor(session));
+    lightbox.querySelector('.poster-lightbox-poster').replaceChildren(posterFor(session, '(max-width: 899px) 90vw, 420px'));
     lightbox.querySelector('.session-date').textContent = `${session.label} · ${formatDate(session.date)}`;
     lightbox.querySelector('.session-title').textContent = session.title;
     lightbox.querySelector('.session-mentor').textContent = session.mentor;
@@ -221,7 +241,7 @@ const MENTOR_SESSIONS = [
       button.type = 'button';
       button.setAttribute('aria-label', `Open the poster for ${session.title}`);
       const frame = el('div', 'session-poster');
-      frame.append(posterFor(session), el('span', 'arc-stamp', stamp(session.date)));
+      frame.append(posterFor(session, '(max-width: 639px) 110px, 240px'), el('span', 'arc-stamp', stamp(session.date)));
       const caption = el('p', 'arc-caption', session.short || session.title);
       caption.append(el('small', null, session.mentor));
       button.append(frame, caption);
@@ -240,12 +260,14 @@ const MENTOR_SESSIONS = [
     // The ring is filled with as many cards as fit around the whole circle, repeating sessions
     function layout() {
       const width = stage.clientWidth;
-      const cardWidth = width < 640 ? 104 : 168;
+      // Cards and ring grow with the root font size, which scales up on very wide screens
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16 || 1;
+      const cardWidth = (width < 640 ? 104 : 168) * rem;
       const cardHeight = cardWidth * 1.25 + 44;
       // The countdown sits inside the ring, so the ring must clear it
       const center = stage.querySelector('.arc-center');
       const clearance = center.offsetHeight + parseFloat(getComputedStyle(center).bottom) + cardHeight / 2 + 28;
-      radius = Math.max(width < 640 ? width * 0.56 : Math.min(width * 0.4, 500), clearance);
+      radius = Math.max(width < 640 ? width * 0.56 : Math.min(width * 0.4, 500 * rem), clearance);
       stage.style.height = Math.round(radius + cardHeight / 2 + 28) + 'px';
       centerX = width / 2;
       centerY = stage.clientHeight;

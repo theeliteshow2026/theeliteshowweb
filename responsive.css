@@ -1,0 +1,1013 @@
+/* ===================== RESPONSIVE LAYER ===================== */
+/* Loaded last on home.html and sessions.html. Screen tiers:
+   small phone  <= 374   phone   375–599   tablet   600–1023
+   laptop  1024–1439     desktop 1440–1919  wide     1920+
+   Type and spacing are mostly in rem, so the root size scales the whole page on wide screens. */
+
+/* ----- Fluid root: 16px up to 1440px wide, growing to ~21px at 2560px ----- */
+/* Percent and rem keep the visitor's own text-size setting as the base */
+html {
+  font-size: clamp(100%, calc(0.5vw + 0.55rem), 137.5%);
+  /* anchor jumps land below the fixed nav */
+  scroll-padding-top: 5.5rem;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Content columns were in px; in rem they widen with the root on big screens */
+.section {
+  max-width: 68.75rem;
+}
+
+#get-involved {
+  max-width: 75rem;
+}
+
+.cube-stage {
+  max-width: 30rem;
+}
+
+#hero {
+  --spot-r: min(26vw, 16.25rem);
+}
+
+.vision-lane {
+  padding-left: max(2rem, calc(50vw - 34.375rem + 2rem));
+}
+
+#vision.vision-sideways .roadmap {
+  padding-right: max(2rem, calc(50vw - 34.375rem + 2rem));
+}
+
+/* "Online makes it live / Offline makes it real" is sized to fill the column on one line each;
+   same formula as before, with the column in rem and any phone notch taken off */
+.live-real {
+  font-size: calc((min(100vw, 68.75rem) - 4rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)) / 19.5);
+}
+
+@media (max-width: 640px) {
+  .live-real {
+    font-size: calc((100vw - 3rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)) / 10.5);
+  }
+}
+
+/* ----- Readable text: nothing under 12px ----- */
+.section-label { font-size: max(12px, 0.6rem); }
+.stat-label { font-size: max(12px, 0.6rem); }
+.hero-kicker { font-size: max(12px, 0.7rem); }
+.nav-cta { font-size: max(12px, 0.7rem); }
+.nav-links a { font-size: max(12px, 0.62rem); }
+.btn-primary, .btn-ghost, .btn-secondary { font-size: max(12px, 0.7rem); }
+.sessions-all, .sessions-back { font-size: max(12px, 0.65rem); }
+.audience-tag { font-size: max(12px, 0.58rem); }
+.audience-cta, .tier-cta { font-size: max(12px, 0.62rem); }
+.progress-step strong { font-size: max(12px, 0.6rem); }
+.form-step-heading span { font-size: max(12px, 0.58rem); }
+.choice-group legend { font-size: max(12px, 0.65rem); }
+.choice-group legend small { font-size: max(12px, 0.58rem); }
+.field-group label { font-size: max(12px, 0.6rem); }
+.field-error, .form-note { font-size: max(12px, 0.65rem); }
+.footer-tagline { font-size: max(12px, 0.65rem); }
+.footer-copy { font-size: max(12px, 0.7rem); color: #8a8a8a; }
+.session-date { font-size: max(12px, 0.58rem); }
+.gen-poster-eyebrow, .gen-poster-foot { font-size: max(11px, 0.55rem); }
+.arc-kicker { font-size: max(12px, 0.65rem); }
+.arc-count small { font-size: max(11px, 0.55rem); }
+.quote-session, .deck-count { font-size: max(12px, 0.6rem); }
+.lead-to li span { font-size: max(12px, 0.6rem); }
+.section-kicker { font-size: max(12px, 0.68rem); }
+.arc-caption { font-size: max(12px, 0.72rem); }
+.arc-caption small { font-size: max(11px, 0.66rem); }
+.quote-sample { font-size: max(11px, 0.55rem); }
+.member-card-top, .member-card-bottom { font-size: max(11px, 0.55rem); }
+.choice-option span { font-size: max(13px, 0.75rem); }
+.stat-label { color: var(--grey); }
+
+/* Big display words shrink with the screen, so larger text settings can't push them off it */
+.brand-name {
+  font-size: clamp(min(2.6rem, 11vw), 8vw, 6.5rem);
+}
+
+.verb-word {
+  font-size: clamp(min(2.4rem, 13vw), 5.4vw, 4.6rem);
+}
+
+/* ----- Touch targets: 44px or more ----- */
+.nav-cta,
+.audience-cta,
+.tier-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  text-align: center;
+}
+
+.audience-cta,
+.tier-cta,
+.btn-ghost {
+  text-wrap: balance;
+}
+
+.nav-cta {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.nav-logo {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: center;
+  column-gap: 0.3em;
+  min-height: 44px;
+}
+
+/* Text links keep their underline look; an invisible pad makes them easy to tap */
+.sessions-all,
+.sessions-back,
+.sessions-page .section-kicker a {
+  position: relative;
+}
+
+.sessions-all::after,
+.sessions-back::after,
+.sessions-page .section-kicker a::after {
+  content: '';
+  position: absolute;
+  inset: -16px -8px;
+}
+
+.nav-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.nav-cta {
+  white-space: nowrap;
+}
+
+@media (min-width: 1920px) {
+  .nav-links a {
+    font-size: 0.7rem;
+  }
+
+  .nav-cta {
+    font-size: 0.78rem;
+  }
+}
+
+.arc-btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.modal-close,
+.poster-lightbox-close {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+}
+
+.modal-close {
+  top: 0.6rem;
+  right: 0.6rem;
+}
+
+.btn-secondary,
+.btn-submit {
+  min-height: 48px;
+}
+
+/* ----- Phone-first form ----- */
+/* 16px inputs stop iPhones zooming in when a field is tapped */
+.field-group input,
+.field-group textarea {
+  font-size: max(16px, 0.9rem);
+}
+
+.field-group input::placeholder,
+.field-group textarea::placeholder {
+  font-size: max(15px, 0.82rem);
+}
+
+#waitlist {
+  padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+}
+
+@media (max-width: 480px) {
+  /* Two per row; Partner takes the last row on its own */
+  .option-grid.join-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .join-grid .choice-option,
+  .join-grid .choice-option:nth-child(-n + 2) {
+    grid-column: span 1;
+  }
+
+  .join-grid .choice-option:last-child {
+    grid-column: 1 / -1;
+  }
+
+  /* Step numbers above their names, so both fit on a small phone */
+  .form-progress {
+    grid-template-columns: auto minmax(24px, 1fr) auto;
+  }
+
+  .progress-step {
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .progress-step strong {
+    letter-spacing: 0.08em;
+  }
+
+  .progress-line {
+    align-self: start;
+    margin-top: 16px;
+  }
+
+  .form-step-heading h3 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 374px) {
+  .option-grid.compact,
+  .option-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .choice-option span {
+    padding: 0.75rem 0.7rem;
+  }
+
+  .choice-option span::before {
+    margin-right: 0.5rem;
+  }
+}
+
+/* ----- Modals and the poster viewer never cut off on short screens ----- */
+.modal-overlay,
+.poster-lightbox {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  align-items: flex-start;
+  padding-top: max(1.5rem, env(safe-area-inset-top, 0px));
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
+}
+
+.modal,
+.poster-lightbox-inner {
+  margin-block: auto;
+}
+
+.poster-lightbox-inner {
+  max-height: none;
+}
+
+.member-card {
+  overflow: visible;
+  height: auto;
+}
+
+.member-card::before {
+  border-radius: inherit;
+}
+
+@media (max-width: 480px) {
+  .modal {
+    padding: 2.6rem 1.25rem 1.8rem;
+  }
+
+  .modal-title {
+    font-size: 1.55rem;
+  }
+}
+
+/* ===================== NAV + MENU ===================== */
+nav {
+  padding-top: max(1.5rem, env(safe-area-inset-top, 0px));
+  padding-left: max(3rem, env(safe-area-inset-left, 0px));
+  padding-right: max(3rem, env(safe-area-inset-right, 0px));
+  gap: 1rem;
+}
+
+.nav-menu-btn {
+  display: none;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 0.8rem;
+  border: 1px solid rgba(245, 245, 240, 0.28);
+  background: rgba(7, 7, 7, 0.4);
+  color: var(--white);
+  font: 600 max(12px, 0.7rem) / 1 'Montserrat', sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.nav-menu-btn:hover,
+.nav-menu-btn:focus-visible {
+  border-color: var(--green);
+  color: var(--green);
+  outline: none;
+}
+
+.nav-menu-icon {
+  position: relative;
+  width: 18px;
+  height: 10px;
+}
+
+.nav-menu-icon i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: currentColor;
+  transition: transform 0.35s cubic-bezier(0.65, 0, 0.25, 1), top 0.35s cubic-bezier(0.65, 0, 0.25, 1);
+}
+
+.nav-menu-icon i:first-child { top: 0; }
+.nav-menu-icon i:last-child { top: 8px; }
+
+.menu-open .nav-menu-icon i:first-child { top: 4px; transform: rotate(45deg); }
+.menu-open .nav-menu-icon i:last-child { top: 4px; transform: rotate(-45deg); }
+
+/* The nav sits above the open menu so its Close button stays where Menu was */
+.menu-open nav {
+  z-index: 9001;
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.menu-open,
+.menu-open body {
+  overflow: hidden;
+}
+
+.site-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background:
+    radial-gradient(ellipse at 85% 0%, rgba(202, 251, 12, 0.1), transparent 55%),
+    var(--black);
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 0.6s cubic-bezier(0.65, 0, 0.25, 1);
+}
+
+.site-menu.is-open {
+  clip-path: inset(0 0 0 0);
+}
+
+.site-menu-inner {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2.5rem;
+  padding: calc(5.5rem + env(safe-area-inset-top, 0px)) max(1.5rem, env(safe-area-inset-right, 0px)) calc(2rem + env(safe-area-inset-bottom, 0px)) max(1.5rem, env(safe-area-inset-left, 0px));
+  max-width: 68.75rem;
+  margin: 0 auto;
+}
+
+.site-menu-links {
+  list-style: none;
+  display: grid;
+}
+
+.site-menu-links li {
+  border-bottom: 1px solid rgba(202, 251, 12, 0.14);
+}
+
+.site-menu-links a,
+.site-menu-foot {
+  transform: translateY(1.2rem);
+  opacity: 0;
+  transition: transform 0.6s cubic-bezier(0.16, 0.84, 0.24, 1), opacity 0.5s ease;
+  transition-delay: calc(0.18s + var(--i, 0) * 0.04s);
+}
+
+.site-menu.is-open .site-menu-links a,
+.site-menu.is-open .site-menu-foot {
+  transform: none;
+  opacity: 1;
+}
+
+.site-menu-links a {
+  display: flex;
+  align-items: center;
+  min-height: 3rem;
+  padding: 0.45rem 0;
+  font-family: 'Archivo', 'Arial Black', sans-serif;
+  font-weight: 900;
+  font-stretch: 125%;
+  font-variation-settings: 'wdth' 125;
+  font-size: clamp(1.1rem, 5.6vw, 2.4rem);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--white);
+  text-decoration: none;
+  transition-property: transform, opacity, color;
+}
+
+.site-menu-links a:hover,
+.site-menu-links a:focus-visible {
+  color: var(--green);
+  outline: none;
+}
+
+.site-menu-foot {
+  display: grid;
+  gap: 1rem;
+  justify-items: start;
+}
+
+.site-menu-join {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 2rem;
+  background: var(--green);
+  color: var(--black);
+  font-size: max(12px, 0.75rem);
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 3px;
+}
+
+.site-menu-join:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 3px;
+}
+
+.site-menu-foot p {
+  font-size: max(12px, 0.7rem);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+
+/* Below 1360px the section links move into the menu */
+@media (max-width: 1359px) {
+  .nav-links {
+    display: none;
+  }
+
+  .nav-menu-btn {
+    display: inline-flex;
+  }
+
+  .nav-cta {
+    margin-left: auto;
+  }
+}
+
+@media (min-width: 1360px) {
+  .site-menu {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  nav {
+    padding-top: max(0.9rem, env(safe-area-inset-top, 0px));
+    padding-bottom: 0.9rem;
+    padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+    gap: 0.6rem;
+  }
+
+  .nav-logo {
+    line-height: 1.25;
+  }
+}
+
+@media (max-width: 599px) {
+  /* icon only: the word "Menu" stays for screen readers */
+  .nav-menu-btn {
+    padding: 0;
+    justify-content: center;
+  }
+
+  .nav-menu-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+/* Small phones: logo and menu only; joining moves to the bottom bar and the menu */
+@media (max-width: 399px) {
+  nav .nav-cta {
+    display: none;
+  }
+
+  .nav-menu-btn {
+    margin-left: auto;
+  }
+
+  .nav-logo {
+    font-size: 0.9rem;
+    letter-spacing: 0.12em;
+  }
+}
+
+/* ===================== JOIN BAR (phones) ===================== */
+.join-bar {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .join-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.7rem max(1rem, env(safe-area-inset-right, 0px)) calc(0.7rem + env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px));
+    background: rgba(7, 7, 7, 0.92);
+    border-top: 1px solid rgba(202, 251, 12, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transform: translateY(110%);
+    visibility: hidden;
+    transition: transform 0.45s cubic-bezier(0.16, 0.84, 0.24, 1), visibility 0s linear 0.45s;
+  }
+
+  .join-bar.is-shown {
+    transform: none;
+    visibility: visible;
+    transition: transform 0.45s cubic-bezier(0.16, 0.84, 0.24, 1), visibility 0s;
+  }
+
+  .menu-open .join-bar {
+    visibility: hidden;
+  }
+
+  .join-bar-btn {
+    flex: 1 1 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 1rem;
+    background: var(--green);
+    color: var(--black);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .join-bar-note {
+    flex: 0 1 auto;
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--grey);
+    max-width: 8.5rem;
+  }
+}
+
+@media (max-width: 359px) {
+  .join-bar-note {
+    display: none;
+  }
+}
+
+/* ===================== SECTIONS BY SCREEN ===================== */
+/* Side padding clears a phone's notch in landscape */
+.section,
+.brand-band,
+footer,
+.stats-strip {
+  padding-left: max(var(--side, 2rem), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--side, 2rem), env(safe-area-inset-right, 0px));
+}
+
+.brand-band { --side: 1.5rem; }
+
+@media (max-width: 640px) {
+  .section { --side: 1.5rem; }
+  footer { --side: 1.5rem; }
+}
+
+#hero {
+  padding-left: max(2rem, env(safe-area-inset-left, 0px));
+  padding-right: max(2rem, env(safe-area-inset-right, 0px));
+}
+
+@media (max-width: 700px) {
+  #hero {
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+    padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Stats sit in one row of three on phones too */
+@media (max-width: 599px) {
+  .stats-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    --side: 1rem;
+  }
+
+  .stat-number {
+    font-size: 2.1rem;
+  }
+
+  .stat-label {
+    letter-spacing: 0.12em;
+    line-height: 1.4;
+  }
+}
+
+/* The tagline under the brand band: tighter tracking so it stays on one line */
+@media (max-width: 599px) {
+  .brand-tag {
+    font-size: max(12px, 0.75rem);
+    letter-spacing: 0.22em;
+  }
+}
+
+@media (max-width: 374px) {
+  .brand-tag {
+    letter-spacing: 0.12em;
+  }
+}
+
+/* Why: four outcomes */
+@media (max-width: 374px) {
+  .lead-to {
+    gap: 1.2rem 1rem;
+  }
+}
+
+/* What we do: the cube sits beside the verbs from tablet width up */
+@media (min-width: 700px) and (max-width: 900px) {
+  .about-split {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: 2rem;
+  }
+
+  .cube-stage {
+    width: 100%;
+    max-width: 22rem;
+  }
+}
+
+@media (max-width: 699px) {
+  .about-split {
+    gap: 1.5rem;
+  }
+
+  .cube-stage {
+    width: min(100%, 22rem);
+  }
+}
+
+/* Experience grid: two columns until phones get narrow */
+@media (min-width: 480px) and (max-width: 640px) {
+  .exp-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Reviews: header beside the deck from tablet width */
+@media (min-width: 760px) and (max-width: 900px) {
+  .reviews-split {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 759px) {
+  .quote-deck {
+    max-width: 34rem;
+    width: 100%;
+    margin: 0 auto;
+  }
+}
+
+/* Membership: side by side from tablet width */
+@media (min-width: 680px) and (max-width: 760px) {
+  .tier-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 679px) {
+  .tier-grid {
+    max-width: 34rem;
+    margin: 0 auto;
+  }
+}
+
+/* Get involved: 1, 2 or 4 across, never a lone card on its own row */
+.audience-grid {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 600px) {
+  .audience-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .audience-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Sessions page grid: 2 / 3 / 4 across */
+@media (min-width: 600px) and (max-width: 900px) {
+  .sessions-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 374px) {
+  .sessions-grid {
+    gap: 0.8rem;
+  }
+
+  .session-title {
+    font-size: 1.1rem;
+  }
+}
+
+/* Saturday sessions head: "See all" sits under the text on phones */
+@media (max-width: 599px) {
+  .sessions-head {
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Countdown boxes shrink to fit a 320px phone */
+@media (max-width: 374px) {
+  .arc-count {
+    gap: 0.3rem;
+  }
+
+  .arc-count div {
+    min-width: 3rem;
+    padding: 0.45rem 0.2rem 0.4rem;
+  }
+
+  .arc-count b {
+    font-size: 1.3rem;
+  }
+}
+
+/* Footer and closing screen keep clear of the iPhone home bar */
+footer {
+  padding-bottom: calc(3rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* ===================== CARDS THAT FIT THEIR SLOT ===================== */
+.tier-card,
+.audience-card {
+  container-type: inline-size;
+}
+
+.quote-deck {
+  container-type: inline-size;
+}
+
+@container (max-width: 300px) {
+  .tier-amount {
+    font-size: 3rem;
+  }
+
+  .tier-cta,
+  .audience-cta {
+    align-self: stretch;
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+  }
+
+  .audience-card h3 {
+    font-size: 1.45rem;
+  }
+}
+
+@container (min-width: 420px) {
+  .audience-card h3 {
+    font-size: 1.9rem;
+  }
+
+  .tier-perks li {
+    font-size: 0.92rem;
+  }
+}
+
+@container (max-width: 360px) {
+  .quote-card {
+    padding: 1.9rem 1.3rem 1.5rem;
+    border-radius: 16px;
+  }
+
+  .quote-text {
+    font-size: 1.2rem;
+  }
+}
+
+/* ===================== SHORT SCREENS ===================== */
+/* Phones turned sideways and short laptops: the full-screen moments fit the height */
+@media (max-height: 520px) and (orientation: landscape) {
+  nav {
+    padding-top: max(0.6rem, env(safe-area-inset-top, 0px));
+    padding-bottom: 0.6rem;
+  }
+
+  #hero {
+    padding-top: 4.5rem;
+    padding-bottom: 1.6rem;
+  }
+
+  .hero-title {
+    font-size: min(6.6rem, calc((100vw - 4rem) / 13.4), 14svh);
+    margin-bottom: 1.1rem;
+  }
+
+  .hero-kicker {
+    margin-bottom: 0.6rem;
+  }
+
+  .hero-actions {
+    flex-direction: row;
+  }
+
+  .hero-actions a {
+    width: auto;
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+  }
+
+  .rise {
+    min-height: 0;
+    padding-top: 4rem;
+    padding-bottom: 1rem;
+  }
+
+  .rise-title {
+    font-size: min(13vw, calc((100svh - 5rem) / 3.75), 13.5rem);
+  }
+
+  .vision-pin {
+    padding-top: 4rem;
+    padding-bottom: 1rem;
+  }
+
+  #vision .section-title {
+    font-size: clamp(1.5rem, 7svh, 2.4rem);
+    margin-bottom: 0.5rem;
+  }
+
+  .vision-lane {
+    margin-top: 1rem;
+  }
+
+  #vision.vision-sideways .roadmap li {
+    padding-top: 1.6rem;
+    font-size: 0.95rem;
+  }
+
+  #vision.vision-sideways .roadmap li span {
+    font-size: min(11vw, 17svh);
+    margin-bottom: 0.4rem;
+  }
+
+  #vision.vision-sideways .section-kicker {
+    margin-top: 1rem;
+    padding-top: 0.8rem;
+  }
+
+  .poster-lightbox-inner {
+    grid-template-columns: minmax(0, 46svh) minmax(0, 280px);
+    max-width: none;
+    align-items: center;
+  }
+
+  .poster-lightbox-poster {
+    max-height: 80svh;
+  }
+}
+
+/* Short laptops (e.g. 1280×720, 1366×768) */
+@media (min-width: 900px) and (max-height: 800px) {
+  #vision.vision-sideways .roadmap li span {
+    font-size: min(clamp(4rem, 11vw, 8.5rem), 17svh);
+  }
+
+  .vision-pin {
+    padding-top: 5rem;
+    padding-bottom: 2rem;
+  }
+}
+
+/* ===================== WIDE SCREENS ===================== */
+@media (min-width: 1920px) {
+  .sessions-grid {
+    gap: 2rem;
+  }
+
+  .section-lead {
+    max-width: 40rem;
+  }
+}
+
+/* ===================== MOTION LEVELS ===================== */
+/* Lighter effects on small or low-power phones */
+[data-motion="lite"] #particles {
+  display: none;
+}
+
+[data-motion="lite"] nav {
+  backdrop-filter: none;
+  background: linear-gradient(to bottom, rgba(7, 7, 7, 0.97), rgba(7, 7, 7, 0.6) 70%, transparent);
+}
+
+[data-motion="lite"] .btn-primary {
+  animation: fadeSlideUp 1s ease 1.3s backwards;
+}
+
+[data-motion="lite"] .btn-primary::after,
+[data-motion="lite"] .brand-tag::after {
+  animation: none;
+}
+
+/* Reduce motion: everything rests in place */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal,
+  .reveal-left,
+  .reveal-right,
+  .reveal-scale {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  #particles {
+    display: none;
+  }
+
+  .hero-kicker,
+  .hero-title,
+  .btn-primary,
+  .btn-ghost,
+  .btn-primary::after,
+  .brand-tag::after,
+  .modal-icon,
+  .form-step.active {
+    animation: none;
+    opacity: 1;
+  }
+
+  .site-menu,
+  .site-menu-links a,
+  .site-menu-foot,
+  .join-bar,
+  .nav-menu-icon i {
+    transition: none;
+  }
+}

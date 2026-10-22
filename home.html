@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#070707">
   <title>The Elite Show Community — Where People Meet Ideas</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="description"
@@ -15,6 +16,7 @@
     rel="stylesheet">
   <link rel="stylesheet" href="the_elite_show.css">
   <link rel="stylesheet" href="motion.css">
+  <link rel="stylesheet" href="responsive.css">
 </head>
 
 <body>
@@ -360,28 +362,28 @@
             <div class="form-grid">
               <div class="field-group full">
                 <label for="fullname">Full Name</label>
-                <input type="text" id="fullname" name="fullname" placeholder="e.g. John Adeyemi" autocomplete="name"
+                <input type="text" id="fullname" name="fullname" placeholder="e.g. John Adeyemi" autocomplete="name" autocapitalize="words" enterkeyhint="next"
                   required>
                 <span class="field-error" id="nameError"></span>
               </div>
               <div class="field-group">
                 <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone" placeholder="e.g. +91 98765 43210" autocomplete="tel" required>
+                <input type="tel" id="phone" name="phone" placeholder="e.g. +91 98765 43210" autocomplete="tel" inputmode="tel" enterkeyhint="next" required>
                 <span class="field-error" id="phoneError"></span>
               </div>
               <div class="field-group">
                 <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+                <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" enterkeyhint="next" required>
                 <span class="field-error" id="emailError"></span>
               </div>
               <div class="field-group">
                 <label for="state">State</label>
-                <input type="text" id="state" name="state" placeholder="e.g. Kerala" required>
+                <input type="text" id="state" name="state" placeholder="e.g. Kerala" autocomplete="address-level1" autocapitalize="words" enterkeyhint="next" required>
                 <span class="field-error" id="stateError"></span>
               </div>
               <div class="field-group">
                 <label for="city">City</label>
-                <input type="text" id="city" name="city" placeholder="e.g. Kochi" required>
+                <input type="text" id="city" name="city" placeholder="e.g. Kochi" autocomplete="address-level2" autocapitalize="words" enterkeyhint="done" required>
                 <span class="field-error" id="cityError"></span>
               </div>
             </div>
@@ -406,7 +408,7 @@
                 </div>
                 <div class="field-group">
                   <label for="profileLink">LinkedIn or Website <small>(optional)</small></label>
-                  <input type="url" id="profileLink" name="profileLink" placeholder="https://" autocomplete="url">
+                  <input type="url" id="profileLink" name="profileLink" placeholder="https://" autocomplete="url" inputmode="url" autocapitalize="off" spellcheck="false">
                   <span class="field-error" id="profileLinkError"></span>
                 </div>
                 <div class="field-group full">
@@ -564,6 +566,7 @@
   <script src="the_elite_show.js"></script>
   <script type="module" src="rubiks_cube.js"></script>
   <script src="motion.js"></script>
+  <script src="responsive.js"></script>
 </body>
 
 </html>

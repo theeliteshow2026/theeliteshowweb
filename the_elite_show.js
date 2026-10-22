@@ -862,8 +862,12 @@ if (hero && heroCrowd && typeof MENTOR_SESSIONS !== 'undefined') {
     .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
     .map(s => s.poster);
   if (posters.length) {
-    heroCrowd.innerHTML = Array.from({ length: 8 }, (_, i) =>
-      `<img src="${posters[i % posters.length]}" alt="" loading="${i < 4 ? 'eager' : 'lazy'}">`).join('');
+    heroCrowd.replaceChildren(...Array.from({ length: 8 }, (_, i) => {
+      const img = setPosterImage(document.createElement('img'), posters[i % posters.length], '(max-width: 700px) 50vw, 25vw');
+      img.alt = '';
+      img.loading = i < 4 ? 'eager' : 'lazy';
+      return img;
+    }));
   }
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
