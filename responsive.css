@@ -1011,3 +1011,17 @@ footer {
     transition: none;
   }
 }
+
+/* Experience grid: five cards (Daily Discussions added) */
+@media (min-width: 901px) {
+  .exp-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1.6rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 900px), (min-width: 480px) and (max-width: 640px) {
+  .exp-grid li:last-child {
+    grid-column: 1 / -1;
+  }
+}
