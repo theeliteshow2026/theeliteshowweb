@@ -219,3 +219,72 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fill);
   fill();
 })();
+
+// ===== MOTION: SIDEWAYS VISION =====
+// The Vision section pins while the years slide past sideways. The lime rail fills with the scroll
+// and each year lights up as it arrives. Reduced motion keeps the plain roadmap list.
+(function () {
+  const section = document.getElementById('vision');
+  const roadmap = section && section.querySelector('.roadmap');
+  // Pinning needs body to clip (not hide) its sideways overflow, or sticky has nothing to stick to
+  if (!roadmap || !CSS.supports('overflow-x', 'clip') || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.body.classList.add('vision-pins');
+
+  const years = [...roadmap.children];
+  years.forEach(li => li.classList.remove('reveal'));
+
+  // Pin: a sticky frame holding everything in the section; the section itself grows to give the scroll room
+  const pin = document.createElement('div');
+  pin.className = 'vision-pin';
+  pin.append(...section.childNodes);
+  section.appendChild(pin);
+
+  const lane = document.createElement('div');
+  lane.className = 'vision-lane';
+  roadmap.before(lane);
+  lane.appendChild(roadmap);
+  const rail = document.createElement('div');
+  rail.className = 'vision-rail';
+  rail.setAttribute('aria-hidden', 'true');
+  rail.innerHTML = '<i></i>';
+  lane.appendChild(rail);
+  const fill = rail.firstChild;
+  section.classList.add('vision-sideways');
+
+  let travel = 0, run = 1;
+  function measure() {
+    travel = Math.max(0, roadmap.scrollWidth - lane.clientWidth);
+    // a little extra scroll at both ends so the first and last year get a moment on their own
+    run = travel * 1.3 + window.innerHeight * 0.5;
+    section.style.height = `${pin.offsetHeight + run}px`;
+    update();
+  }
+
+  function update() {
+    const p = Math.min(1, Math.max(0, -section.getBoundingClientRect().top / run));
+    const eased = Math.min(1, Math.max(0, (p - 0.12) / 0.76));
+    roadmap.style.transform = `translate3d(${-eased * travel}px, 0, 0)`;
+    fill.style.transform = `scaleX(${eased})`;
+    years.forEach((li, i) => li.classList.toggle('on', p > 0.04 && eased >= i / (years.length - 1) - 0.1));
+  }
+
+  let ticking = false, near = false;
+  window.addEventListener('scroll', () => {
+    if (!near || ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { ticking = false; update(); });
+  }, { passive: true });
+  new IntersectionObserver(entries => {
+    near = entries[entries.length - 1].isIntersecting;
+    if (near) update();
+  }, { rootMargin: '50% 0px' }).observe(section);
+
+  let lastWidth = window.innerWidth;
+  window.addEventListener('resize', () => {
+    if (window.innerWidth === lastWidth) return;
+    lastWidth = window.innerWidth;
+    measure();
+  });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+  measure();
+})();
