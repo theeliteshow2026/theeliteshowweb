@@ -277,7 +277,7 @@
     $$('.nav a').forEach(a => a.classList.toggle('is-active', a.dataset.view === (view === 'session' ? 'sessions' : view)));
     const main = $('#main');
     main.replaceChildren();
-    const views = { dashboard, sessions: sessionsView, session: () => editor(arg), reviews: reviewsView, mentors: mentorsView, history: historyView, admins: adminsView, settings: settingsView };
+    const views = { dashboard, members: () => membersView(main, arg), sessions: sessionsView, session: () => editor(arg), reviews: reviewsView, mentors: mentorsView, history: historyView, admins: adminsView, settings: settingsView };
     (views[view] || dashboard)(main);
     showDriveCount();
     main.focus({ preventScroll: true });
@@ -339,7 +339,7 @@
     const driveNudge = h('li', { hidden: true, dataset: { driveNudge: '' } });
     nudges.append(driveNudge);
 
-    const members = h('section', { class: 'card' }, h('div', { class: 'card-title' }, h('h3', { text: 'Premium members' }), h('span', { class: 'muted small', text: 'Newest first' })), h('p', { class: 'muted', text: 'Loading…' }));
+    const members = h('section', { class: 'card' }, h('div', { class: 'card-title' }, h('h3', { text: 'Premium members' }), h('a', { class: 'small', href: '#members', text: 'See all and search' })), h('p', { class: 'muted', text: 'Loading…' }));
 
     main.append(head('Dashboard', `Signed in as ${state.me.email}`, h('a', { class: 'btn btn-primary', href: '#session/new', text: 'New session' })),
       tiles, nextCard,
@@ -372,6 +372,225 @@
         h('td', { class: 'small' }, x.email, h('br'), x.phone)))))) : h('p', { class: 'muted', text: 'No Premium members yet.' }));
   }
   const tile = (value, label) => h('div', { class: 'tile' }, h('b', { text: value }), h('span', { text: label }));
+
+  // ---------- Premium members ----------
+  // Read-only: who joined, who pays, whose month runs out soon, and each member's story.
+  const MEMBER_STATUS = {
+    active: ['Active', 'status-live'],
+    created: ['Didn\'t pay', 'status-hidden'],
+    authenticated: ['Payment set up', 'status-scheduled'],
+    pending: ['Payment failing', 'status-draft'],
+    halted: ['Stopped', 'status-bad'],
+    cancelled: ['Cancelled', 'status-bad'],
+    paused: ['Paused', 'status-draft'],
+    completed: ['Finished', 'status-past'],
+    expired: ['Expired', 'status-past']
+  };
+  const memberFilters = { all: 'All', active: 'Active', ending: 'Ending soon', unpaid: 'Didn\'t pay', lapsed: 'Cancelled or lapsed' };
+  const memberSorts = { newest: 'Newest first', renewal: 'Renewal date', name: 'Name', paid: 'Most paid' };
+  const memberView = { filter: 'all', days: 7, query: '', sort: 'newest' };
+  const rupees = paise => '₹' + ((paise || 0) / 100).toLocaleString('en-IN');
+  const isPaid = p => ['captured', 'paid'].includes(p.status);
+
+  async function loadPremium() {
+    const [m, p, e] = await Promise.all([
+      db.from('premium_members').select('id,member_code,name,email,phone,razorpay_subscription_id,status,current_period_end,activated_at,created_at').order('created_at', { ascending: false }).limit(5000),
+      db.from('premium_payments').select('member_id,razorpay_subscription_id,amount_paise,status,method,paid_at,created_at').limit(20000),
+      db.rpc('admin_member_events')
+    ]);
+    const error = m.error || p.error || e.error;
+    if (error) throw error;
+    return m.data.map(member => {
+      const payments = p.data.filter(x => x.member_id === member.id || (member.razorpay_subscription_id && x.razorpay_subscription_id === member.razorpay_subscription_id));
+      const events = (e.data || []).filter(x => x.subscription_id && x.subscription_id === member.razorpay_subscription_id);
+      const paid = payments.filter(isPaid);
+      const end = member.current_period_end ? Date.parse(member.current_period_end) : null;
+      const last = events[events.length - 1];
+      const inPeriod = end != null && end > Date.now();
+      // Will the next month be charged on its own, or does access stop at the period end?
+      const autoRenews = member.status === 'active' && !(last && last.remaining_count === 0);
+      let group;
+      if (member.status === 'active' && (end == null || inPeriod)) group = 'active';
+      else if (!member.activated_at && !paid.length && ['created', 'authenticated'].includes(member.status)) group = 'unpaid';
+      else if (inPeriod && ['pending', 'paused'].includes(member.status)) group = 'active';
+      else group = 'lapsed';
+      return {
+        ...member, payments, events, end, inPeriod, autoRenews, group,
+        total: paid.reduce((sum, x) => sum + (x.amount_paise || 0), 0),
+        months: paid.length,
+        haystack: [member.member_code, member.name, member.email, member.phone, (member.phone || '').replace(/\D/g, '')].join(' ').toLowerCase()
+      };
+    });
+  }
+
+  const endingWithin = (m, days) => m.inPeriod && m.end - Date.now() <= days * 864e5;
+
+  function memberStatusBadge(m) {
+    const [text, cls] = MEMBER_STATUS[m.status] || [m.status, 'status-hidden'];
+    return h('span', { class: 'status ' + (m.status === 'active' && !m.inPeriod && m.end ? 'status-bad' : cls), text: m.status === 'active' && !m.inPeriod && m.end ? 'Lapsed' : text });
+  }
+  function outlook(m) {
+    if (!m.end) return h('span', { class: 'muted', text: '—' });
+    const when = formatDate(new Date(m.end + 5.5 * 3600e3).toISOString().slice(0, 10), { day: 'numeric', month: 'short', year: 'numeric' });
+    const days = Math.ceil((m.end - Date.now()) / 864e5);
+    const left = days > 1 ? `in ${days} days` : days === 1 ? 'tomorrow' : days === 0 ? 'today' : 'ended';
+    if (!m.inPeriod) return h('span', { class: 'muted', text: `Ended ${when}` });
+    const note = m.autoRenews ? `Auto-renews ${left}` : m.status === 'pending' ? `Payment retrying, ends ${left}` : `Ends ${left}`;
+    return h('span', null, when, h('br'), h('span', { class: 'small ' + (m.autoRenews ? 'muted' : 'warn'), text: note }));
+  }
+
+  async function membersView(main, id) {
+    const box = h('div', null, h('p', { class: 'muted', text: 'Loading members…' }));
+    main.append(box);
+    let members;
+    try { members = await loadPremium(); } catch (error) { box.replaceChildren(h('p', { class: 'muted', text: 'Couldn\'t load Premium members.' })); return fail('Couldn\'t load members', error); }
+    if (id) return memberJourney(box, members.find(m => m.id === id));
+
+    const count = g => members.filter(m => m.group === g).length;
+    const endingSoon = members.filter(m => endingWithin(m, 7));
+    const collected = members.reduce((sum, m) => sum + m.total, 0);
+    const pickTile = (filter, value, label) => h('button', { class: 'tile tile-button', type: 'button', onclick: () => { memberView.filter = filter; if (filter === 'ending') memberView.days = 7; render(); } }, h('b', { text: value }), h('span', { text: label }));
+
+    const search = h('input', { type: 'search', placeholder: 'Search name, email, phone or ESP-0001', value: memberView.query, autocomplete: 'off', 'aria-label': 'Search members' });
+    const sort = h('select', { 'aria-label': 'Sort' }, Object.entries(memberSorts).map(([k, label]) => h('option', { value: k, text: label, selected: k === memberView.sort })));
+    const days = h('select', { 'aria-label': 'Ending within' }, [3, 7, 14, 30].map(d => h('option', { value: d, text: `Next ${d} days`, selected: d === memberView.days })));
+    const chips = h('div', { class: 'filters' }, Object.entries(memberFilters).map(([k, label]) =>
+      h('button', { class: 'chip' + (k === memberView.filter ? ' is-on' : ''), type: 'button', text: label, onclick: () => { memberView.filter = k; render(); } })),
+      memberView.filter === 'ending' ? days : null);
+    const body = h('tbody');
+    const summary = h('p', { class: 'muted small' });
+
+    const shown = () => {
+      const q = memberView.query.trim().toLowerCase();
+      const list = members.filter(m => (memberView.filter === 'all' || (memberView.filter === 'ending' ? endingWithin(m, memberView.days) : m.group === memberView.filter))
+        && (!q || q.split(/\s+/).every(word => m.haystack.includes(word))));
+      const by = {
+        newest: (a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
+        renewal: (a, b) => (a.end ?? Infinity) - (b.end ?? Infinity),
+        name: (a, b) => (a.name || '').localeCompare(b.name || ''),
+        paid: (a, b) => b.total - a.total
+      };
+      return list.sort(memberView.filter === 'ending' ? by.renewal : by[memberView.sort]);
+    };
+    const paint = () => {
+      const list = shown();
+      summary.textContent = memberView.filter === 'ending'
+        ? `${list.length} ${list.length === 1 ? 'member\'s' : 'members\''} paid month runs out in the next ${memberView.days} days (${list.filter(m => !m.autoRenews).length} won't renew on their own).`
+        : `${list.length} of ${members.length} members`;
+      body.replaceChildren(...(list.length ? list.map(m => h('tr', { class: 'row-link', tabindex: 0, onclick: () => { location.hash = '#members/' + m.id; }, onkeydown: e => { if (e.key === 'Enter') location.hash = '#members/' + m.id; } },
+        h('td', { text: m.member_code || '—' }),
+        h('td', null, h('strong', { text: m.name || '—' }), m.member_code ? h('span', { class: 'muted small member-code-inline', text: ' · ' + m.member_code }) : null),
+        h('td', { class: 'small' }, m.email, h('br'), m.phone),
+        h('td', null, memberStatusBadge(m)),
+        h('td', { class: 'small', text: formatWhen(m.created_at) }),
+        h('td', { class: 'small' }, outlook(m)),
+        h('td', { text: m.total ? `${rupees(m.total)} · ${m.months} mo` : '—' })))
+        : [h('tr', null, h('td', { colspan: 7, class: 'muted', text: members.length ? 'No members match.' : 'No Premium members yet.' }))]));
+    };
+    search.addEventListener('input', () => { memberView.query = search.value; paint(); });
+    sort.addEventListener('change', () => { memberView.sort = sort.value; paint(); });
+    days.addEventListener('change', () => { memberView.days = Number(days.value); paint(); });
+
+    const exportButton = h('button', { class: 'btn', type: 'button', text: 'Download CSV', onclick: () => downloadMembers(shown()) });
+    box.replaceChildren(
+      head('Premium members', 'Everyone who started a Premium membership. Tap a member to see their journey.', exportButton),
+      h('div', { class: 'tiles' },
+        pickTile('active', count('active'), 'Active members'),
+        pickTile('ending', endingSoon.length, 'Ending in the next 7 days'),
+        pickTile('unpaid', count('unpaid'), 'Started, didn\'t pay'),
+        pickTile('lapsed', count('lapsed'), 'Cancelled or lapsed'),
+        tile(rupees(collected), 'Collected so far')),
+      h('section', { class: 'card' },
+        h('div', { class: 'member-tools' }, h('label', { class: 'field member-search' }, h('span', { text: 'Search' }), search), h('label', { class: 'field' }, h('span', { text: 'Sort' }), sort)),
+        chips, summary,
+        h('div', { class: 'table-wrap' }, h('table', { class: 'members-table' },
+          h('thead', null, h('tr', null, ['ID', 'Name', 'Contact', 'Status', 'Joined', 'Paid until', 'Paid'].map(t => h('th', { text: t })))), body))));
+    paint();
+    if (memberView.query) search.focus();
+  }
+
+  function downloadMembers(list) {
+    // A leading = + - @ would run as a formula in a spreadsheet
+    const cell = v => {
+      let s = v == null ? '' : String(v);
+      if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const day = t => (t ? new Date(Date.parse(t) + 5.5 * 3600e3).toISOString().slice(0, 10) : '');
+    const rows = [['Member ID', 'Name', 'Email', 'Phone', 'Status', 'Joined', 'Activated', 'Paid until', 'Renewal', 'Months paid', 'Total paid (Rs)']]
+      .concat(list.map(m => [m.member_code, m.name, m.email, m.phone, (MEMBER_STATUS[m.status] || [m.status])[0], day(m.created_at), day(m.activated_at),
+        day(m.current_period_end), !m.inPeriod ? '' : m.autoRenews ? 'Auto-renews' : 'Ends', m.months, m.total / 100]));
+    const csv = '﻿' + rows.map(r => r.map(cell).join(',')).join('\r\n');
+    const link = h('a', { href: URL.createObjectURL(new Blob([csv], { type: 'text/csv' })), download: `premium-members-${todayIST()}.csv` });
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  }
+
+  // One member's story, oldest first, ending with what happens next
+  const EVENT_TEXT = {
+    'subscription.authenticated': ['Set up monthly autopay', 'Razorpay confirmed the payment method for ₹199 a month.'],
+    'subscription.activated': ['Premium activated', null],
+    'subscription.pending': ['Renewal payment failed', 'Razorpay is retrying the payment.'],
+    'subscription.halted': ['Payments stopped', 'Every retry failed, so Razorpay stopped charging.'],
+    'subscription.cancelled': ['Subscription cancelled', null],
+    'subscription.paused': ['Paused', null],
+    'subscription.resumed': ['Resumed', null],
+    'subscription.completed': ['Subscription finished', 'All planned months were charged.'],
+    'subscription.updated': ['Subscription changed', null]
+  };
+  const RANK = { signup: 0, 'subscription.authenticated': 1, 'subscription.activated': 2, payment: 3 };
+  const METHOD = { upi: 'UPI', card: 'card', netbanking: 'net banking', wallet: 'wallet', emandate: 'bank mandate', nach: 'NACH' };
+
+  function memberJourney(box, m) {
+    const back = h('a', { class: 'btn', href: '#members', text: 'All members' });
+    if (!m) return box.replaceChildren(head('Member not found', null, back));
+    const steps = [{ at: Date.parse(m.created_at), rank: RANK.signup, title: 'Signed up on the site', note: 'Filled in the Premium form and opened the payment window.' }];
+    for (const e of m.events) {
+      if (e.event === 'subscription.charged') continue; // the payment itself is listed from payments
+      const [title, note] = EVENT_TEXT[e.event] || [e.event.replace('subscription.', ''), null];
+      steps.push({ at: Date.parse(e.at), rank: RANK[e.event] ?? 4, title: e.event === 'subscription.activated' && m.member_code ? `Premium activated as ${m.member_code}` : title, note, bad: ['subscription.pending', 'subscription.halted', 'subscription.cancelled'].includes(e.event) });
+    }
+    if (!m.events.some(e => e.event === 'subscription.activated') && m.activated_at) steps.push({ at: Date.parse(m.activated_at), rank: RANK['subscription.activated'], title: m.member_code ? `Premium activated as ${m.member_code}` : 'Premium activated' });
+    m.payments.forEach((p, i) => {
+      const ok = isPaid(p);
+      steps.push({ at: Date.parse(p.paid_at || p.created_at), rank: RANK.payment, money: ok,
+        title: ok ? `Paid ${rupees(p.amount_paise)}${p.method ? ' by ' + (METHOD[p.method] || p.method) : ''}` : `Payment ${p.status || 'not completed'}`,
+        note: ok ? (i === 0 ? 'First month.' : null) : 'This payment didn\'t go through.', bad: !ok });
+    });
+    // Two events a few seconds apart arrive out of order, so keep the natural order within a minute
+    steps.sort((a, b) => (Math.abs(a.at - b.at) < 60e3 ? a.rank - b.rank : a.at - b.at));
+    if (m.end) {
+      const when = formatWhen(new Date(m.end).toISOString());
+      steps.push(m.inPeriod
+        ? { at: m.end, future: true, title: m.autoRenews ? `Renews on ${when}` : `Access ends on ${when}`, note: m.autoRenews ? '₹199 will be charged automatically.' : 'It won\'t renew on its own.', bad: !m.autoRenews }
+        : { at: m.end, title: `Paid month ended on ${when}`, bad: true });
+    }
+
+    const since = m.activated_at ? Math.max(1, Math.round((Date.now() - Date.parse(m.activated_at)) / (30.44 * 864e5))) : 0;
+    const facts = [
+      ['Member ID', m.member_code || 'Not given yet (unpaid)'],
+      ['Email', m.email ? h('a', { href: 'mailto:' + m.email, text: m.email }) : '—'],
+      ['Phone', m.phone ? h('a', { href: 'tel:' + m.phone.replace(/[^\d+]/g, ''), text: m.phone }) : '—'],
+      ['Joined', formatWhen(m.created_at)],
+      ['Member for', since ? `${since} ${since === 1 ? 'month' : 'months'}` : '—'],
+      ['Paid in total', `${rupees(m.total)} over ${m.months} ${m.months === 1 ? 'payment' : 'payments'}`],
+      ['Paid until', outlook(m)]
+    ];
+    box.replaceChildren(
+      head(m.name || 'Member', `${m.member_code ? m.member_code + ' · ' : ''}Premium member journey`, back),
+      h('div', { class: 'journey' },
+        h('section', { class: 'card journey-facts' },
+          h('div', { class: 'card-title' }, h('h3', { text: 'At a glance' }), memberStatusBadge(m)),
+          h('dl', null, facts.map(([k, v]) => [h('dt', { text: k }), h('dd', null, v)]))),
+        h('section', { class: 'card' },
+          h('div', { class: 'card-title' }, h('h3', { text: 'Journey' }), h('span', { class: 'muted small', text: 'India time' })),
+          h('ol', { class: 'timeline' }, steps.map(s => h('li', { class: [s.bad ? 'is-bad' : '', s.money ? 'is-money' : '', s.future ? 'is-future' : ''].join(' ').trim() || null },
+            h('span', { class: 'timeline-when', text: s.future ? 'Next' : formatWhen(new Date(s.at).toISOString()) }),
+            h('strong', { text: s.title }),
+            s.note ? h('span', { class: 'muted small', text: s.note }) : null))))));
+  }
 
   // ---------- Sessions list ----------
   let sessionFilter = 'all';
