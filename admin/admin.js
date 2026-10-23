@@ -1,5 +1,5 @@
 // ===== ADMIN PANEL =====
-// Sign-in (email link or code, then an authenticator app code), and the screens for
+// Sign-in (a code sent to an admin's email, then their panel password), and the screens for
 // sessions, reviews, mentors, admins, history and settings. Everything is stored in
 // Supabase; the database rules decide who may change what, so this page only has to
 // be friendly, not trusted.
@@ -7,7 +7,7 @@
   'use strict';
 
   const db = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' }
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
   });
 
   const KINDS = ['Mentor Session', 'Workshop', 'Community Session', 'Elite Brew', 'Masterclass', 'Meetup', 'Panel Discussion', 'Bootcamp', 'Webinar'];
@@ -15,7 +15,7 @@
   const DEFAULT_TIME = '19:30';
   const SHEET_COMING_SOON = 'https://docs.google.com/spreadsheets/d/15KEHG65Qm9pt1qfzanXmCoQwTTnS7wlRbH68eSAID0g';
 
-  const state = { me: null, sessions: [], driveIds: new Set(), mentors: [], reviews: [], admins: [], settings: {}, drive: null };
+  const state = { me: null, sessions: [], driveIds: new Set(), mentors: [], reviews: [], admins: [], passwords: [], settings: {}, drive: null };
   let timers = [];
 
   // ---------- Small helpers ----------
@@ -117,13 +117,15 @@
   // ---------- Sign in ----------
   const gate = $('#gate');
   let pendingEmail = '';
-  let enrollingFactor = null;
+  let expiryTimer = null;
 
   function step(name, email) {
     $('#app').hidden = true;
     gate.hidden = false;
     $$('.gate-step', gate).forEach(el => { el.hidden = el.dataset.step !== name; });
     $$('[data-email]', gate).forEach(el => { el.textContent = email || pendingEmail; });
+    $$('[data-email-value]', gate).forEach(el => { el.value = email || pendingEmail; });
+    $$('input[type=password]', gate).forEach(el => { el.value = ''; });
     gateError('');
     const input = $(`[data-step="${name}"] input`, gate);
     if (input) setTimeout(() => input.focus(), 30);
@@ -138,11 +140,13 @@
     e.preventDefault();
     const email = e.target.email.value.trim().toLowerCase();
     await busy(e.submitter || $('button', e.target), async () => {
-      const { error } = await db.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: location.origin + location.pathname, shouldCreateUser: true }
-      });
-      if (error) return gateError(error.status === 429 ? 'Too many sign-in emails just now. Wait a few minutes and try again.' : error.message);
+      // Supabase only makes accounts for emails on the admin list (the sign-up hook)
+      const { error } = await db.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+      if (error) {
+        if (error.status === 429) return gateError('Too many sign-in emails just now. Wait a few minutes and try again.');
+        if (/admin list|not allowed|signups/i.test(error.message)) return gateError('That email isn\'t on the admin list.');
+        return gateError(error.message);
+      }
       pendingEmail = email;
       step('code');
     });
@@ -152,40 +156,50 @@
     e.preventDefault();
     await busy($('button[type=submit]', e.target), async () => {
       const { error } = await db.auth.verifyOtp({ email: pendingEmail, token: e.target.code.value.trim(), type: 'email' });
-      if (error) return gateError('That code didn\'t work. Check it, or ask for a new email.');
+      if (error) return gateError('That code didn\'t work or has run out. Check it, or ask for a new one.');
       route();
     });
   });
 
-  $('#mfaSetupForm').addEventListener('submit', async e => {
+  $('#setPasswordForm').addEventListener('submit', async e => {
     e.preventDefault();
+    const { password, confirm: again } = e.target;
+    if (password.value !== again.value) return gateError('The two passwords don\'t match.');
     await busy($('button[type=submit]', e.target), async () => {
-      const { error } = await db.auth.mfa.challengeAndVerify({ factorId: enrollingFactor, code: e.target.code.value.trim() });
-      if (error) return gateError('That code didn\'t match. Use the newest code in the app.');
+      const { error } = await db.rpc('admin_set_password', { new_password: password.value });
+      if (error) return gateError(error.message);
       route();
     });
   });
 
-  $('#mfaForm').addEventListener('submit', async e => {
+  $('#passwordForm').addEventListener('submit', async e => {
     e.preventDefault();
     await busy($('button[type=submit]', e.target), async () => {
-      const { data } = await db.auth.mfa.listFactors();
-      const factor = (data.totp || []).find(f => f.status === 'verified');
-      const { error } = await db.auth.mfa.challengeAndVerify({ factorId: factor.id, code: e.target.code.value.trim() });
-      if (error) return gateError('That code didn\'t match. Use the newest code in the app.');
-      route();
+      const { data, error } = await db.rpc('admin_verify_password', { password: e.target.password.value });
+      e.target.password.value = '';
+      if (error) return gateError(error.message);
+      if (data.ok) return route();
+      if (data.needs_password) return route();
+      if (data.locked_until) return gateError(lockedMessage(data.locked_until));
+      gateError(`That password isn't right. ${data.tries_left} ${data.tries_left === 1 ? 'try' : 'tries'} left before a 15-minute lock.`);
     });
   });
+
+  const lockedMessage = until => `Too many wrong passwords. Try again after ${new Date(until).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}.`;
+
+  async function signOut() {
+    clearTimeout(expiryTimer);
+    await db.rpc('admin_sign_out');
+    await db.auth.signOut();
+    state.me = null;
+    step('email');
+  }
 
   document.addEventListener('click', async e => {
     const act = e.target.closest('[data-action]');
     if (!act) return;
     if (act.dataset.action === 'restart') step('email');
-    if (act.dataset.action === 'sign-out') {
-      await db.auth.signOut();
-      state.me = null;
-      step('email');
-    }
+    if (act.dataset.action === 'sign-out') await signOut();
   });
 
   async function route() {
@@ -193,22 +207,19 @@
     const { data: { session } } = await db.auth.getSession();
     if (!session) return step('email');
     const email = (session.user.email || '').toLowerCase();
-    const { data: aal, error } = await db.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (error) return gateError(error.message);
-    if (aal.currentLevel !== 'aal2') {
-      const { data: factors } = await db.auth.mfa.listFactors();
-      if ((factors.totp || []).some(f => f.status === 'verified')) return step('mfa');
-      // Clear half-finished set-ups, then start a fresh one
-      for (const f of factors.all || []) if (f.status !== 'verified') await db.auth.mfa.unenroll({ factorId: f.id });
-      const { data: enrolled, error: enrollError } = await db.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Elite Show admin ' + Date.now() });
-      if (enrollError) { step('mfa-setup'); return gateError(enrollError.message); }
-      enrollingFactor = enrolled.id;
-      // Supabase gives the QR code as an SVG data link; a blob link shows it in every browser
-      const svg = enrolled.totp.qr_code.replace(/^data:image\/svg\+xml[^,]*,/, '');
-      $('[data-qr]').src = URL.createObjectURL(new Blob([svg.startsWith('<') ? svg : decodeURIComponent(svg)], { type: 'image/svg+xml' }));
-      $('[data-secret]').textContent = enrolled.totp.secret;
-      return step('mfa-setup');
+    // The database decides each step: email on the list, password made, password typed
+    const { data: auth, error } = await db.rpc('admin_auth_state');
+    if (error) { step('email'); return gateError(error.message); }
+    if (!auth.listed) return step('denied', email);
+    if (!auth.has_password) return step('set-password', email);
+    if (!auth.signed_in_until) {
+      step('password', email);
+      if (auth.locked_until) gateError(lockedMessage(auth.locked_until));
+      return;
     }
+    // A sign-in lasts 12 hours; then ask for the password again
+    clearTimeout(expiryTimer);
+    expiryTimer = setTimeout(() => { toast('Your sign-in ran out. Type your password to carry on.'); route(); }, Math.min(Date.parse(auth.signed_in_until) - Date.now(), 2 ** 31 - 1));
     const { data: admins } = await db.from('admins').select('*').order('created_at');
     const me = (admins || []).find(a => a.email === email);
     if (!me) return step('denied', email);
@@ -228,21 +239,23 @@
 
   // ---------- Data ----------
   async function loadAll() {
-    const [sessions, driveIds, mentors, reviews, admins, settings] = await Promise.all([
+    const [sessions, driveIds, mentors, reviews, admins, settings, passwords] = await Promise.all([
       db.from('sessions').select('*').is('deleted_at', null).order('session_date', { ascending: false }),
       db.from('sessions').select('drive_file_id').not('drive_file_id', 'is', null),
       db.from('mentors').select('*').order('name'),
       db.from('reviews').select('*').is('deleted_at', null).order('sort_order').order('created_at'),
       db.from('admins').select('*').order('created_at'),
-      db.from('settings').select('*')
+      db.from('settings').select('*'),
+      db.rpc('admin_password_status')
     ]);
-    const firstError = [sessions, driveIds, mentors, reviews, admins, settings].find(r => r.error);
+    const firstError = [sessions, driveIds, mentors, reviews, admins, settings, passwords].find(r => r.error);
     if (firstError) fail('Couldn\'t load everything', firstError.error);
     state.sessions = sessions.data || [];
     state.driveIds = new Set((driveIds.data || []).map(r => r.drive_file_id));
     state.mentors = mentors.data || [];
     state.reviews = reviews.data || [];
     state.admins = admins.data || state.admins;
+    state.passwords = passwords.data || state.passwords;
     state.settings = Object.fromEntries((settings.data || []).map(r => [r.key, r.value]));
   }
 
@@ -1072,7 +1085,7 @@
     const add = h('button', { class: 'btn btn-primary', type: 'submit', text: 'Add admin' });
     const form = h('form', { class: 'card stack' },
       h('h3', { text: 'Add an admin' }),
-      h('p', { class: 'muted small', text: 'They sign in at this page with that email, then set up an authenticator app the first time.' }),
+      h('p', { class: 'muted small', text: 'They sign in at this page with that email and a code we email them, then create their own password the first time.' }),
       h('div', { class: 'btn-row' }, h('label', { class: 'field', style: 'flex:1;min-width:220px' }, h('span', { text: 'Email' }), email), add));
     form.addEventListener('submit', async e => {
       e.preventDefault();
@@ -1085,19 +1098,38 @@
         toast(`${value} is now an admin. Send them the link: ${location.origin}${location.pathname}`, { ms: 12000 });
       });
     });
+    const pw = new Map(state.passwords.map(p => [p.email, p]));
+    const passwordCell = a => {
+      const p = pw.get(a.email);
+      if (!p || !p.has_password) return h('span', { class: 'muted small', text: 'Not made yet' });
+      return h('span', { class: 'small', text: p.locked ? 'Locked for now' : 'Set' });
+    };
+    const resetButton = a => (!state.me.is_owner || !(pw.get(a.email) || {}).has_password ? null :
+      h('button', { class: 'btn btn-small', type: 'button', text: 'Reset password', onclick: async () => {
+        const self = a.email === state.me.email;
+        if (!confirm(self ? 'Reset your own password? You\'ll be signed out and make a new one when you sign in again.'
+          : `Reset ${a.email}'s password? They're signed out and make a new one at their next sign-in.`)) return;
+        const { error } = await db.rpc('admin_reset_password', { target_email: a.email });
+        if (error) return fail('Couldn\'t reset', error);
+        if (self) return signOut();
+        await loadAll(); render(); toast(`${a.email} will make a new password at their next sign-in.`);
+      } }));
     const rows = state.admins.map(a => h('tr', null,
       h('td', null, a.email, a.email === state.me.email ? h('span', { class: 'muted', text: ' (you)' }) : null),
       h('td', null, a.is_owner ? h('span', { class: 'status status-upcoming', text: 'Owner' }) : h('span', { class: 'status status-live', text: 'Admin' })),
+      h('td', null, passwordCell(a)),
       h('td', { class: 'muted small', text: `${a.added_by && a.added_by !== 'setup' ? 'by ' + a.added_by + ', ' : ''}${formatWhen(a.created_at)}` }),
-      h('td', null, a.is_owner || a.email === state.me.email ? null : h('button', { class: 'btn btn-small btn-danger', type: 'button', text: 'Remove', onclick: async () => {
+      h('td', null, h('div', { class: 'btn-row' }, resetButton(a), a.is_owner || a.email === state.me.email ? null : h('button', { class: 'btn btn-small btn-danger', type: 'button', text: 'Remove', onclick: async () => {
         if (!confirm(`Remove ${a.email} as an admin? They lose access straight away.`)) return;
         const { error } = await db.from('admins').delete().eq('email', a.email);
         if (error) return fail('Couldn\'t remove', error);
         await loadAll(); render(); toast(`${a.email} removed.`);
-      } }))));
-    main.append(head('Admins', 'People who can use this panel. The owner can\'t be removed, and you can\'t remove yourself.'),
+      } })))));
+    main.append(head('Admins', state.me.is_owner
+      ? 'People who can use this panel. You can reset anyone\'s password if they forget it. The owner can\'t be removed.'
+      : 'People who can use this panel. If you forget your password, ask the owner to reset it.'),
       form, h('div', { class: 'card table-wrap' }, h('table', null,
-        h('thead', null, h('tr', null, ['Email', 'Role', 'Added', ''].map(t => h('th', { text: t })))), h('tbody', null, rows))));
+        h('thead', null, h('tr', null, ['Email', 'Role', 'Password', 'Added', ''].map(t => h('th', { text: t })))), h('tbody', null, rows))));
   }
 
   // ---------- Settings ----------
@@ -1129,7 +1161,8 @@
     main.append(head('Settings'), form,
       h('section', { class: 'card' }, h('h3', { text: 'Security', style: 'margin-bottom:0.6rem' }),
         h('ul', { class: 'nudges' },
-          h('li', { class: 'ok', text: 'Two-step sign-in is on for every admin.' }),
+          h('li', { class: 'ok', text: 'Every sign-in needs a code from the admin\'s email and their own password. Five wrong passwords lock that admin for 15 minutes.' }),
+          h('li', { class: 'ok', text: 'A sign-in lasts 12 hours on a device.' }),
           h('li', { class: 'ok', text: 'The database itself refuses changes from anyone who isn\'t on the admin list.' }),
           h('li', { class: 'ok', text: 'Every change is recorded in History with who made it.' }))));
   }

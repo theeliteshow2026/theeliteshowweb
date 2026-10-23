@@ -30,40 +30,46 @@
           <span>Email</span>
           <input type="email" name="email" autocomplete="email" required>
         </label>
-        <button class="btn btn-primary" type="submit">Email me a sign-in link</button>
+        <button class="btn btn-primary" type="submit">Email me a code</button>
       </form>
 
       <form id="codeForm" class="gate-step" data-step="code" hidden>
         <h1>Check your email</h1>
-        <p class="muted">We sent a sign-in link to <strong data-email></strong>. Open it on this device, or type the code from the email here.</p>
+        <p class="muted">We sent a 6-digit code to <strong data-email></strong>. It works for 10 minutes.</p>
         <label class="field">
           <span>Code from the email</span>
           <input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,8}" maxlength="8" required>
         </label>
-        <button class="btn btn-primary" type="submit">Sign in</button>
+        <button class="btn btn-primary" type="submit">Continue</button>
         <button class="btn btn-quiet" type="button" data-action="restart">Use a different email</button>
       </form>
 
-      <form id="mfaSetupForm" class="gate-step" data-step="mfa-setup" hidden>
-        <h1>Set up two-step sign-in</h1>
-        <p class="muted">Scan this with an authenticator app (Google Authenticator, Microsoft Authenticator or 1Password). You'll type its 6-digit code each time you sign in.</p>
-        <div class="qr"><img alt="QR code for your authenticator app" data-qr></div>
-        <p class="muted small">Can't scan? Enter this key in the app: <code data-secret></code></p>
+      <form id="setPasswordForm" class="gate-step" data-step="set-password" hidden>
+        <h1>Create your password</h1>
+        <p class="muted">You'll type this after the email code every time you sign in. Use at least 10 characters, and don't reuse your email password.</p>
+        <input type="email" name="username" autocomplete="username" data-email-value hidden>
         <label class="field">
-          <span>6-digit code from the app</span>
-          <input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
+          <span>New password</span>
+          <input type="password" name="password" autocomplete="new-password" minlength="10" maxlength="72" required>
         </label>
-        <button class="btn btn-primary" type="submit">Turn on and continue</button>
+        <label class="field">
+          <span>Type it again</span>
+          <input type="password" name="confirm" autocomplete="new-password" minlength="10" maxlength="72" required>
+        </label>
+        <button class="btn btn-primary" type="submit">Save and continue</button>
+        <button class="btn btn-quiet" type="button" data-action="sign-out">Sign out</button>
       </form>
 
-      <form id="mfaForm" class="gate-step" data-step="mfa" hidden>
-        <h1>Two-step sign-in</h1>
-        <p class="muted">Type the 6-digit code from your authenticator app.</p>
+      <form id="passwordForm" class="gate-step" data-step="password" hidden>
+        <h1>Enter your password</h1>
+        <p class="muted">Last step for <strong data-email></strong>.</p>
+        <input type="email" name="username" autocomplete="username" data-email-value hidden>
         <label class="field">
-          <span>Code</span>
-          <input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
+          <span>Password</span>
+          <input type="password" name="password" autocomplete="current-password" maxlength="72" required>
         </label>
-        <button class="btn btn-primary" type="submit">Continue</button>
+        <button class="btn btn-primary" type="submit">Sign in</button>
+        <p class="muted small">Forgot it? Ask the owner to reset your password on the Admins page.</p>
         <button class="btn btn-quiet" type="button" data-action="sign-out">Sign out</button>
       </form>
 

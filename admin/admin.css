@@ -97,8 +97,6 @@ h3 { font-size: 0.95rem; }
 .gate-card { width: min(100%, 420px); display: flex; flex-direction: column; gap: 1.4rem; }
 .gate-step { display: flex; flex-direction: column; gap: 1rem; }
 .gate-error, .gate-note { color: var(--bad); background: var(--bad-soft); padding: 0.7rem 0.9rem; border-radius: 8px; }
-.qr { background: #fff; padding: 12px; border-radius: 10px; width: 220px; }
-.qr img { width: 196px; height: 196px; }
 
 /* ----- Layout ----- */
 .app { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100vh; background: linear-gradient(90deg, var(--panel) 0 220px, var(--bg) 220px); }
