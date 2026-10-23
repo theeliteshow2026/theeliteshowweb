@@ -824,16 +824,12 @@ if (supportsPointerEffects) {
   };
   animateRing();
 
-  const interactables = document.querySelectorAll('a, button, input, textarea, .feature-card, .audience-card, .session-card, .scramble-target');
-  interactables.forEach(el => {
-    el.addEventListener('mouseenter', () => {
-      cursorRing?.classList.add('hovered');
-      cursorDot?.classList.add('hovered');
-    });
-    el.addEventListener('mouseleave', () => {
-      cursorRing?.classList.remove('hovered');
-      cursorDot?.classList.remove('hovered');
-    });
+  // Watched on the whole page so cards that load later (live sessions, reviews) count too
+  const interactable = 'a, button, input, textarea, .feature-card, .audience-card, .session-card, .scramble-target';
+  document.addEventListener('mouseover', e => {
+    const on = !!e.target.closest(interactable);
+    cursorRing?.classList.toggle('hovered', on);
+    cursorDot?.classList.toggle('hovered', on);
   });
 }
 
@@ -858,17 +854,21 @@ if (supportsPointerEffects) {
 const hero = document.getElementById('hero');
 const heroCrowd = document.querySelector('.hero-crowd');
 if (hero && heroCrowd && typeof MENTOR_SESSIONS !== 'undefined') {
-  const posters = MENTOR_SESSIONS.filter(s => s.poster)
-    .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
-    .map(s => s.poster);
-  if (posters.length) {
+  const fillCrowd = list => {
+    const posters = list.filter(s => s.poster)
+      .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    if (!posters.length) return;
     heroCrowd.replaceChildren(...Array.from({ length: 8 }, (_, i) => {
-      const img = setPosterImage(document.createElement('img'), posters[i % posters.length], '(max-width: 700px) 50vw, 25vw');
+      const s = posters[i % posters.length];
+      const img = setPosterImage(document.createElement('img'), s.poster, '(max-width: 700px) 50vw, 25vw', s.posterSmall);
       img.alt = '';
       img.loading = i < 4 ? 'eager' : 'lazy';
       return img;
     }));
-  }
+  };
+  // The live posters from the admin panel, or the built-in ones if Supabase doesn't answer
+  (typeof SITE_CONTENT !== 'undefined' ? SITE_CONTENT : Promise.resolve({}))
+    .then(c => fillCrowd(c.sessions && c.sessions.length ? c.sessions : MENTOR_SESSIONS));
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let steeredAt = 0;

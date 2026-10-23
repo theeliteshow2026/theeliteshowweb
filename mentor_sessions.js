@@ -1,14 +1,18 @@
 // ===== SATURDAY MENTOR SESSIONS =====
-// To add a session: copy one entry, fill it in, and drop the poster image into
+// Sessions are now managed in the admin panel (/admin) and load live from Supabase
+// (see site_content.js). The list below is the backup the pages use if Supabase
+// can't be reached, so keep it roughly in step.
+//
+// To add a session by hand: copy one entry, fill it in, and drop the poster image into
 // the posters/ folder (portrait, about 900px wide). Newest sessions show first
 // automatically. Leave `poster` empty to show a generated poster until the
 // real one is ready. `number` is only used on that generated poster.
 // `short` is the brief title shown on the cards; the full title shows when
 // the poster is opened.
 //
-// The home page counts down to the next Saturday session at this time (India time,
+// The home page counts down to the next upcoming session at its own start time. With no
+// upcoming session listed, it counts down to next Saturday at this time (India time,
 // 24-hour clock; the posters say 7:30 PM).
-// Change it here if the sessions move.
 const SESSION_START_IST = '19:30';
 const SESSION_LENGTH_HOURS = 2;
 const MENTOR_SESSIONS = [
@@ -94,11 +98,12 @@ const MENTOR_SESSIONS = [
 // Fills an <img> with a session poster: small and large WebP copies (posters/sm, posters/lg,
 // made by tools/poster_sizes.py) so each screen downloads the size it shows. `sizes` says how
 // wide the poster appears. If a copy is missing, the image falls back to the original file.
-function setPosterImage(img, path, sizes) {
+// Posters uploaded in the admin panel already come as a 900px copy plus a 480px `small` one.
+function setPosterImage(img, path, sizes, small) {
   const name = path.replace(/^posters\//, '').replace(/\.[a-z]+$/i, '');
   img.src = path;
-  if (path.startsWith('posters/')) {
-    img.srcset = `posters/sm/${name}.webp 480w, posters/lg/${name}.webp 900w`;
+  if (path.startsWith('posters/') || small) {
+    img.srcset = small ? `${small} 480w, ${path} 900w` : `posters/sm/${name}.webp 480w, posters/lg/${name}.webp 900w`;
     img.sizes = sizes;
     img.addEventListener('error', () => {
       if (!img.srcset) return;
@@ -112,8 +117,23 @@ function setPosterImage(img, path, sizes) {
   return img;
 }
 
-(function () {
-  const sessions = [...MENTOR_SESSIONS].sort((a, b) => b.date.localeCompare(a.date));
+// The day it is in India, as YYYY-MM-DD
+function todayIST() {
+  return new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 10);
+}
+
+(typeof SITE_CONTENT !== 'undefined' ? SITE_CONTENT : Promise.resolve({}))
+  .then(content => {
+    renderSessions(content.sessions || MENTOR_SESSIONS);
+    // The sections grew after the page opened, so a link like #sessions needs its scroll again
+    const target = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
+    if (target && window.scrollY > 0) target.scrollIntoView();
+  });
+
+function renderSessions(source) {
+  const sessions = [...source].sort((a, b) => b.date.localeCompare(a.date));
+  const today = todayIST();
+  const dateLine = session => `${session.date >= today ? 'Coming up · ' : ''}${session.label} · ${formatDate(session.date)}`;
 
   function formatDate(iso) {
     const [y, m, d] = iso.split('-').map(Number);
@@ -144,7 +164,7 @@ function setPosterImage(img, path, sizes) {
 
   function posterFor(session, sizes = '(max-width: 599px) 50vw, (max-width: 1023px) 33vw, 25vw') {
     if (!session.poster) return generatedPoster(session);
-    const img = setPosterImage(el('img', 'session-poster-img'), session.poster, sizes);
+    const img = setPosterImage(el('img', 'session-poster-img'), session.poster, sizes, session.posterSmall);
     img.alt = `Poster for ${session.title} with ${session.mentor}`;
     img.loading = 'lazy';
     return img;
@@ -158,7 +178,7 @@ function setPosterImage(img, path, sizes) {
     frame.append(posterFor(session));
     const meta = el('div', 'session-meta');
     meta.append(
-      el('time', 'session-date', `${session.label} · ${formatDate(session.date)}`),
+      el('time', 'session-date', dateLine(session)),
       el('h3', 'session-title', session.short || session.title),
       el('p', 'session-mentor', session.mentor),
       el('p', 'session-summary', session.summary)
@@ -199,7 +219,7 @@ function setPosterImage(img, path, sizes) {
     if (!lightbox) buildLightbox();
     lastFocus = opener;
     lightbox.querySelector('.poster-lightbox-poster').replaceChildren(posterFor(session, '(max-width: 899px) 90vw, 420px'));
-    lightbox.querySelector('.session-date').textContent = `${session.label} · ${formatDate(session.date)}`;
+    lightbox.querySelector('.session-date').textContent = dateLine(session);
     lightbox.querySelector('.session-title').textContent = session.title;
     lightbox.querySelector('.session-mentor').textContent = session.mentor;
     lightbox.querySelector('.session-summary').textContent = session.summary;
@@ -353,20 +373,32 @@ function setPosterImage(img, path, sizes) {
     startCountdown();
   }
 
-  // Counts down to the next Saturday session; while one is on, it says so
+  // Counts down to the next session; while one is on, it says so
   function startCountdown() {
     const IST = 5.5 * 3600e3;
     const [hh, mm] = SESSION_START_IST.split(':').map(Number);
+    const length = SESSION_LENGTH_HOURS * 3600e3;
+    // Start times of the sessions listed from today on, soonest first
+    const listed = sessions
+      .filter(s => s.date >= today)
+      .map(s => {
+        const [y, m, d] = s.date.split('-').map(Number);
+        const [h, min] = (s.time || SESSION_START_IST).split(':').map(Number);
+        return Date.UTC(y, m - 1, d, h, min) - IST;
+      })
+      .sort((a, b) => a - b);
     const kicker = document.getElementById('arcKicker');
     const count = document.getElementById('arcCount');
     const when = document.getElementById('arcWhen');
     const pad = n => String(n).padStart(2, '0');
 
     function nextStart(now) {
+      const upcoming = listed.find(start => now < start + length);
+      if (upcoming) return upcoming;
       const ist = new Date(now + IST);
       const daysAhead = (6 - ist.getUTCDay() + 7) % 7;
       let start = Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate() + daysAhead, hh, mm) - IST;
-      if (now >= start + SESSION_LENGTH_HOURS * 3600e3) start += 7 * 864e5;
+      if (now >= start + length) start += 7 * 864e5;
       return start;
     }
 
@@ -389,4 +421,4 @@ function setPosterImage(img, path, sizes) {
     update();
     setInterval(update, 1000);
   }
-})();
+}

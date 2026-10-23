@@ -1,5 +1,7 @@
 // ===== REVIEWS =====
-// To add a review: copy one entry and fill it in. `session` is optional.
+// Reviews are now managed in the admin panel (/admin) and load live from Supabase
+// (see site_content.js). The list below is the backup used if Supabase can't be reached.
+// To add a review by hand: copy one entry and fill it in. `session` is optional.
 // Entries marked `sample: true` are placeholders and show a "Sample" tag;
 // replace them with real words from members before going live.
 const REVIEWS = [
@@ -35,9 +37,12 @@ const REVIEWS = [
 
 // A deck of quote cards: the top card flicks away and goes to the back.
 // Drag or swipe it, use the arrows, or let it turn on its own.
-(function () {
+(typeof SITE_CONTENT !== 'undefined' ? SITE_CONTENT : Promise.resolve({}))
+  .then(content => buildQuoteDeck(content.reviews || REVIEWS));
+
+function buildQuoteDeck(reviews) {
   const deck = document.getElementById('quoteDeck');
-  if (!deck || !REVIEWS.length) return;
+  if (!deck || !reviews.length) return;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const counter = document.getElementById('deckCount');
   const pad = n => String(n).padStart(2, '0');
@@ -49,7 +54,7 @@ const REVIEWS = [
     return node;
   }
 
-  const cards = REVIEWS.map((review, i) => {
+  const cards = reviews.map((review, i) => {
     const card = el('figure', 'quote-card');
     card.dataset.index = i;
     const by = el('figcaption', 'quote-by');
@@ -142,4 +147,5 @@ const REVIEWS = [
   if (!reduceMotion) setInterval(() => { if (visible && !paused && !drag) advance(1); }, 7000);
 
   stack();
-})();
+  document.dispatchEvent(new Event('quotedeck:ready'));
+}

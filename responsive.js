@@ -166,5 +166,7 @@
     fit();
   });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+  // The cards arrive once the live reviews have loaded
+  document.addEventListener('quotedeck:ready', fit);
   fit();
 })();
