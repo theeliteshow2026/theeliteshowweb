@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#070707">
   <title>Saturday Mentor Sessions — The Elite Show Community</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="description"
@@ -12,6 +13,8 @@
     href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="the_elite_show.css">
+  <link rel="stylesheet" href="motion.css">
+  <link rel="stylesheet" href="responsive.css">
 </head>
 
 <body class="plain-cursor">
@@ -44,7 +47,11 @@
     <div class="footer-copy">© <span id="footerYear">2026</span> The Elite Show Community. All rights reserved.</div>
   </footer>
 
+  <script src="supabase_config.js"></script>
+  <script src="site_content.js"></script>
   <script src="mentor_sessions.js"></script>
+  <script src="motion.js"></script>
+  <script src="responsive.js"></script>
   <script>
     document.getElementById('footerYear').textContent = new Date().getFullYear();
   </script>

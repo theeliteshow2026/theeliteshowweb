@@ -4,3 +4,4 @@ Thumbs.db
 supabase/.env
 supabase/functions/.env
 .env*
+responsive-check/

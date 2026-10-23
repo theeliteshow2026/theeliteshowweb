@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#070707">
   <title>The Elite Show Community — Where People Meet Ideas</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="description"
@@ -14,6 +15,8 @@
     href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,900&family=Cormorant+Garamond:wght@300;400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="the_elite_show.css">
+  <link rel="stylesheet" href="motion.css">
+  <link rel="stylesheet" href="responsive.css">
 </head>
 
 <body>
@@ -107,89 +110,72 @@
     <p class="section-label reveal">What We Do</p>
     <h2 class="section-title reveal">We create the rooms where <em>connections</em> happen</h2>
 
-    <div class="features-grid">
-      <div class="feature-card reveal-left">
-        <div class="feature-icon-wrap">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-          </svg>
-        </div>
-        <h3 class="feature-title">Meet</h3>
-        <p class="feature-text">Real people, in real rooms. Students, founders, creators and professionals who are
-          building something.</p>
-      </div>
-      <div class="feature-card reveal-scale">
-        <div class="feature-icon-wrap">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-            <polyline points="17 6 23 6 23 12" />
-          </svg>
-        </div>
-        <h3 class="feature-title">Learn</h3>
-        <p class="feature-text">From people a few steps ahead of you, through honest conversations about what they
-          actually did.</p>
-      </div>
-      <div class="feature-card reveal-scale">
-        <div class="feature-icon-wrap">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-          </svg>
-        </div>
-        <h3 class="feature-title">Connect</h3>
-        <p class="feature-text">Beyond the event. The relationships you start in the room keep going in the
-          community.</p>
-      </div>
-      <div class="feature-card reveal-right">
-        <div class="feature-icon-wrap">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2 2 7l10 5 10-5-10-5z" />
-            <path d="m2 17 10 5 10-5" />
-            <path d="m2 12 10 5 10-5" />
-          </svg>
-        </div>
-        <h3 class="feature-title">Build</h3>
-        <p class="feature-text">Something together. Projects, teams and ideas that only happen when the right people
-          meet.</p>
+    <div class="about-split">
+      <ul class="verb-list">
+        <li class="verb reveal is-lit" tabindex="0">
+          <h3 class="verb-word">Meet</h3>
+          <p class="verb-text">Real people, in real rooms. Students, founders, creators and professionals who are
+            building something.</p>
+        </li>
+        <li class="verb reveal" tabindex="0">
+          <h3 class="verb-word">Learn</h3>
+          <p class="verb-text">From people a few steps ahead of you, through honest conversations about what they
+            actually did.</p>
+        </li>
+        <li class="verb reveal" tabindex="0">
+          <h3 class="verb-word">Connect</h3>
+          <p class="verb-text">Beyond the event. The relationships you start in the room keep going in the
+            community.</p>
+        </li>
+        <li class="verb reveal" tabindex="0">
+          <h3 class="verb-word">Build</h3>
+          <p class="verb-text">Something together. Projects, teams and ideas that only happen when the right people
+            meet.</p>
+        </li>
+      </ul>
+      <div class="cube-stage reveal-scale" aria-hidden="true">
+        <canvas class="cube-canvas" id="cubeCanvas"></canvas>
+        <p class="cube-sorted" id="cubeSorted">All Sorted!</p>
       </div>
     </div>
   </section>
 
   <!-- EXPERIENCES -->
   <section id="experiences" class="section">
-    <div class="split">
-      <div class="split-intro">
-        <p class="section-label reveal">The Experience</p>
-        <h2 class="section-title reveal">A community you can <em>experience</em></h2>
-        <p class="split-motto reveal">Online keeps it alive.<br><strong>Offline makes it real.</strong></p>
-        <ul class="not-list reveal">
-          <li>Not another content page</li>
-          <li>Not another WhatsApp group</li>
-          <li>Not another networking event</li>
-        </ul>
-      </div>
-      <ul class="exp-list">
-        <li class="reveal-right">
-          <h3>Mentor Sessions</h3>
-          <p>Learn directly from people who are building.</p>
-        </li>
-        <li class="reveal-right">
-          <h3>Elite Brew</h3>
-          <p>Small, meaningful offline conversations over coffee.</p>
-        </li>
-        <li class="reveal-right">
-          <h3>Workshops</h3>
-          <p>Practical skills. Real experiences.</p>
-        </li>
-        <li class="reveal-right">
-          <h3>Community</h3>
-          <p>The conversation continues after the event.</p>
-        </li>
-      </ul>
-    </div>
+    <p class="section-label reveal">The Experience</p>
+    <h2 class="section-title reveal">A community you can <em>experience</em></h2>
+    <p class="live-real">
+      <span class="visually-hidden">Online makes it live. Offline makes it real.</span>
+      <span class="live-real-line" aria-hidden="true"><span>Online makes it <em>live.</em></span></span>
+      <span class="live-real-line" aria-hidden="true"><span>Offline makes it <em>real.</em></span></span>
+    </p>
+    <ul class="not-row reveal">
+      <li><span>Not another content page</span></li>
+      <li><span>Not another WhatsApp group</span></li>
+      <li><span>Not another networking event</span></li>
+    </ul>
+    <ul class="exp-grid">
+      <li class="reveal">
+        <h3>Mentor Sessions</h3>
+        <p>Learn directly from people who are building.</p>
+      </li>
+      <li class="reveal">
+        <h3>Daily Discussions</h3>
+        <p>Ideas, questions and wins shared every day, between the sessions.</p>
+      </li>
+      <li class="reveal">
+        <h3>Elite Brew</h3>
+        <p>Small, meaningful offline conversations over coffee.</p>
+      </li>
+      <li class="reveal">
+        <h3>Workshops</h3>
+        <p>Practical skills. Real experiences.</p>
+      </li>
+      <li class="reveal">
+        <h3>Community</h3>
+        <p>The conversation continues after the event.</p>
+      </li>
+    </ul>
     <p class="section-kicker reveal">We're already building the habit. Most importantly, people keep showing up.</p>
   </section>
 
@@ -199,12 +185,45 @@
       <div>
         <p class="section-label reveal">Every Saturday</p>
         <h2 class="section-title reveal">Saturday <em>mentor sessions</em></h2>
-        <p class="section-lead reveal">Each week someone a few steps ahead shares what they've learned. Here are the
-          latest rooms we've opened.</p>
+        <p class="section-lead reveal">Each week someone a few steps ahead shares what they've learned. Drag through
+          the rooms we've opened.</p>
       </div>
       <a class="sessions-all reveal" href="sessions.html">See all sessions →</a>
     </div>
-    <div class="sessions-grid" data-sessions data-limit="4"></div>
+    <div class="session-arc" data-session-arc>
+      <div class="arc-ring"></div>
+      <div class="arc-center">
+        <p class="arc-kicker" id="arcKicker">Next room opens in</p>
+        <div class="arc-count" id="arcCount">
+          <div><b id="arcDays">0</b><small>Days</small></div>
+          <div><b id="arcHours">00</b><small>Hrs</small></div>
+          <div><b id="arcMins">00</b><small>Min</small></div>
+          <div><b id="arcSecs">00</b><small>Sec</small></div>
+        </div>
+        <p class="arc-when" id="arcWhen">Saturday</p>
+        <div class="arc-nav">
+          <button class="arc-btn" type="button" data-arc-step="-1" aria-label="Previous session">←</button>
+          <button class="arc-btn" type="button" data-arc-step="1" aria-label="Next session">→</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section id="reviews" class="section">
+    <div class="reviews-split">
+      <div>
+        <p class="section-label reveal">From The Room</p>
+        <h2 class="section-title reveal">What members <em>say</em></h2>
+        <p class="section-lead reveal">Real words from people who walked in on a Saturday and kept coming back.</p>
+        <div class="deck-nav reveal">
+          <button class="arc-btn" type="button" id="deckPrev" aria-label="Previous review">←</button>
+          <span class="deck-count" id="deckCount">01 / 01</span>
+          <button class="arc-btn" type="button" id="deckNext" aria-label="Next review">→</button>
+        </div>
+      </div>
+      <div class="quote-deck" id="quoteDeck" aria-live="polite"></div>
+    </div>
   </section>
 
   <!-- AUDIENCES -->
@@ -213,7 +232,7 @@
     <p class="section-label reveal">Membership</p>
     <h2 class="section-title reveal">Two ways to <em>join</em></h2>
     <p class="section-lead reveal">Start free with The Elite Show Community, or go further with The Elite Show Premium
-      Community, now open.</p>
+      Community.</p>
 
     <div class="tier-grid">
       <article class="tier-card reveal-scale">
@@ -234,7 +253,8 @@
         <ul class="tier-perks">
           <li><strong>Everything in the free community</strong></li>
           <li><strong>Saturday mentor sessions</strong> with people a few steps ahead of you</li>
-          <li><strong>Elite Brew meetups and workshops</strong> where ideas turn into plans</li>
+          <li><strong>Daily discussions</strong> with members in the Premium circle</li>
+          <li><strong>Exclusive discounted rate</strong> for Elite Brew meetups and workshops</li>
           <li><strong>A close circle of ambitious people</strong> who grow together</li>
           <li><strong>Direct connections</strong> to mentors, founders, creators and collaborators</li>
         </ul>
@@ -242,6 +262,16 @@
       </article>
     </div>
   </section>
+
+  <!-- VELOCITY RIBBON: drifts on its own, speeds up and leans with the scroll -->
+  <div class="ribbon-band" aria-hidden="true">
+    <div class="ribbon-row" data-dir="1">
+      <span>Mentors<i>✦</i></span><span>Founders<i>✦</i></span><span>Creators<i>✦</i></span><span>Students<i>✦</i></span><span>Builders<i>✦</i></span>
+    </div>
+    <div class="ribbon-row ribbon-row--outline" data-dir="-1">
+      <span>Saturday Sessions<i>✦</i></span><span>Daily Discussions<i>✦</i></span><span>Elite Brew<i>✦</i></span><span>Workshops<i>✦</i></span>
+    </div>
+  </div>
 
   <section id="get-involved" class="section">
     <p class="section-label reveal">Get Involved</p>
@@ -286,11 +316,11 @@
     <p class="section-label reveal">The Vision</p>
     <h2 class="section-title reveal">Start with a community. <em>Build an ecosystem.</em></h2>
     <ol class="roadmap">
-      <li class="reveal"><span>2026</span>Build the strongest community in Kerala</li>
-      <li class="reveal"><span>2027</span>Expand experiences across Kerala</li>
-      <li class="reveal"><span>2028+</span>Build a wider network of young builders</li>
+      <li class="reveal"><span>2026</span>Build a very strong community in Kerala</li>
+      <li class="reveal"><span>2027</span>Take the mission outside Kerala</li>
+      <li class="reveal"><span>2028</span>The best startup community in India</li>
     </ol>
-    <p class="section-kicker reveal">The ambition: become the network where Kerala's next generation meets.</p>
+    <p class="section-kicker reveal">The ambition: the best startup community in India.</p>
   </section>
 
   <!-- WAITLIST -->
@@ -337,28 +367,28 @@
             <div class="form-grid">
               <div class="field-group full">
                 <label for="fullname">Full Name</label>
-                <input type="text" id="fullname" name="fullname" placeholder="e.g. John Adeyemi" autocomplete="name"
+                <input type="text" id="fullname" name="fullname" placeholder="e.g. John Adeyemi" autocomplete="name" autocapitalize="words" enterkeyhint="next"
                   required>
                 <span class="field-error" id="nameError"></span>
               </div>
               <div class="field-group">
                 <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone" placeholder="e.g. +91 98765 43210" autocomplete="tel" required>
+                <input type="tel" id="phone" name="phone" placeholder="e.g. +91 98765 43210" autocomplete="tel" inputmode="tel" enterkeyhint="next" required>
                 <span class="field-error" id="phoneError"></span>
               </div>
               <div class="field-group">
                 <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+                <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" enterkeyhint="next" required>
                 <span class="field-error" id="emailError"></span>
               </div>
               <div class="field-group">
                 <label for="state">State</label>
-                <input type="text" id="state" name="state" placeholder="e.g. Kerala" required>
+                <input type="text" id="state" name="state" placeholder="e.g. Kerala" autocomplete="address-level1" autocapitalize="words" enterkeyhint="next" required>
                 <span class="field-error" id="stateError"></span>
               </div>
               <div class="field-group">
                 <label for="city">City</label>
-                <input type="text" id="city" name="city" placeholder="e.g. Kochi" required>
+                <input type="text" id="city" name="city" placeholder="e.g. Kochi" autocomplete="address-level2" autocapitalize="words" enterkeyhint="done" required>
                 <span class="field-error" id="cityError"></span>
               </div>
             </div>
@@ -383,7 +413,7 @@
                 </div>
                 <div class="field-group">
                   <label for="profileLink">LinkedIn or Website <small>(optional)</small></label>
-                  <input type="url" id="profileLink" name="profileLink" placeholder="https://" autocomplete="url">
+                  <input type="url" id="profileLink" name="profileLink" placeholder="https://" autocomplete="url" inputmode="url" autocapitalize="off" spellcheck="false">
                   <span class="field-error" id="profileLinkError"></span>
                 </div>
                 <div class="field-group full">
@@ -506,6 +536,18 @@
             stroke-linejoin="round" class="modal-check" />
         </svg>
       </div>
+      <div class="member-card" id="memberCard" hidden>
+        <div class="member-card-top">
+          <span><b>The Elite Show</b><br>Premium Community</span>
+          <span class="member-card-chip" aria-hidden="true"></span>
+        </div>
+        <div class="member-card-name" id="memberCardName"></div>
+        <div class="member-card-bottom">
+          <span>Member ID<b id="memberCardId"></b></span>
+          <span>Since<b id="memberCardSince"></b></span>
+          <span>Monthly<b>₹199</b></span>
+        </div>
+      </div>
       <h2 class="modal-title" id="modalTitle">Welcome to The Elite Show Community 🎉</h2>
       <p class="modal-msg" id="modalMsg">
         You're officially on the list.<br><br>
@@ -523,8 +565,15 @@
     </div>
   </div>
 
+  <script type="importmap">{ "imports": { "three": "./vendor/three/three.module.min.js" } }</script>
+  <script src="supabase_config.js"></script>
+  <script src="site_content.js"></script>
   <script src="mentor_sessions.js"></script>
+  <script src="reviews.js"></script>
   <script src="the_elite_show.js"></script>
+  <script type="module" src="rubiks_cube.js"></script>
+  <script src="motion.js"></script>
+  <script src="responsive.js"></script>
 </body>
 
 </html>

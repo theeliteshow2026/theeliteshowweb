@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' blob:; worker-src 'self' blob:; connect-src 'self' data: blob: https://mlrzeqekvhbzwnblzzlv.supabase.co wss://mlrzeqekvhbzwnblzzlv.supabase.co https://script.google.com https://script.googleusercontent.com; img-src 'self' data: blob: https://mlrzeqekvhbzwnblzzlv.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
+  <title>Admin · The Elite Show Community</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+  <noscript><p class="gate-note">The admin panel needs JavaScript.</p></noscript>
+
+  <!-- ===== Sign in ===== -->
+  <main class="gate" id="gate" hidden>
+    <div class="gate-card">
+      <a class="brand" href="../home.html">The Elite Show <span>Admin</span></a>
+
+      <form id="signInForm" class="gate-step" data-step="email">
+        <h1>Sign in</h1>
+        <p class="muted">Only emails on the admin list can get in.</p>
+        <label class="field">
+          <span>Email</span>
+          <input type="email" name="email" autocomplete="email" required>
+        </label>
+        <button class="btn btn-primary" type="submit">Email me a code</button>
+      </form>
+
+      <form id="codeForm" class="gate-step" data-step="code" hidden>
+        <h1>Check your email</h1>
+        <p class="muted">We sent a 6-digit code to <strong data-email></strong>. It works for 10 minutes.</p>
+        <label class="field">
+          <span>Code from the email</span>
+          <input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,8}" maxlength="8" required>
+        </label>
+        <button class="btn btn-primary" type="submit">Continue</button>
+        <button class="btn btn-quiet" type="button" data-action="restart">Use a different email</button>
+      </form>
+
+      <form id="setPasswordForm" class="gate-step" data-step="set-password" hidden>
+        <h1>Create your password</h1>
+        <p class="muted">You'll type this after the email code every time you sign in. Use at least 10 characters, and don't reuse your email password.</p>
+        <input type="email" name="username" autocomplete="username" data-email-value hidden>
+        <label class="field">
+          <span>New password</span>
+          <input type="password" name="password" autocomplete="new-password" minlength="10" maxlength="72" required>
+        </label>
+        <label class="field">
+          <span>Type it again</span>
+          <input type="password" name="confirm" autocomplete="new-password" minlength="10" maxlength="72" required>
+        </label>
+        <button class="btn btn-primary" type="submit">Save and continue</button>
+        <button class="btn btn-quiet" type="button" data-action="sign-out">Sign out</button>
+      </form>
+
+      <form id="passwordForm" class="gate-step" data-step="password" hidden>
+        <h1>Enter your password</h1>
+        <p class="muted">Last step for <strong data-email></strong>.</p>
+        <input type="email" name="username" autocomplete="username" data-email-value hidden>
+        <label class="field">
+          <span>Password</span>
+          <input type="password" name="password" autocomplete="current-password" maxlength="72" required>
+        </label>
+        <button class="btn btn-primary" type="submit">Sign in</button>
+        <p class="muted small">Forgot it? Ask the owner to reset your password on the Admins page.</p>
+        <button class="btn btn-quiet" type="button" data-action="sign-out">Sign out</button>
+      </form>
+
+      <div class="gate-step" data-step="denied" hidden>
+        <h1>Not on the admin list</h1>
+        <p class="muted"><strong data-email></strong> isn't an admin. Ask an admin to add this email in the panel, then sign in again.</p>
+        <button class="btn btn-quiet" type="button" data-action="sign-out">Sign out</button>
+      </div>
+
+      <div class="gate-step" data-step="loading">
+        <p class="muted">Loading…</p>
+      </div>
+
+      <p class="gate-error" id="gateError" role="alert" hidden></p>
+    </div>
+  </main>
+
+  <!-- ===== Panel ===== -->
+  <div class="app" id="app" hidden>
+    <aside class="side">
+      <a class="brand" href="../home.html" target="_blank" rel="noopener">The Elite Show <span>Admin</span></a>
+      <nav class="nav" aria-label="Admin sections">
+        <a href="#dashboard" data-view="dashboard">Dashboard</a>
+        <a href="#members" data-view="members">Members</a>
+        <a href="#sessions" data-view="sessions">Sessions <span class="nav-badge" data-drive-badge hidden></span></a>
+        <a href="#reviews" data-view="reviews">Reviews</a>
+        <a href="#mentors" data-view="mentors">Mentors</a>
+        <a href="#history" data-view="history">History</a>
+        <a href="#admins" data-view="admins">Admins</a>
+        <a href="#settings" data-view="settings">Settings</a>
+      </nav>
+      <div class="side-foot">
+        <span class="muted small" data-me></span>
+        <button class="btn btn-quiet btn-small" type="button" data-action="sign-out">Sign out</button>
+      </div>
+    </aside>
+    <main class="main" id="main" tabindex="-1"></main>
+  </div>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script src="../supabase_config.js"></script>
+  <script src="../vendor/supabase/supabase-2.117.3.js"></script>
+  <script src="../vendor/tesseract/tesseract.min.js"></script>
+  <script src="poster_reader.js"></script>
+  <script src="admin.js"></script>
+</body>
+
+</html>
