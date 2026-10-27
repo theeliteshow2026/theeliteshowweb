@@ -833,10 +833,43 @@ if (hero && heroCrowd && typeof MENTOR_SESSIONS !== 'undefined') {
   const posters = MENTOR_SESSIONS.filter(s => s.poster)
     .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
     .map(s => s.poster);
-  if (posters.length) {
-    heroCrowd.innerHTML = Array.from({ length: 8 }, (_, i) =>
-      `<img src="${posters[i % posters.length]}" alt="" loading="${i < 4 ? 'eager' : 'lazy'}">`).join('');
-  }
+  // One tile per session, newest first. The grid picks its own columns and rows
+  // from the session count and the hero's shape so tiles stay poster-shaped
+  // (4:5) and always fill the stage. Tiles shrink as sessions add up, down to a
+  // minimum width; past that the wall shows the newest sessions that fit.
+  // Spare cells in the last row repeat the newest posters, so there are no holes.
+  let crowdLayout = '';
+  const layoutCrowd = () => {
+    const w = hero.clientWidth, h = hero.clientHeight;
+    if (!posters.length || !w || !h) return;
+    const n = posters.length;
+    const maxCols = Math.max(2, Math.floor(w / (w <= 700 ? 90 : 120)));
+    const rowsFor = c => Math.max(1, Math.round(h / (w / c * 1.25)));
+    // Prefer a grid that fits every session with the fewest repeats while
+    // tiles stay roughly poster-shaped
+    let cols = 0, rows = 0, best = Infinity;
+    for (let c = 1; c <= maxCols; c++) {
+      const r = Math.ceil(n / c), shape = (h / r) / (w / c);
+      if (shape < 0.85 || shape > 1.8) continue;
+      const score = (c * r - n) + Math.abs(Math.log(shape / 1.25)) * 2;
+      if (score < best) { best = score; cols = c; rows = r; }
+    }
+    // Otherwise size tiles from the poster shape: the fewest columns that
+    // hold every session, or the densest allowed grid of the newest ones
+    if (!cols) {
+      for (cols = 1; cols < maxCols && cols * rowsFor(cols) < n; cols++);
+      rows = rowsFor(cols);
+    }
+    const key = cols + 'x' + rows;
+    if (key === crowdLayout) return;
+    crowdLayout = key;
+    heroCrowd.style.setProperty('--crowd-cols', cols);
+    heroCrowd.style.setProperty('--crowd-rows', rows);
+    heroCrowd.innerHTML = Array.from({ length: cols * rows }, (_, i) =>
+      `<img src="${posters[i % posters.length]}" alt="" decoding="async"${i < 8 ? '' : ' fetchpriority="low"'}>`).join('');
+  };
+  layoutCrowd();
+  new ResizeObserver(layoutCrowd).observe(hero);
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let steeredAt = 0;
