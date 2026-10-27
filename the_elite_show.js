@@ -854,21 +854,58 @@ if (supportsPointerEffects) {
 const hero = document.getElementById('hero');
 const heroCrowd = document.querySelector('.hero-crowd');
 if (hero && heroCrowd && typeof MENTOR_SESSIONS !== 'undefined') {
-  const fillCrowd = list => {
-    const posters = list.filter(s => s.poster)
-      .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-    if (!posters.length) return;
-    heroCrowd.replaceChildren(...Array.from({ length: 8 }, (_, i) => {
-      const s = posters[i % posters.length];
-      const img = setPosterImage(document.createElement('img'), s.poster, '(max-width: 700px) 50vw, 25vw', s.posterSmall);
+  // One tile per session, newest first. The grid picks its own columns and rows
+  // from the session count and the hero's shape so tiles stay poster-shaped
+  // (4:5) and always fill the stage. Tiles shrink as sessions add up, down to a
+  // minimum width; past that the wall shows the newest sessions that fit.
+  // Spare cells in the last row repeat the newest posters, so there are no holes.
+  let sessions = [];
+  let crowdLayout = '';
+  const layoutCrowd = () => {
+    const w = hero.clientWidth, h = hero.clientHeight;
+    if (!sessions.length || !w || !h) return;
+    const n = sessions.length;
+    const maxCols = Math.max(2, Math.floor(w / (w <= 700 ? 90 : 120)));
+    const rowsFor = c => Math.max(1, Math.round(h / (w / c * 1.25)));
+    // Prefer a grid that fits every session with the fewest repeats while
+    // tiles stay roughly poster-shaped
+    let cols = 0, rows = 0, best = Infinity;
+    for (let c = 1; c <= maxCols; c++) {
+      const r = Math.ceil(n / c), shape = (h / r) / (w / c);
+      if (shape < 0.85 || shape > 1.8) continue;
+      const score = (c * r - n) + Math.abs(Math.log(shape / 1.25)) * 2;
+      if (score < best) { best = score; cols = c; rows = r; }
+    }
+    // Otherwise size tiles from the poster shape: the fewest columns that
+    // hold every session, or the densest allowed grid of the newest ones
+    if (!cols) {
+      for (cols = 1; cols < maxCols && cols * rowsFor(cols) < n; cols++);
+      rows = rowsFor(cols);
+    }
+    const key = cols + 'x' + rows;
+    if (key === crowdLayout) return;
+    crowdLayout = key;
+    heroCrowd.style.setProperty('--crowd-cols', cols);
+    heroCrowd.style.setProperty('--crowd-rows', rows);
+    heroCrowd.replaceChildren(...Array.from({ length: cols * rows }, (_, i) => {
+      const s = sessions[i % n];
+      const img = setPosterImage(document.createElement('img'), s.poster, `${Math.ceil(100 / cols)}vw`, s.posterSmall);
       img.alt = '';
-      img.loading = i < 4 ? 'eager' : 'lazy';
+      img.decoding = 'async';
+      if (i >= 8) img.fetchPriority = 'low';
       return img;
     }));
   };
   // The live posters from the admin panel, or the built-in ones if Supabase doesn't answer
   (typeof SITE_CONTENT !== 'undefined' ? SITE_CONTENT : Promise.resolve({}))
-    .then(c => fillCrowd(c.sessions && c.sessions.length ? c.sessions : MENTOR_SESSIONS));
+    .then(c => {
+      sessions = (c.sessions && c.sessions.length ? c.sessions : MENTOR_SESSIONS)
+        .filter(s => s.poster)
+        .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      crowdLayout = '';
+      layoutCrowd();
+    });
+  new ResizeObserver(layoutCrowd).observe(hero);
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let steeredAt = 0;
