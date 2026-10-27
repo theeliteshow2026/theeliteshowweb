@@ -391,6 +391,27 @@ body {
   color: #6c7060;
 }
 
+.cs-legal {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1.4rem;
+  margin-top: 0.9rem;
+  letter-spacing: 0.12em;
+  text-transform: none;
+}
+
+.cs-legal a {
+  color: inherit;
+  text-decoration: none;
+  padding: 0.35rem 0;
+}
+
+.cs-legal a:hover,
+.cs-legal a:focus-visible {
+  color: #cafb0c;
+}
+
 @media (max-width: 600px) {
   :root {
     --door-w: 160px;
