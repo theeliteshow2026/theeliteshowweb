@@ -11,6 +11,20 @@
     content="The Elite Show Community brings Kerala's students, founders, creators and professionals together through mentor sessions, Elite Brew meetups and workshops. Join the free community or The Elite Show Premium Community, or mentor, invest or partner with us.">
   <meta property="og:title" content="The Elite Show Community">
   <meta property="og:description" content="Where people meet ideas. And ideas meet opportunity.">
+  <!-- Link preview: the card WhatsApp, LinkedIn and X show when the site is shared.
+       Rebuild the image with tools/make_share_cards.js; use a new file name when it changes, because apps keep old cards. -->
+  <link rel="canonical" href="https://www.theeliteshow.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="The Elite Show Community">
+  <meta property="og:url" content="https://www.theeliteshow.com/">
+  <meta property="og:image" content="https://www.theeliteshow.com/images/share/poster-wall.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The Elite Show Community: Where people meet ideas, over a wall of session posters">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="The Elite Show Community">
+  <meta name="twitter:description" content="Where people meet ideas. And ideas meet opportunity.">
+  <meta name="twitter:image" content="https://www.theeliteshow.com/images/share/poster-wall.jpg">
   <link
     href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,900&family=Cormorant+Garamond:wght@300;400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
@@ -259,6 +273,7 @@
           <li><strong>Direct connections</strong> to mentors, founders, creators and collaborators</li>
         </ul>
         <a class="tier-cta" href="#waitlist" data-join="Member">Join Premium for ₹199/month →</a>
+        <button type="button" class="tier-cta tier-cta--ghost tier-share" id="shareMyCard" hidden>Share your member card →</button>
       </article>
     </div>
   </section>
@@ -568,6 +583,13 @@
         </svg>
         Join Our WhatsApp Community
       </a>
+      <div class="member-share" id="memberShare" hidden>
+        <p class="member-share-label">Bring a friend into the room</p>
+        <button type="button" class="member-share-main" id="shareCardImage">Share my card</button>
+        <a class="member-share-btn" id="shareCardWhatsApp" href="#" target="_blank" rel="noopener">WhatsApp</a>
+        <button type="button" class="member-share-btn" id="shareCardCopy">Copy link</button>
+        <button type="button" class="member-share-btn" id="shareCardSave">Save image</button>
+      </div>
     </div>
   </div>
 
@@ -577,6 +599,7 @@
   <script src="mentor_sessions.js"></script>
   <script src="reviews.js"></script>
   <script src="the_elite_show.js"></script>
+  <script src="member_share.js"></script>
   <script type="module" src="rubiks_cube.js"></script>
   <script src="motion.js"></script>
   <script src="responsive.js"></script>

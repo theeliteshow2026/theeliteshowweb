@@ -1,4 +1,7 @@
 {
+  "rewrites": [
+    { "source": "/join", "destination": "/invite.html" }
+  ],
   "headers": [
     {
       "source": "/admin(.*)",

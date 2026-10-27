@@ -3022,6 +3022,89 @@ body.plain-cursor button {
   font-variant-numeric: tabular-nums;
 }
 
+/* Share buttons under the member card */
+.member-share {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 1.6rem;
+}
+
+.member-share-label {
+  grid-column: 1 / -1;
+  margin-bottom: 0.2rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+
+.btn-pay[hidden] + .btn-whatsapp[hidden] + .member-share {
+  margin-top: 0;
+}
+
+.member-share-main,
+.member-share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  text-align: center;
+  padding: 0.85rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease, background 0.3s ease, color 0.3s ease;
+}
+
+.member-share-main {
+  grid-column: 1 / -1;
+  color: var(--green);
+  background: rgba(202, 251, 12, 0.08);
+  border: 1.5px solid var(--green);
+  font-size: 0.7rem;
+  padding: 1rem;
+}
+
+.member-share-btn {
+  color: var(--green);
+  background: transparent;
+  border: 1px solid rgba(202, 251, 12, 0.4);
+}
+
+.member-share-main:hover {
+  box-shadow: 0 0 25px rgba(202, 251, 12, 0.35);
+}
+
+.member-share-main:hover,
+.member-share-btn:hover {
+  color: var(--black);
+  background: var(--green);
+}
+
+.member-share-main:focus-visible,
+.member-share-btn:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 2px;
+}
+
+@media (max-width: 420px) {
+  .member-share-btn {
+    letter-spacing: 0.08em;
+  }
+}
+
+.tier-share {
+  margin-top: 0.6rem;
+  font-family: 'Montserrat', sans-serif;
+  cursor: pointer;
+}
+
 @media (max-width: 900px) {
   .about-split,
   .reviews-split {

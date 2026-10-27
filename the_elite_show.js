@@ -522,6 +522,7 @@ async function startPremiumPayment(contact) {
 function openPremiumWelcome({ memberCode, communityLink, name }) {
   openModal('Member');
   showMemberCard(name, memberCode);
+  if (window.MemberShare) MemberShare.remember(name, memberCode);
   document.getElementById('modalMsg').innerHTML =
     "Your payment is confirmed. <strong>You're now a Premium member.</strong> Your card above shows your member ID." +
     (communityLink
@@ -533,14 +534,17 @@ function openPremiumWelcome({ memberCode, communityLink, name }) {
   document.querySelector('.btn-whatsapp').hidden = Boolean(communityLink);
 }
 
+function memberSinceNow() {
+  return new Date().toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }).toUpperCase();
+}
+
 // Only a paid Premium member sees their card: name, ESP number and join month.
 // It tilts and catches the light under the cursor.
-function showMemberCard(name, memberCode) {
+function showMemberCard(name, memberCode, since = memberSinceNow()) {
   const card = document.getElementById('memberCard');
   document.getElementById('memberCardName').textContent = name || 'Premium Member';
   document.getElementById('memberCardId').textContent = memberCode || 'ESP-····';
-  document.getElementById('memberCardSince').textContent =
-    new Date().toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }).toUpperCase();
+  document.getElementById('memberCardSince').textContent = since;
   document.querySelector('.modal-icon').hidden = true;
   card.hidden = false;
 }
@@ -656,6 +660,7 @@ function openModal(joiningAs = 'Free Member') {
   document.getElementById('premiumBtn').hidden = true;
   document.querySelector('.btn-whatsapp').hidden = false;
   document.getElementById('memberCard').hidden = true;
+  document.getElementById('memberShare').hidden = true;
   document.querySelector('.modal-icon').hidden = false;
   document.getElementById('modalOverlay').classList.add('active');
   document.body.style.overflow = 'hidden';
