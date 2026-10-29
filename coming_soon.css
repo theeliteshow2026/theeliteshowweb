@@ -52,6 +52,12 @@ body {
   color: var(--white);
 }
 
+.cs-logo img {
+  display: block;
+  height: 40px;
+  width: auto;
+}
+
 .cs-main {
   flex: 1;
   display: flex;
@@ -425,6 +431,10 @@ body {
   .cs-logo {
     font-size: 0.95rem;
     letter-spacing: 0.15em;
+  }
+
+  .cs-logo img {
+    height: 34px;
   }
 
   .cs-main {

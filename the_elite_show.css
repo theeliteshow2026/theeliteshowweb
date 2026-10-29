@@ -3286,3 +3286,17 @@ body.plain-cursor button {
   color: var(--green);
   margin-bottom: 0.4rem;
 }
+
+/* ===================== OFFICIAL LOGO ===================== */
+.nav-logo-img {
+  display: block;
+  height: 44px;
+  width: auto;
+}
+
+.footer-logo img {
+  display: block;
+  height: 120px;
+  width: auto;
+  margin: 0 auto 0.8rem;
+}

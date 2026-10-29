@@ -19,24 +19,27 @@ body { background: #222; font-family: Montserrat, sans-serif; }
 .wall { position: absolute; inset: -30px; display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px;
   transform: rotate(-6deg) scale(1.15); filter: brightness(.55) saturate(.9); }
 .wall img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; display: block; }
-#poster-wall .veil { position: absolute; inset: 0;
+#poster-wall-logo .veil { position: absolute; inset: 0;
   background: radial-gradient(ellipse 560px 260px at 600px 360px, rgba(7,7,7,.2), rgba(7,7,7,.92) 75%); }
-#poster-wall .brand { position: absolute; top: 52px; left: 0; right: 0; text-align: center; }
-#poster-wall .h { position: absolute; left: 0; right: 0; top: 250px; text-align: center; }
-#poster-wall .display { font-size: 92px; text-shadow: 0 6px 40px #000; }
-#poster-wall .lab { position: absolute; left: 0; right: 0; bottom: 48px; text-align: center; }
+#poster-wall-logo .brand-logo { position: absolute; top: 48px; left: 50%; height: 64px; transform: translateX(-50%); }
+#poster-wall-logo .h { position: absolute; left: 0; right: 0; top: 250px; text-align: center; }
+#poster-wall-logo .display { font-size: 92px; text-shadow: 0 6px 40px #000; }
+#poster-wall-logo .lab { position: absolute; left: 0; right: 0; bottom: 48px; text-align: center; }
 
 /* Invite link a Premium member shares: same dark card as the site's member card */
-#invite { background: radial-gradient(circle 420px at 860px 300px, rgba(202,251,12,.14), transparent 70%), #070707; }
-#invite .l { position: absolute; left: 64px; top: 70px; width: 520px; }
-#invite .display { font-size: 84px; margin: 24px 0 26px; }
-#invite .sub { font-size: 22px; color: #bdbdb4; line-height: 1.5; }
-#invite .url { position: absolute; left: 64px; bottom: 56px; }
+#invite-logo { background: radial-gradient(circle 420px at 860px 300px, rgba(202,251,12,.14), transparent 70%), #070707; }
+#invite-logo .l { position: absolute; left: 64px; top: 52px; width: 520px; }
+#invite-logo .brand-logo { display: block; height: 52px; margin-bottom: 34px; }
+#invite-logo .display { font-size: 84px; margin: 24px 0 26px; }
+#invite-logo .sub { font-size: 22px; color: #bdbdb4; line-height: 1.5; }
+#invite-logo .url { position: absolute; left: 64px; bottom: 56px; }
 .mcard { position: absolute; left: 640px; top: 130px; width: 500px; height: 315px; border-radius: 26px; padding: 30px 34px;
   border: 2px solid rgba(202,251,12,.45); background: radial-gradient(120% 140% at 0% 0%, #2a3014, #050505 60%);
   box-shadow: 0 30px 90px rgba(202,251,12,.18); transform: rotate(-6deg); display: grid; grid-template-rows: auto 1fr auto; }
 .mcard .top { display: flex; justify-content: space-between; font-size: 15px; font-weight: 600; letter-spacing: .2em; line-height: 1.4; text-transform: uppercase; color: #aaa; }
 .mcard .top b { color: #CAFB0C; }
+.mcard .mtitle { display: flex; gap: 14px; align-items: center; }
+.mcard .mtitle img { height: 44px; }
 .mcard .chip { width: 56px; height: 42px; border-radius: 8px; background: linear-gradient(135deg, #d9f86a, #8da516); }
 .mcard .name { align-self: end; font-family: Archivo, sans-serif; font-stretch: 125%; font-weight: 900; font-size: 40px; text-transform: uppercase; }
 .mcard .bottom { display: flex; justify-content: space-between; margin-top: 12px; font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #aaa; }
@@ -44,23 +47,24 @@ body { background: #222; font-family: Montserrat, sans-serif; }
 </style>
 </head>
 <body>
-<div class="card" id="poster-wall">
+<div class="card" id="poster-wall-logo">
   <div class="wall" id="wall"></div>
   <div class="veil"></div>
-  <div class="brand"><b>The Elite Show</b> Community</div>
+  <img class="brand-logo" src="../images/logo/the-elite-show-horizontal.svg" alt="">
   <div class="h"><div class="display">Where people<br>meet <span class="lime">ideas</span></div></div>
   <div class="lab"><span class="lime">Saturday sessions</span> &nbsp;·&nbsp; Daily discussions</div>
 </div>
 
-<div class="card" id="invite">
+<div class="card" id="invite-logo">
   <div class="l">
+    <img class="brand-logo" src="../images/logo/the-elite-show-horizontal.svg" alt="">
     <div class="lab"><span class="lime">A member invited you</span></div>
     <div class="display">I'm in.<br>Your <span class="lime">turn.</span></div>
     <div class="sub">Join The Elite Show Community. Saturday sessions, daily discussions and people who build.</div>
   </div>
   <div class="lab url">Join now &nbsp;·&nbsp; <span class="lime">theeliteshow.com/join</span></div>
   <div class="mcard">
-    <div class="top"><span><b>The Elite Show</b><br>Premium Community</span><span class="chip"></span></div>
+    <div class="top"><span class="mtitle"><img src="../images/logo/tes-mark.svg" alt=""><span><b>The Elite Show</b><br>Premium Community</span></span><span class="chip"></span></div>
     <div class="name">You're next</div>
     <div class="bottom"><span>Member ID<b>ESP-····</b></span><span>Since<b>2026</b></span><span>Monthly<b>₹199</b></span></div>
   </div>
