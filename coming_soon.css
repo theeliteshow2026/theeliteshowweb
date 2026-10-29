@@ -257,6 +257,18 @@ body {
   white-space: nowrap;
 }
 
+.cs-emblem {
+  position: absolute;
+  left: 50%;
+  top: 25%;
+  width: 34%;
+  height: 26%;
+  transform: translateX(-50%);
+  background: url("images/logo/tes-mark.svg") center / contain no-repeat;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
 .cs-handle {
   position: absolute;
   right: 10%;
