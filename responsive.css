@@ -505,6 +505,10 @@ nav {
 }
 
 @media (max-width: 599px) {
+  .nav-logo-img {
+    height: 36px;
+  }
+
   /* icon only: the word "Menu" stays for screen readers */
   .nav-menu-btn {
     padding: 0;

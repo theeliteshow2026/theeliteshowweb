@@ -39,6 +39,8 @@ h3 { font-size: 0.95rem; }
 .small { font-size: 0.8rem; }
 .brand { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 1.25rem; color: var(--text); text-decoration: none; }
 .brand span { color: var(--lime); }
+.brand { display: inline-flex; align-items: center; gap: 0.4em; }
+.brand img { height: 1.5em; width: auto; }
 
 /* ----- Buttons and fields ----- */
 .btn {

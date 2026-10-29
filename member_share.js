@@ -110,6 +110,7 @@ window.MemberShare = (() => {
       document.fonts.load('600 40px Montserrat'),
       document.fonts.load('500 40px Montserrat')
     ]).catch(() => {});
+    const logo = await loadImage('images/logo/the-elite-show-horizontal.png');
     const canvas = document.createElement('canvas');
     canvas.width = W;
     canvas.height = H;
@@ -131,7 +132,13 @@ window.MemberShare = (() => {
 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
-    spacedText(ctx, [['THE ELITE SHOW ', LIME], ['COMMUNITY', '#f5f5f0']], W / 2, 190, '700 40px "Cormorant Garamond", serif', 12);
+    if (logo) {
+      const logoH = 130;
+      const logoW = logoH * logo.naturalWidth / logo.naturalHeight;
+      ctx.drawImage(logo, (W - logoW) / 2, 110, logoW, logoH);
+    } else {
+      spacedText(ctx, [['THE ELITE SHOW ', LIME], ['COMMUNITY', '#f5f5f0']], W / 2, 190, '700 40px "Cormorant Garamond", serif', 12);
+    }
 
     display(ctx, 132);
     ctx.fillStyle = '#f5f5f0';
@@ -154,6 +161,16 @@ window.MemberShare = (() => {
 
     return new Promise((resolve, reject) =>
       canvas.toBlob(blob => (blob ? resolve(blob) : reject(new Error('no image'))), 'image/png'));
+  }
+
+  // A PNG, not the SVG: Safari will not export a canvas that has an SVG drawn on it
+  function loadImage(src) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = src;
+    });
   }
 
   // Faint, tilted wall of the session posters already on the page (same site only, so the image can be saved).

@@ -9,6 +9,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' blob:; worker-src 'self' blob:; connect-src 'self' data: blob: https://mlrzeqekvhbzwnblzzlv.supabase.co wss://mlrzeqekvhbzwnblzzlv.supabase.co https://script.google.com https://script.googleusercontent.com; img-src 'self' data: blob: https://mlrzeqekvhbzwnblzzlv.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
   <title>Admin · The Elite Show Community</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="apple-touch-icon" href="../images/logo/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -21,7 +22,7 @@
   <!-- ===== Sign in ===== -->
   <main class="gate" id="gate" hidden>
     <div class="gate-card">
-      <a class="brand" href="../home.html">The Elite Show <span>Admin</span></a>
+      <a class="brand" href="../home.html"><img src="../images/logo/tes-mark.svg" alt="" width="20" height="30">The Elite Show <span>Admin</span></a>
 
       <form id="signInForm" class="gate-step" data-step="email">
         <h1>Sign in</h1>
@@ -90,7 +91,7 @@
   <!-- ===== Panel ===== -->
   <div class="app" id="app" hidden>
     <aside class="side">
-      <a class="brand" href="../home.html" target="_blank" rel="noopener">The Elite Show <span>Admin</span></a>
+      <a class="brand" href="../home.html" target="_blank" rel="noopener"><img src="../images/logo/tes-mark.svg" alt="" width="20" height="30">The Elite Show <span>Admin</span></a>
       <nav class="nav" aria-label="Admin sections">
         <a href="#dashboard" data-view="dashboard">Dashboard</a>
         <a href="#members" data-view="members">Members</a>

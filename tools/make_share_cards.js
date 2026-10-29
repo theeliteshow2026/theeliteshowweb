@@ -1,6 +1,6 @@
 // Rebuilds the link preview images in images/share/ from tools/share_cards.html:
-//   poster-wall.jpg  what WhatsApp, LinkedIn and X show when the full site is shared
-//   invite.jpg       what they show for the /join link a Premium member shares
+//   poster-wall-logo.jpg  what WhatsApp, LinkedIn and X show when the full site is shared
+//   invite-logo.jpg       what they show for the /join link a Premium member shares
 // Run it after adding new session posters, from the site folder:
 //   node tools/make_share_cards.js
 // Needs Playwright (see responsive-check.js) and Pillow (python3, for JPG compression).
@@ -14,7 +14,7 @@ try { playwright = require('playwright'); } catch { playwright = require(process
 
 const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'images', 'share');
-const CARDS = ['poster-wall', 'invite'];
+const CARDS = ['poster-wall-logo', 'invite-logo'];
 
 (async () => {
   const posters = fs.readdirSync(path.join(ROOT, 'posters', 'lg'))
