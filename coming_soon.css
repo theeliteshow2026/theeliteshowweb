@@ -238,6 +238,7 @@ body {
 }
 
 .cs-panel {
+  position: relative;
   flex: 1;
   border: 2px solid var(--door-edge);
 }
@@ -257,13 +258,10 @@ body {
   white-space: nowrap;
 }
 
+/* faint logo, centred inside the upper panel */
 .cs-emblem {
   position: absolute;
-  left: 50%;
-  top: 25%;
-  width: 34%;
-  height: 26%;
-  transform: translateX(-50%);
+  inset: 25% 0;
   background: url("images/logo/tes-mark.svg") center / contain no-repeat;
   opacity: 0.22;
   pointer-events: none;
