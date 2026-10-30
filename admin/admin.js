@@ -300,7 +300,7 @@
     $$('.nav a').forEach(a => a.classList.toggle('is-active', a.dataset.view === (view === 'session' ? 'sessions' : view)));
     const main = $('#main');
     main.replaceChildren();
-    const views = { dashboard, members: () => membersView(main, arg), sessions: sessionsView, session: () => editor(arg), reviews: reviewsView, mentors: mentorsView, history: historyView, admins: adminsView, settings: settingsView };
+    const views = { dashboard, members: () => membersView(main, arg), business: businessPage, sessions: sessionsView, session: () => editor(arg), reviews: reviewsView, mentors: mentorsView, history: historyView, admins: adminsView, settings: settingsView };
     (views[view] || dashboard)(main);
     showDriveCount();
     main.focus({ preventScroll: true });
@@ -613,6 +613,270 @@
             h('span', { class: 'timeline-when', text: s.future ? 'Next' : formatWhen(new Date(s.at).toISOString()) }),
             h('strong', { text: s.title }),
             s.note ? h('span', { class: 'muted small', text: s.note }) : null))))));
+  }
+
+  // ---------- Business ----------
+  // Growth, renewals and churn worked out from the members, their payments and the Razorpay
+  // events. Months are India months. Only the cancellation reasons are typed in by admins.
+  const CANCEL_REASONS = {
+    too_expensive: 'Too expensive',
+    not_using: 'Not using it enough',
+    no_value: 'Didn\'t find value',
+    found_alternative: 'Found something else',
+    personal: 'Personal reasons',
+    payment_failed: 'Payment failed',
+    other: 'Other'
+  };
+  const PERIODS = [['this', 'This month'], ['last', 'Last month'], ['3', 'Last 3 months'], ['6', 'Last 6 months'], ['12', 'Last 12 months']];
+  const businessView = { period: 'this', cancelled: 'period' };
+  const IST = 5.5 * 3600e3;
+  const monthKey = t => new Date(t + IST).toISOString().slice(0, 7);
+  const monthStart = key => Date.parse(`${key}-01T00:00:00+05:30`);
+  const shiftMonth = (key, n) => { const [y, m] = key.split('-').map(Number); const d = new Date(Date.UTC(y, m - 1 + n, 1)); return d.toISOString().slice(0, 7); };
+  const monthName = (key, year) => new Date(monthStart(key) + IST).toLocaleDateString('en-IN', { month: 'short', year: year ? 'numeric' : undefined, timeZone: 'UTC' });
+  // The same date a month later (31 Jan -> 28/29 Feb), as Razorpay bills it
+  const nextMonthDay = t => {
+    const d = new Date(t + IST);
+    const last = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 2, 0)).getUTCDate();
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, Math.min(d.getUTCDate(), last), d.getUTCHours(), d.getUTCMinutes()) - IST;
+  };
+  const dayText = t => new Date(t).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' });
+  const percent = (part, whole) => (whole ? `${Math.round((part / whole) * 1000) / 10}%` : '—');
+  const FAILED_EVENTS = new Set(['payment.failed', 'subscription.pending', 'subscription.halted']);
+
+  // When each member started, stopped, cancelled, and each monthly charge that fell due
+  function businessFacts(m, note) {
+    const paidTimes = m.payments.filter(isPaid).map(p => Date.parse(p.paid_at || p.created_at)).sort((a, b) => a - b);
+    if (!paidTimes.length && m.activated_at) paidTimes.push(Date.parse(m.activated_at));
+    const start = m.activated_at ? Math.min(Date.parse(m.activated_at), paidTimes[0] ?? Infinity) : paidTimes[0];
+    if (start == null) return null; // never paid: not a member for these numbers
+    const terminal = m.events.filter(e => ['subscription.cancelled', 'subscription.halted', 'subscription.completed'].includes(e.event));
+    const cancelEvent = m.events.find(e => e.event === 'subscription.cancelled');
+    let endedAt = null;
+    // A cancelled member keeps access to the end of the month they paid for
+    if (m.group !== 'active') endedAt = m.end || (terminal.length ? Date.parse(terminal[terminal.length - 1].at) : Date.now());
+    const cancelledAt = cancelEvent ? Date.parse(cancelEvent.at) : endedAt;
+    const halted = m.status === 'halted' || m.events.some(e => e.event === 'subscription.halted');
+    const autoKind = halted ? 'payment' : 'voluntary';
+    const kind = note && note.kind ? note.kind : note && note.reason === 'payment_failed' ? 'payment' : autoKind;
+    const failedAt = [
+      ...m.payments.filter(p => !isPaid(p) && p.status === 'failed').map(p => Date.parse(p.paid_at || p.created_at)),
+      ...m.events.filter(e => FAILED_EVENTS.has(e.event)).map(e => Date.parse(e.at))
+    ];
+    // Each paid month makes the next one due. Razorpay's own date wins for the latest month.
+    const dues = paidTimes.map((t, i) => {
+      const due = i === paidTimes.length - 1 && m.end && m.end > t ? m.end : nextMonthDay(t);
+      const near = x => x > due - 5 * 864e5 && x < due + 15 * 864e5;
+      let result;
+      if (paidTimes.slice(i + 1).some(near)) result = 'paid';
+      else if (cancelEvent && Date.parse(cancelEvent.at) < due - 864e5 && !halted) result = 'cancelled'; // switched off before it fell due
+      else if (due > Date.now()) result = 'upcoming';
+      else if (failedAt.some(near) || endedAt != null || due + 15 * 864e5 < Date.now()) result = 'failed';
+      else result = 'retrying';
+      return { due, result };
+    }).filter(d => d.result !== 'cancelled');
+    return { m, note, start, endedAt, cancelledAt, cancelEvent, kind, autoKind, dues, activeAt: t => start <= t && (endedAt == null || endedAt > t) };
+  }
+
+  function periodRange(period) {
+    const now = Date.now();
+    const thisMonth = monthKey(now);
+    if (period === 'this') return { from: monthStart(thisMonth), to: now, months: [thisMonth] };
+    if (period === 'last') { const k = shiftMonth(thisMonth, -1); return { from: monthStart(k), to: monthStart(thisMonth), months: [k] }; }
+    const n = Number(period);
+    const months = Array.from({ length: n }, (_, i) => shiftMonth(thisMonth, i - n + 1));
+    return { from: monthStart(months[0]), to: now, months };
+  }
+
+  function monthStats(facts, key) {
+    const from = monthStart(key);
+    const to = Math.min(Date.now(), monthStart(shiftMonth(key, 1)));
+    const atStart = facts.filter(f => f.activeAt(from - 1)).length;
+    const atEnd = facts.filter(f => f.activeAt(to)).length;
+    const ended = facts.filter(f => f.endedAt != null && f.endedAt >= from && f.endedAt < to).length;
+    return { key, atStart, atEnd, added: facts.filter(f => f.start >= from && f.start < to).length, ended, growth: atStart ? (atEnd - atStart) / atStart : null, churn: atStart ? ended / atStart : null };
+  }
+  const average = list => { const xs = list.filter(x => x != null); return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null; };
+  const signedPercent = x => (x == null ? '—' : `${x > 0 ? '+' : ''}${Math.round(x * 1000) / 10}%`);
+
+  async function businessPage(main) {
+    const box = h('div', null, h('p', { class: 'muted', text: 'Loading the numbers…' }));
+    main.append(head('Business', 'How Premium is growing, renewing and churning. Months follow India time.'), box);
+    let members, notes;
+    try {
+      const [list, n] = await Promise.all([loadPremium(), db.from('premium_cancellation_notes').select('*')]);
+      if (n.error) throw n.error;
+      members = list;
+      notes = Object.fromEntries(n.data.map(x => [x.member_id, x]));
+    } catch (error) {
+      box.replaceChildren(h('p', { class: 'muted', text: 'Couldn\'t load the business numbers.' }));
+      return fail('Couldn\'t load the business numbers', error);
+    }
+    const facts = members.map(m => businessFacts(m, notes[m.id])).filter(Boolean);
+    const { from, to, months } = periodRange(businessView.period);
+    const inRange = t => t != null && t >= from && t < to;
+    const isNow = businessView.period !== 'last';
+    const stats = months.map(k => monthStats(facts, k));
+
+    // 1. Acquisition
+    const activeEnd = facts.filter(f => f.activeAt(to)).length;
+    const activeStart = facts.filter(f => f.activeAt(from - 1)).length;
+    const added = facts.filter(f => inRange(f.start));
+    const growth = average(stats.map(s => s.growth));
+    // 2. Renewals
+    const dues = facts.flatMap(f => f.dues.map(d => ({ ...d, f }))).filter(d => inRange(d.due) || (isNow && d.result === 'upcoming' && monthKey(d.due) === monthKey(Date.now())));
+    const renewed = dues.filter(d => d.result === 'paid').length;
+    const failed = dues.filter(d => d.result === 'failed').length;
+    const retrying = dues.filter(d => d.result === 'retrying').length;
+    const upcoming = dues.filter(d => d.result === 'upcoming').length;
+    const autoOff = isNow
+      ? members.filter(m => m.inPeriod && !m.autoRenews && m.status !== 'pending' && facts.some(f => f.m === m)).length
+      : null;
+    const kept = facts.filter(f => f.activeAt(from - 1) && f.activeAt(to)).length;
+    // 3. Cancellations
+    const requests = facts.filter(f => f.cancelEvent && inRange(Date.parse(f.cancelEvent.at)));
+    const endedNow = facts.filter(f => inRange(f.endedAt));
+    const churn = average(stats.map(s => s.churn));
+    const voluntary = endedNow.filter(f => f.kind === 'voluntary').length;
+
+    const range = businessView.period === 'this' ? 'this month' : businessView.period === 'last' ? 'last month' : `the last ${businessView.period} months`;
+    const statTile = (value, label, hint) => h('div', { class: 'tile' }, h('b', { text: value }), h('span', { text: label }), hint ? h('small', { class: 'tile-hint', text: hint }) : null);
+    const group = (title, ...tiles) => h('section', { class: 'biz-group' }, h('h2', { class: 'biz-title', text: title }), h('div', { class: 'tiles' }, tiles));
+    const periods = h('div', { class: 'filters' }, PERIODS.map(([k, label]) =>
+      h('button', { class: 'chip' + (k === businessView.period ? ' is-on' : ''), type: 'button', text: label, 'aria-pressed': String(k === businessView.period), onclick: () => { businessView.period = k; render(); } })));
+
+    box.replaceChildren(
+      periods,
+      ...(facts.length ? [] : [h('p', { class: 'card muted', style: 'margin-bottom:1rem', text: 'No paid Premium members yet. The numbers fill in as members join and renew.' })]),
+      group('Membership acquisition',
+        statTile(activeEnd, isNow ? 'Total active members' : 'Active members at month end', months.length > 1 ? `${activeStart} on 1 ${monthName(months[0], true)}` : `${activeStart} at the start of ${range}`),
+        statTile(added.length, 'New memberships', `First paid ${range}`),
+        statTile(signedPercent(growth), 'Monthly membership growth', months.length > 1 ? 'Average per month' : `${activeEnd - activeStart >= 0 ? '+' : ''}${activeEnd - activeStart} members`)),
+      group('Renewals & retention',
+        statTile(dues.length, 'Total renewals due', upcoming ? `${upcoming} still to come${retrying ? `, ${retrying} retrying` : ''}` : retrying ? `${retrying} retrying` : `Monthly charges due ${range}`),
+        statTile(renewed, 'Successful renewals'),
+        statTile(failed, 'Failed renewals', 'Charge didn\'t go through'),
+        statTile(percent(renewed, renewed + failed), 'Renewal rate', 'Of renewals already settled'),
+        statTile(autoOff == null ? '—' : autoOff, 'Auto-renewal disabled', isNow ? 'Paid month running, won\'t renew' : 'Only shown for now'),
+        statTile(percent(kept, activeStart), 'Membership retention rate', `Of the ${activeStart} active at the start`)),
+      group('Cancellations & churn',
+        statTile(requests.length, 'Total cancellation requests', 'Cancelled in Razorpay'),
+        statTile(endedNow.length, 'Completed cancellations', 'Membership ended'),
+        statTile(churn == null ? '—' : `${Math.round(churn * 1000) / 10}%`, 'Monthly churn rate', months.length > 1 ? 'Average per month' : 'Ended ÷ active at start'),
+        statTile(`${voluntary} / ${endedNow.length - voluntary}`, 'Voluntary / payment related')),
+      h('div', { class: 'biz-charts' },
+        growthChart(stats.length >= 6 ? stats : periodRange('6').months.map(k => monthStats(facts, k))),
+        reasonsChart(endedNow, range)),
+      cancelledList(facts, notes, inRange, range));
+  }
+
+  // New vs ended members each month, with the active count above each pair
+  function growthChart(stats) {
+    // Narrower drawing on phones so the labels stay readable
+    const W = window.innerWidth < 640 ? 340 : 560, H = 230, top = 22, bottom = 42, left = 8, right = 8;
+    const max = Math.max(1, ...stats.flatMap(s => [s.added, s.ended]));
+    const slot = (W - left - right) / stats.length;
+    const bw = Math.min(22, slot / 3);
+    const y = v => top + (H - top - bottom) * (1 - v / max);
+    const ns = 'http://www.w3.org/2000/svg';
+    const el = (tag, attrs, text) => { const n = document.createElementNS(ns, tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); if (text != null) n.textContent = text; return n; };
+    // A bar with 4px rounded top, square at the baseline
+    const bar = (x, v, cls) => {
+      const y0 = H - bottom, y1 = y(v), r = Math.min(4, (y0 - y1) / 2, bw / 2);
+      if (!v) return el('rect', { x, y: y0 - 1, width: bw, height: 1, class: cls + ' is-zero' });
+      return el('path', { class: cls, d: `M${x},${y0}V${y1 + r}Q${x},${y1} ${x + r},${y1}H${x + bw - r}Q${x + bw},${y1} ${x + bw},${y1 + r}V${y0}Z` });
+    };
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, class: 'biz-chart', role: 'img', 'aria-label': 'New and ended memberships per month' });
+    svg.append(el('line', { x1: left, x2: W - right, y1: H - bottom, y2: H - bottom, class: 'chart-base' }));
+    stats.forEach((s, i) => {
+      const cx = left + slot * i + slot / 2;
+      const g = el('g', { class: 'chart-month', tabindex: 0 });
+      g.append(el('title', {}, `${monthName(s.key, true)}: ${s.added} new, ${s.ended} ended, ${s.atEnd} active at month end`));
+      g.append(el('rect', { x: cx - slot / 2, y: 0, width: slot, height: H, class: 'chart-hit' }));
+      g.append(bar(cx - bw - 1, s.added, 'chart-new'), bar(cx + 1, s.ended, 'chart-ended'));
+      if (s.added) g.append(el('text', { x: cx - bw / 2 - 1, y: y(s.added) - 5, class: 'chart-value' }, s.added));
+      if (s.ended) g.append(el('text', { x: cx + bw / 2 + 1, y: y(s.ended) - 5, class: 'chart-value' }, s.ended));
+      g.append(el('text', { x: cx, y: H - 24, class: 'chart-label' }, monthName(s.key)));
+      g.append(el('text', { x: cx, y: H - 8, class: 'chart-active' }, `${s.atEnd} active`));
+      svg.append(g);
+    });
+    return h('section', { class: 'card' },
+      h('div', { class: 'card-title' }, h('h3', { text: 'Monthly membership growth' }), h('span', { class: 'muted small', text: 'Hover a month for detail' })),
+      svg,
+      h('div', { class: 'legend' }, h('span', null, h('i', { style: 'background:var(--lime)' }), 'New'), h('span', null, h('i', { style: 'background:var(--bad)' }), 'Ended'), h('span', { text: 'Under each month: active at month end' })));
+  }
+
+  function reasonsChart(ended, range) {
+    const counts = {};
+    ended.forEach(f => { const k = f.note && f.note.reason ? f.note.reason : 'unmarked'; counts[k] = (counts[k] || 0) + 1; });
+    const rows = Object.entries(counts).sort((a, b) => (a[0] === 'unmarked') - (b[0] === 'unmarked') || b[1] - a[1]);
+    const max = Math.max(1, ...rows.map(r => r[1]));
+    return h('section', { class: 'card' },
+      h('div', { class: 'card-title' }, h('h3', { text: 'Cancellation reasons' }), h('span', { class: 'muted small', text: range })),
+      rows.length ? h('ul', { class: 'reason-bars' }, rows.map(([k, n]) => h('li', { class: k === 'unmarked' ? 'is-unmarked' : null, title: `${n} of ${ended.length}` },
+        h('span', { class: 'reason-name', text: CANCEL_REASONS[k] || 'Not marked yet' }),
+        h('span', { class: 'reason-track' }, h('i', { style: `width:${(n / max) * 100}%` })),
+        h('b', { text: n }))))
+        : h('p', { class: 'muted', text: `No memberships ended ${range}.` }),
+      rows.some(r => r[0] === 'unmarked') ? h('p', { class: 'muted small', style: 'margin-top:0.8rem', text: 'Mark reasons in the Cancelled members list below.' }) : null);
+  }
+
+  // Everyone whose membership ended or is set to end, with a place to note why
+  function cancelledList(facts, notes, inRange, range) {
+    const all = facts.filter(f => f.endedAt != null || f.cancelEvent).sort((a, b) => (b.cancelledAt || 0) - (a.cancelledAt || 0));
+    const shown = businessView.cancelled === 'period' ? all.filter(f => inRange(f.cancelledAt) || inRange(f.endedAt)) : all;
+    const kindBadge = f => h('span', { class: 'status ' + (f.kind === 'payment' ? 'status-draft' : 'status-hidden'), text: f.kind === 'payment' ? 'Payment related' : 'Voluntary' });
+    const row = f => {
+      const m = f.m;
+      const note = notes[m.id] || {};
+      const saved = h('span', { class: 'small muted save-state', 'aria-live': 'polite' });
+      const reason = h('select', { 'aria-label': `Reason for ${m.name}` }, h('option', { value: '', text: 'Choose a reason…' }), Object.entries(CANCEL_REASONS).map(([k, label]) => h('option', { value: k, text: label, selected: note.reason === k })));
+      const kind = h('select', { 'aria-label': `Type for ${m.name}` },
+        h('option', { value: '', text: `Automatic (${f.autoKind === 'payment' ? 'payment related' : 'voluntary'})` }),
+        h('option', { value: 'voluntary', text: 'Voluntary', selected: note.kind === 'voluntary' }),
+        h('option', { value: 'payment', text: 'Payment related', selected: note.kind === 'payment' }));
+      const text = h('textarea', { rows: 2, maxlength: 1000, placeholder: 'What did they say? (optional)', 'aria-label': `Notes for ${m.name}` }, note.note || '');
+      let last = JSON.stringify([note.reason || '', note.kind || '', note.note || '']);
+      const save = async () => {
+        const now = JSON.stringify([reason.value, kind.value, text.value.trim()]);
+        if (now === last) return;
+        saved.textContent = 'Saving…';
+        const { data, error } = await db.from('premium_cancellation_notes').upsert({
+          member_id: m.id, reason: reason.value || null, kind: kind.value || null, note: text.value.trim() || null,
+          updated_at: new Date().toISOString(), updated_by: state.me.email
+        }).select().single();
+        if (error) { saved.textContent = 'Not saved'; return fail('Couldn\'t save the reason', error); }
+        last = now;
+        notes[m.id] = data;
+        saved.textContent = 'Saved';
+        setTimeout(() => { if (saved.textContent === 'Saved') saved.textContent = ''; }, 2500);
+      };
+      reason.addEventListener('change', save);
+      kind.addEventListener('change', save);
+      text.addEventListener('blur', save);
+      const ended = f.endedAt != null && f.endedAt <= Date.now();
+      return h('li', { class: 'cancel-row' },
+        h('div', { class: 'cancel-who' },
+          h('a', { href: '#members/' + m.id, text: m.name || '—' }),
+          h('span', { class: 'muted small', text: [m.member_code, m.email].filter(Boolean).join(' · ') }),
+          h('span', { class: 'small' },
+            f.cancelEvent ? `Cancelled ${dayText(Date.parse(f.cancelEvent.at))}` : 'Stopped renewing',
+            ' · ', ended ? `ended ${dayText(f.endedAt)}` : m.end ? `access until ${dayText(m.end)}` : 'access ending',
+            ` · ${m.months} ${m.months === 1 ? 'month' : 'months'} paid`),
+          h('span', null, kindBadge(f))),
+        h('div', { class: 'cancel-mark' },
+          h('label', { class: 'field' }, h('span', { text: 'Reason' }), reason),
+          h('label', { class: 'field' }, h('span', { text: 'Type' }), kind),
+          h('label', { class: 'field cancel-note' }, h('span', { text: 'Notes' }), text),
+          saved));
+    };
+    const toggle = h('div', { class: 'filters', style: 'margin:0' }, [['period', `Cancelled or ended ${range}`], ['all', 'All time']].map(([k, label]) =>
+      h('button', { class: 'chip' + (k === businessView.cancelled ? ' is-on' : ''), type: 'button', text: label, 'aria-pressed': String(k === businessView.cancelled), onclick: () => { businessView.cancelled = k; render(); } })));
+    const unmarked = shown.filter(f => !(notes[f.m.id] && notes[f.m.id].reason)).length;
+    return h('section', { class: 'card', id: 'cancelled' },
+      h('div', { class: 'card-title' }, h('h3', { text: 'Cancelled members' }), toggle),
+      h('p', { class: 'muted small', style: 'margin-bottom:0.6rem', text: shown.length ? `${shown.length} ${shown.length === 1 ? 'member' : 'members'}${unmarked ? `, ${unmarked} without a reason yet` : ''}. Changes save on their own.` : '' }),
+      shown.length ? h('ul', { class: 'cancel-list' }, shown.map(row)) : h('p', { class: 'muted', text: all.length ? `Nobody cancelled ${range}.` : 'Nobody has cancelled yet.' }));
   }
 
   // ---------- Sessions list ----------
