@@ -658,3 +658,42 @@
     animation-iteration-count: 1 !important;
   }
 }
+
+/* ----- Premium card reveal: card_reveal.html fills the screen above the popup ----- */
+.card-reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #050505;
+}
+
+/* The flat card (fallback, and what stays in the popup after the reveal) in the Volt finish */
+.modal-overlay .member-card {
+  border: 0;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 3px),
+    linear-gradient(135deg, #b9e30a, #CAFB0C 40%, #e2ff6a 55%, #b6df08);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.modal-overlay .member-card-top,
+.modal-overlay .member-card-bottom {
+  color: rgba(10, 12, 4, 0.62);
+}
+
+.modal-overlay .member-card-top b,
+.modal-overlay .member-card-name,
+.modal-overlay .member-card-bottom b {
+  color: #0a0c04;
+}
+
+.modal-overlay .member-card-chip {
+  background: linear-gradient(135deg, #e9e9e9, #8f8f8f);
+}
+
+.modal-overlay .member-card::before {
+  mix-blend-mode: soft-light;
+}

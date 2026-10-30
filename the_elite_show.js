@@ -557,7 +557,45 @@ function openPremiumWelcome({ memberCode, communityLink, name }) {
     document.querySelector('.btn-whatsapp').hidden = Boolean(communityLink);
     // The share image was already prepared by MemberShare.remember above
     document.getElementById('memberShare').hidden = !window.MemberShare;
+    // The card view above stays underneath; the 3D envelope opens on top where the device can run it
+    if (canRunCardReveal()) openCardReveal({ name, memberCode, communityLink, since: memberSinceNow() });
   };
+}
+
+// ===== CARD REVEAL (the 3D sealed envelope in card_reveal.html) =====
+// Only loaded when a paid member taps "Open your membership card". Older phones, reduced motion
+// and browsers without WebGL keep the flat card in the popup instead.
+function canRunCardReveal() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+  if (navigator.deviceMemory && navigator.deviceMemory < 3) return false;
+  if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) return false;
+  try {
+    const gl = document.createElement('canvas').getContext('webgl2');
+    return Boolean(gl);
+  } catch (err) {
+    return false;
+  }
+}
+
+function openCardReveal(member) {
+  if (document.getElementById('cardReveal')) return;
+  window.__cardReveal = member;
+  const frame = document.createElement('iframe');
+  frame.id = 'cardReveal';
+  frame.className = 'card-reveal';
+  frame.title = 'Your membership card';
+  frame.src = 'card_reveal.html';
+  frame.allow = 'vibrate';
+  document.body.appendChild(frame);
+  frame.focus();
+}
+
+// Called from inside card_reveal.html. share: true goes straight to the share sheet.
+function closeCardReveal({ share = false } = {}) {
+  const frame = document.getElementById('cardReveal');
+  if (frame) frame.remove();
+  if (share) document.getElementById('shareCardImage').click();
+  else document.querySelector('#modalOverlay .modal-close').focus();
 }
 
 function memberSinceNow() {
