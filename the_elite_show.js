@@ -1101,18 +1101,11 @@ window.addEventListener('scroll', () => {
   const docHeight = document.body.scrollHeight - window.innerHeight;
   const scrollRatio = winScroll / docHeight;
   
-  // 1. Cursor ring fade out at bottom
-  if (typeof cursorRing !== 'undefined' && cursorRing && typeof cursorDot !== 'undefined' && cursorDot) {
-    const op = scrollRatio > 0.95 ? '0' : '1';
-    cursorRing.style.opacity = op;
-    cursorDot.style.opacity = op;
-  }
-
-  // 2. Scroll Progress Bar
+  // 1. Scroll Progress Bar
   const progressBar = document.getElementById('scrollProgress');
   if (progressBar) progressBar.style.width = (scrollRatio * 100) + '%';
 
-  // 3. Grid BG Parallax
+  // 2. Grid BG Parallax
   const gridBg = document.querySelector('.grid-bg');
   if (gridBg) {
     gridBg.style.backgroundPositionY = `${winScroll * 0.3}px`;
