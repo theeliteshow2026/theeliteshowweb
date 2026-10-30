@@ -16,7 +16,7 @@ try { playwright = require('playwright'); } catch { playwright = require(process
 
 const BASE = process.argv[2] || 'http://localhost:8080';
 const OUT = process.argv[3] || 'responsive-check';
-const PAGES = ['home.html', 'sessions.html'];
+const PAGES = ['index.html', 'sessions.html'];
 const SIZES = [
   { name: 'phone-320', width: 320, height: 568, touch: true },
   { name: 'phone-360', width: 360, height: 780, touch: true },

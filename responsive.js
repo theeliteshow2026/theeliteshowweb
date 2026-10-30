@@ -1,5 +1,5 @@
 // ===== RESPONSIVE: MENU, JOIN BAR, MOTION LEVEL AND FIT GUARDS =====
-// Loaded last on home.html and sessions.html. Layout lives in responsive.css; this file only adds
+// Loaded last on index.html and sessions.html. Layout lives in responsive.css; this file only adds
 // what CSS can't do on its own.
 
 // ----- Motion level -----

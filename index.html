@@ -3,72 +3,702 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Elite Show Community — Coming Soon</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#070707">
+  <title>The Elite Show Community — Where People Meet Ideas</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="apple-touch-icon" href="images/logo/apple-touch-icon.png">
   <meta name="description"
-    content="The Elite Show Community is getting the room ready. Leave your name and WhatsApp number and we'll tell you when the doors open.">
-  <meta property="og:title" content="The Elite Show Community — Coming Soon">
-  <meta property="og:description" content="The room is getting ready.">
+    content="The Elite Show Community brings students, founders, creators and professionals together through mentor sessions, Elite Brew meetups and workshops. Join the free community or The Elite Show Premium Community, or mentor, invest or partner with us.">
+  <meta property="og:title" content="The Elite Show Community">
+  <meta property="og:description" content="Where people meet ideas. And ideas meet opportunity.">
+  <!-- Link preview: the card WhatsApp, LinkedIn and X show when the site is shared.
+       Rebuild the image with tools/make_share_cards.js; use a new file name when it changes, because apps keep old cards. -->
+  <link rel="canonical" href="https://www.theeliteshow.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="The Elite Show Community">
+  <meta property="og:url" content="https://www.theeliteshow.com/">
+  <meta property="og:image" content="https://www.theeliteshow.com/images/share/poster-wall-logo.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The Elite Show Community: Where people meet ideas, over a wall of session posters">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="The Elite Show Community">
+  <meta name="twitter:description" content="Where people meet ideas. And ideas meet opportunity.">
+  <meta name="twitter:image" content="https://www.theeliteshow.com/images/share/poster-wall-logo.jpg">
   <link
-    href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,900&family=Cormorant+Garamond:wght@700&family=Montserrat:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,900&family=Cormorant+Garamond:wght@300;400;600;700&family=Montserrat:wght@300;400;500;600;700;800&family=Caveat:wght@600&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="coming_soon.css">
+  <link rel="stylesheet" href="the_elite_show.css">
+  <link rel="stylesheet" href="motion.css">
+  <link rel="stylesheet" href="responsive.css">
+  <link rel="stylesheet" href="thank_you.css">
 </head>
 
 <body>
-  <header class="cs-top">
-    <span class="cs-logo"><img src="images/logo/the-elite-show-horizontal.svg" alt="The Elite Show Community" width="134" height="40"></span>
-  </header>
 
-  <main class="cs-main">
-    <h1 class="cs-title" id="csTitle" aria-live="polite">The room is getting ready.</h1>
-    <p class="cs-sub">Mentor sessions, meetups and workshops for students, founders and creators.</p>
+  <!-- CUSTOM CURSOR -->
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
 
-    <div class="cs-scene" id="csScene">
-      <div class="cs-floor-light" id="csFloorLight"></div>
-      <button class="cs-door" id="csDoor" type="button" aria-label="Peek through the door">
-        <span class="cs-room" aria-hidden="true">
-          <img class="cs-poster p1" src="posters/2026-10-03-mentor-session-09.jpg" alt="">
-          <img class="cs-poster p2" src="posters/2026-10-10-mentor-session-10.jpg" alt="">
-          <img class="cs-poster p3" src="posters/2026-09-19-mentor-session-08.jpg" alt="">
-          <span class="cs-crowd"><i></i><i></i><i></i><i></i><i></i><i></i></span>
-        </span>
-        <span class="cs-leaf" id="csLeaf" aria-hidden="true">
-          <span class="cs-panel"><span class="cs-emblem"></span></span>
-          <span class="cs-panel"></span>
-          <span class="cs-plate">Members only</span>
-          <span class="cs-handle"></span>
-        </span>
-      </button>
-      <span class="cs-hint" id="csHint">Move closer to peek</span>
+  <!-- Scroll Progress Bar -->
+  <div class="scroll-progress-bar" id="scrollProgress"></div>
+
+  <!-- Grid Background -->
+  <div class="grid-bg"></div>
+
+  <!-- Particles -->
+  <div id="particles"></div>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="#hero"><img class="nav-logo-img" src="images/logo/the-elite-show-horizontal.svg" alt="The Elite Show Community" width="147" height="44"></a>
+    <div class="nav-links">
+      <a href="#why">Why</a>
+      <a href="#experiences">Experiences</a>
+      <a href="#sessions">Sessions</a>
+      <a href="#membership">Membership</a>
+      <a href="#get-involved">Get Involved</a>
     </div>
+    <a class="nav-cta" href="#membership">Join Us</a>
+  </nav>
 
-    <form class="cs-form" id="csForm" novalidate>
-      <p class="cs-form-title">Knock to get on the list</p>
-      <div class="cs-fields">
-        <input class="cs-input" id="csName" name="name" type="text" placeholder="Your name" autocomplete="name"
-          maxlength="60" aria-label="Your name" required>
-        <input class="cs-input" id="csPhone" name="phone" type="tel" placeholder="WhatsApp number" autocomplete="tel"
-          maxlength="20" aria-label="WhatsApp number" required>
-        <button class="cs-knock" id="csKnock" type="submit">Knock</button>
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-crowd" aria-hidden="true"></div>
+    <div class="hero-dark"></div>
+    <div class="hero-beam"></div>
+    <div class="hero-copy">
+      <p class="hero-kicker">The Elite Show Community</p>
+      <h1 class="hero-title"><span class="hero-line">The show <em>starts</em></span> <span class="hero-line">when you walk in</span></h1>
+      <div class="hero-actions">
+        <a class="btn-primary" href="#membership"><span>Join the Community</span></a>
+        <a class="btn-ghost" href="#get-involved"><span>Mentor, Invest or Partner</span></a>
       </div>
-      <p class="cs-msg" id="csMsg" role="status"></p>
-    </form>
-  </main>
+    </div>
+  </section>
 
-  <footer class="cs-foot">
-    <p>Saturday 31st Oct 2026</p>
-    <nav class="cs-legal" aria-label="Legal">
+  <!-- BRAND BAND -->
+  <section class="brand-band" aria-label="The Elite Show Community">
+    <div class="brand-name-wrap">
+      <h2 class="brand-name">
+        <span class="scramble-target" data-value="The Elite Show">The Elite Show</span>
+        <span class="highlight">Community</span>
+      </h2>
+    </div>
+    <p class="brand-tag" data-text="— Where People Meet Ideas —"><span>—</span> Where People Meet Ideas <span>—</span></p>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats-strip">
+    <div class="stat">
+      <div class="stat-number" data-count="9" data-pad="2" data-suffix="+">09+</div>
+      <div class="stat-label">Mentor Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number" data-count="2" data-pad="2" data-suffix="+">02+</div>
+      <div class="stat-label">Elite Brew Meetups</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">1</div>
+      <div class="stat-label">Growing Community</div>
+    </div>
+  </div>
+
+  <!-- WHY -->
+  <section id="why" class="section">
+    <p class="section-label reveal">Why We Exist</p>
+    <h2 class="section-title reveal">Talent isn't the problem. <em>Proximity is.</em></h2>
+    <p class="section-lead reveal">
+      The missing layer is connection. What if the right people met more often? One conversation can lead to:
+    </p>
+    <ol class="lead-to">
+      <li class="reveal"><span>01</span>A Mentor</li>
+      <li class="reveal"><span>02</span>A Collaborator</li>
+      <li class="reveal"><span>03</span>A Project</li>
+      <li class="reveal"><span>04</span>An Opportunity</li>
+    </ol>
+    <p class="section-kicker reveal">Meaningful relationships are an infrastructure for growth.</p>
+  </section>
+
+  <!-- WHAT WE DO -->
+  <section id="about" class="section">
+    <p class="section-label reveal">What We Do</p>
+    <h2 class="section-title reveal">We create the rooms where <em>connections</em> happen</h2>
+
+    <div class="about-split">
+      <ul class="verb-list">
+        <li class="verb reveal is-lit" tabindex="0">
+          <h3 class="verb-word">Meet</h3>
+          <p class="verb-text">Real people, in real rooms. Students, founders, creators and professionals who are
+            building something.</p>
+        </li>
+        <li class="verb reveal" tabindex="0">
+          <h3 class="verb-word">Learn</h3>
+          <p class="verb-text">From people a few steps ahead of you, through honest conversations about what they
+            actually did.</p>
+        </li>
+        <li class="verb reveal" tabindex="0">
+          <h3 class="verb-word">Connect</h3>
+          <p class="verb-text">Beyond the event. The relationships you start in the room keep going in the
+            community.</p>
+        </li>
+        <li class="verb reveal" tabindex="0">
+          <h3 class="verb-word">Build</h3>
+          <p class="verb-text">Something together. Projects, teams and ideas that only happen when the right people
+            meet.</p>
+        </li>
+      </ul>
+      <div class="cube-stage reveal-scale" aria-hidden="true">
+        <canvas class="cube-canvas" id="cubeCanvas"></canvas>
+        <p class="cube-sorted" id="cubeSorted">All Sorted!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCES -->
+  <section id="experiences" class="section">
+    <p class="section-label reveal">The Experience</p>
+    <h2 class="section-title reveal">A community you can <em>experience</em></h2>
+    <p class="live-real">
+      <span class="visually-hidden">Online makes it live. Offline makes it real.</span>
+      <span class="live-real-line" aria-hidden="true"><span>Online makes it <em>live.</em></span></span>
+      <span class="live-real-line" aria-hidden="true"><span>Offline makes it <em>real.</em></span></span>
+    </p>
+    <ul class="not-row reveal">
+      <li><span>Not another content page</span></li>
+      <li><span>Not another WhatsApp group</span></li>
+      <li><span>Not another networking event</span></li>
+    </ul>
+    <ul class="exp-grid">
+      <li class="reveal">
+        <h3>Mentor Sessions</h3>
+        <p>Learn directly from people who are building.</p>
+      </li>
+      <li class="reveal">
+        <h3>Daily Discussions</h3>
+        <p>Ideas, questions and wins shared every day, between the sessions.</p>
+      </li>
+      <li class="reveal">
+        <h3>Elite Brew</h3>
+        <p>Small, meaningful offline conversations over coffee.</p>
+      </li>
+      <li class="reveal">
+        <h3>Workshops</h3>
+        <p>Practical skills. Real experiences.</p>
+      </li>
+      <li class="reveal">
+        <h3>Community</h3>
+        <p>The conversation continues after the event.</p>
+      </li>
+    </ul>
+    <p class="section-kicker reveal">We're already building the habit. Most importantly, people keep showing up.</p>
+  </section>
+
+  <!-- MENTOR SESSIONS -->
+  <section id="sessions" class="section">
+    <div class="sessions-head">
+      <div>
+        <p class="section-label reveal">Every Saturday</p>
+        <h2 class="section-title reveal">Saturday <em>mentor sessions</em></h2>
+        <p class="section-lead reveal">Each week someone a few steps ahead shares what they've learned. Drag through
+          the rooms we've opened.</p>
+      </div>
+      <a class="sessions-all reveal" href="sessions.html">See all sessions →</a>
+    </div>
+    <div class="session-arc" data-session-arc>
+      <div class="arc-ring"></div>
+      <div class="arc-center">
+        <p class="arc-kicker" id="arcKicker">Next room opens in</p>
+        <div class="arc-count" id="arcCount">
+          <div><b id="arcDays">0</b><small>Days</small></div>
+          <div><b id="arcHours">00</b><small>Hrs</small></div>
+          <div><b id="arcMins">00</b><small>Min</small></div>
+          <div><b id="arcSecs">00</b><small>Sec</small></div>
+        </div>
+        <p class="arc-when" id="arcWhen">Saturday</p>
+        <div class="arc-nav">
+          <button class="arc-btn" type="button" data-arc-step="-1" aria-label="Previous session">←</button>
+          <button class="arc-btn" type="button" data-arc-step="1" aria-label="Next session">→</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section id="reviews" class="section">
+    <div class="reviews-split">
+      <div>
+        <p class="section-label reveal">From The Room</p>
+        <h2 class="section-title reveal">What members <em>say</em></h2>
+        <p class="section-lead reveal">Real words from people who walked in on a Saturday and kept coming back.</p>
+        <div class="deck-nav reveal">
+          <button class="arc-btn" type="button" id="deckPrev" aria-label="Previous review">←</button>
+          <span class="deck-count" id="deckCount">01 / 01</span>
+          <button class="arc-btn" type="button" id="deckNext" aria-label="Next review">→</button>
+        </div>
+      </div>
+      <div class="quote-deck" id="quoteDeck" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- AUDIENCES -->
+  <!-- MEMBERSHIP: FREE AND PREMIUM -->
+  <section id="membership" class="section">
+    <p class="section-label reveal">Membership</p>
+    <h2 class="section-title reveal">Two ways to <em>join</em></h2>
+    <p class="section-lead reveal">Start free with The Elite Show Community, or go further with The Elite Show Premium
+      Community.</p>
+
+    <div class="tier-grid">
+      <article class="tier-card reveal-scale">
+        <p class="audience-tag">Free Community</p>
+        <p class="tier-amount">Free</p>
+        <p class="tier-note">Open to everyone</p>
+        <ul class="tier-perks">
+          <li><strong>Our WhatsApp community</strong>, open to anyone who wants in</li>
+          <li><strong>First news</strong> of every mentor session, Elite Brew and workshop</li>
+          <li><strong>Ambitious people near you</strong> to meet and learn from</li>
+        </ul>
+        <a class="tier-cta tier-cta--ghost" href="#waitlist" data-join="Free Member">Join for Free →</a>
+      </article>
+      <article class="tier-card tier-card--premium reveal-scale">
+        <p class="audience-tag">Premium Community <span class="tier-badge">Now Open</span></p>
+        <p class="tier-amount">₹199<span class="tier-period">/month</span></p>
+        <p class="tier-note">Monthly membership of the Premium Community</p>
+        <ul class="tier-perks">
+          <li><strong>Everything in the free community</strong></li>
+          <li><strong>Saturday mentor sessions</strong> with people a few steps ahead of you</li>
+          <li><strong>Daily discussions</strong> with members in the Premium circle</li>
+          <li><strong>Exclusive discounted rate</strong> for Elite Brew meetups and workshops</li>
+          <li><strong>A close circle of ambitious people</strong> who grow together</li>
+          <li><strong>Direct connections</strong> to mentors, founders, creators and collaborators</li>
+        </ul>
+        <a class="tier-cta" href="#waitlist" data-join="Member">Join Premium for ₹199/month →</a>
+        <button type="button" class="tier-cta tier-cta--ghost tier-share" id="shareMyCard" hidden>Share your member card →</button>
+      </article>
+    </div>
+  </section>
+
+  <!-- VELOCITY RIBBON: drifts on its own, speeds up and leans with the scroll -->
+  <div class="ribbon-band" aria-hidden="true">
+    <div class="ribbon-row" data-dir="1">
+      <span>Mentors<i>✦</i></span><span>Founders<i>✦</i></span><span>Creators<i>✦</i></span><span>Students<i>✦</i></span><span>Builders<i>✦</i></span>
+    </div>
+    <div class="ribbon-row ribbon-row--outline" data-dir="-1">
+      <span>Saturday Sessions<i>✦</i></span><span>Daily Discussions<i>✦</i></span><span>Elite Brew<i>✦</i></span><span>Workshops<i>✦</i></span>
+    </div>
+  </div>
+
+  <section id="get-involved" class="section">
+    <p class="section-label reveal">Get Involved</p>
+    <h2 class="section-title reveal">Help us build <em>the room</em></h2>
+    <p class="section-lead reveal">Whoever you are, there's a seat for you. Pick the one that fits and tell us a bit
+      about yourself.</p>
+
+    <div class="audience-grid">
+      <article class="audience-card reveal-scale">
+        <p class="audience-tag">For new members</p>
+        <h3>Join the community</h3>
+        <p>Join free, or go further with The Elite Show Premium Community for ₹199 a month. Meet ambitious people near you,
+          learn from those ahead of you and find your next mentor, collaborator or opportunity.</p>
+        <a class="audience-cta" href="#membership">Choose Your Membership →</a>
+      </article>
+      <article class="audience-card reveal-scale">
+        <p class="audience-tag">For mentors</p>
+        <h3>Strengthen the network</h3>
+        <p>Share what you've learned in a mentor session or an Elite Brew. A single conversation with you can change
+          someone's direction.</p>
+        <a class="audience-cta" href="#waitlist" data-join="Mentor">Become a Mentor →</a>
+      </article>
+      <article class="audience-card reveal-scale">
+        <p class="audience-tag">For investors</p>
+        <h3>Back the infrastructure</h3>
+        <p>Capital to build the infrastructure and scale the community. The event can be copied. The network
+          can't.</p>
+        <a class="audience-cta" href="#waitlist" data-join="Investor">Talk to Us →</a>
+      </article>
+      <article class="audience-card reveal-scale">
+        <p class="audience-tag">For collaborators &amp; partners</p>
+        <h3>Expand the ecosystem</h3>
+        <p>Brands, organisations and builders who want to host, sponsor or co-create experiences, and open new doors
+          for young talent.</p>
+        <a class="audience-cta" href="#waitlist" data-join="Collaborator">Partner With Us →</a>
+      </article>
+    </div>
+  </section>
+
+  <!-- VISION -->
+  <section id="vision" class="section">
+    <p class="section-label reveal">The Vision</p>
+    <h2 class="section-title reveal">Start with a community. <em>Build an ecosystem.</em></h2>
+    <ol class="roadmap">
+      <li class="reveal"><span>2026</span>Build a very strong community in Kerala</li>
+      <li class="reveal"><span>2027</span>Take the mission outside Kerala</li>
+      <li class="reveal"><span>2028</span>The best startup community in India</li>
+    </ol>
+    <p class="section-kicker reveal">The ambition: the best startup community in India.</p>
+  </section>
+
+  <!-- WAITLIST -->
+  <section id="waitlist">
+    <div class="waitlist-inner">
+      <p class="section-label reveal">Take Your Seat</p>
+      <h2 class="section-title reveal">Join The Elite Show <em>Community</em></h2>
+      <p class="waitlist-sub reveal">
+        Join free, or become a Premium member for ₹199 a month. Coming as a mentor, investor or partner instead? Pick that
+        below and we'll reach out personally.
+      </p>
+
+      <div class="reveal-scale">
+        <div class="form-progress" aria-label="Waitlist form progress">
+          <div class="progress-step active" id="progressStep1">
+            <span>1</span>
+            <strong>Contact Details</strong>
+          </div>
+          <div class="progress-line"><span id="progressLineFill"></span></div>
+          <div class="progress-step" id="progressStep2">
+            <span>2</span>
+            <strong>About Me</strong>
+          </div>
+        </div>
+
+        <form id="waitlistForm" novalidate>
+          <div class="form-step active" id="formStep1">
+            <div class="form-step-heading">
+              <span>Step 1 of 2</span>
+              <h3>Contact Details</h3>
+            </div>
+
+            <fieldset class="choice-group" id="joinGroup">
+              <legend>I'd like to</legend>
+              <div class="option-grid join-grid">
+                <label class="choice-option"><input type="radio" name="joiningAs" value="Free Member" checked><span>Join Free</span></label>
+                <label class="choice-option"><input type="radio" name="joiningAs" value="Member"><span>Premium · ₹199/mo</span></label>
+                <label class="choice-option"><input type="radio" name="joiningAs" value="Mentor"><span>Mentor</span></label>
+                <label class="choice-option"><input type="radio" name="joiningAs" value="Investor"><span>Invest</span></label>
+                <label class="choice-option"><input type="radio" name="joiningAs" value="Collaborator"><span>Partner</span></label>
+              </div>
+            </fieldset>
+
+            <div class="form-grid">
+              <div class="field-group full">
+                <label for="fullname">Full Name</label>
+                <input type="text" id="fullname" name="fullname" placeholder="e.g. John Adeyemi" autocomplete="name" autocapitalize="words" enterkeyhint="next"
+                  required>
+                <span class="field-error" id="nameError"></span>
+              </div>
+              <div class="field-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" placeholder="e.g. +91 98765 43210" autocomplete="tel" inputmode="tel" enterkeyhint="next" required>
+                <span class="field-error" id="phoneError"></span>
+              </div>
+              <div class="field-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" enterkeyhint="next" required>
+                <span class="field-error" id="emailError"></span>
+              </div>
+              <div class="field-group">
+                <label for="state">State</label>
+                <input type="text" id="state" name="state" placeholder="e.g. Kerala" autocomplete="address-level1" autocapitalize="words" enterkeyhint="next" required>
+                <span class="field-error" id="stateError"></span>
+              </div>
+              <div class="field-group">
+                <label for="city">City</label>
+                <input type="text" id="city" name="city" placeholder="e.g. Kochi" autocomplete="address-level2" autocapitalize="words" enterkeyhint="done" required>
+                <span class="field-error" id="cityError"></span>
+              </div>
+            </div>
+
+            <button class="btn-submit" id="nextBtn" type="button" onclick="goToAboutMe()">
+              <span id="nextBtnText">Next: About Me</span>
+            </button>
+          </div>
+
+          <div class="form-step" id="formStep2">
+            <div class="form-step-heading">
+              <span>Step 2 of 2</span>
+              <h3 id="step2Title">About Me</h3>
+            </div>
+
+            <div class="partner-fields" id="partnerFields" hidden>
+              <div class="form-grid">
+                <div class="field-group">
+                  <label for="organisation">Organisation or What You Do</label>
+                  <input type="text" id="organisation" name="organisation" placeholder="e.g. Founder, Acme Labs" autocomplete="organization">
+                  <span class="field-error" id="organisationError"></span>
+                </div>
+                <div class="field-group">
+                  <label for="profileLink">LinkedIn or Website <small>(optional)</small></label>
+                  <input type="url" id="profileLink" name="profileLink" placeholder="https://" autocomplete="url" inputmode="url" autocapitalize="off" spellcheck="false">
+                  <span class="field-error" id="profileLinkError"></span>
+                </div>
+                <div class="field-group full">
+                  <label for="message" id="messageLabel">How would you like to be involved?</label>
+                  <textarea id="message" name="message" rows="4" placeholder="Tell us a little about what you'd like to do with us."></textarea>
+                  <span class="field-error" id="messageError"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="member-fields" id="memberFields">
+
+            <fieldset class="choice-group" id="ageGroup">
+              <legend>Age</legend>
+              <div class="option-grid compact">
+                <label class="choice-option"><input type="radio" name="age" value="13-17"><span>13-17</span></label>
+                <label class="choice-option"><input type="radio" name="age" value="18-24"><span>18-24</span></label>
+                <label class="choice-option"><input type="radio" name="age" value="25-34"><span>25-34</span></label>
+                <label class="choice-option"><input type="radio" name="age" value="35+"><span>35+</span></label>
+              </div>
+              <p class="field-hint" id="minorNote" hidden>Under 18? Please check with a parent or guardian before you
+                pay the membership fee.</p>
+              <span class="field-error" id="ageError"></span>
+            </fieldset>
+
+            <fieldset class="choice-group" id="roleGroup">
+              <legend>You are a</legend>
+              <div class="option-grid">
+                <label class="choice-option"><input type="radio" name="role" value="School Student"><span>School Student</span></label>
+                <label class="choice-option"><input type="radio" name="role" value="College Student"><span>College Student</span></label>
+                <label class="choice-option"><input type="radio" name="role" value="Entrepreneur"><span>Entrepreneur</span></label>
+                <label class="choice-option"><input type="radio" name="role" value="Working Professional"><span>Working Professional</span></label>
+                <label class="choice-option"><input type="radio" name="role" value="Creator"><span>Creator</span></label>
+                <label class="choice-option"><input type="radio" name="role" value="Other"><span>Other</span></label>
+              </div>
+              <span class="field-error" id="roleError"></span>
+            </fieldset>
+
+            <fieldset class="choice-group" id="topicsGroup">
+              <legend>What topics interest you most? <small>Choose up to 3</small></legend>
+              <div class="option-grid">
+                <label class="choice-option"><input type="checkbox" name="topics" value="Entrepreneur"><span>Entrepreneur</span></label>
+                <label class="choice-option"><input type="checkbox" name="topics" value="Business"><span>Business</span></label>
+                <label class="choice-option"><input type="checkbox" name="topics" value="Technology"><span>Technology</span></label>
+                <label class="choice-option"><input type="checkbox" name="topics" value="Education"><span>Education</span></label>
+                <label class="choice-option"><input type="checkbox" name="topics" value="Career Growth"><span>Career Growth</span></label>
+                <label class="choice-option"><input type="checkbox" name="topics" value="Success Stories"><span>Success Stories</span></label>
+                <label class="choice-option"><input type="checkbox" name="topics" value="Innovation"><span>Innovation</span></label>
+                <label class="choice-option"><input type="checkbox" name="topics" value="Personal Development"><span>Personal Development</span></label>
+              </div>
+              <span class="field-error" id="topicsError"></span>
+            </fieldset>
+
+            <fieldset class="choice-group" id="involvementGroup">
+              <legend>How would you like to be involved with the community?</legend>
+              <div class="option-grid single-column">
+                <label class="choice-option"><input type="radio" name="involvement" value="Learn and gain insights"><span>I'm here to learn and gain insights</span></label>
+                <label class="choice-option"><input type="radio" name="involvement" value="Contribute ideas and feedback"><span>I'd like to contribute ideas and feedback</span></label>
+                <label class="choice-option"><input type="radio" name="involvement" value="Help build the community"><span>I'd love to help build the community</span></label>
+                <label class="choice-option"><input type="radio" name="involvement" value="Make meaningful collaborations"><span>I'd like to make meaningful collaborations</span></label>
+                <label class="choice-option"><input type="radio" name="involvement" value="Not sure yet"><span>Not sure yet</span></label>
+              </div>
+              <span class="field-error" id="involvementError"></span>
+            </fieldset>
+
+            <div class="consent-group" id="paymentGroup" hidden>
+              <label class="payment-consent">
+                <input type="checkbox" id="paymentConsent" name="paymentConsent">
+                <span class="checkmark" aria-hidden="true"></span>
+                <span>I agree to pay <strong>₹199 a month</strong> to join The Elite Show Premium Community.</span>
+              </label>
+              <p class="field-hint">You'll pay securely with Razorpay by UPI or card. Your membership renews every month and you can cancel any time. By paying you agree to our <a href="terms.html" target="_blank" rel="noopener">Terms</a>, <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and <a href="refunds.html" target="_blank" rel="noopener">Refund Policy</a>.</p>
+              <span class="field-error" id="paymentError"></span>
+            </div>
+            </div>
+
+            <div class="form-error" id="formError">Something went wrong. Please try again.</div>
+
+            <div class="form-actions">
+              <button class="btn-secondary" id="backBtn" type="button" onclick="goToContactDetails()">
+                <span>Back</span>
+              </button>
+              <button class="btn-submit" id="submitBtn" type="submit">
+                <span id="btnText">Join for Free</span>
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <p class="form-note">🔒 Your information is private. We never share or sell your data.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLOSING -->
+  <section id="rise" class="rise" aria-label="Think Big, Rise Together">
+    <h2 class="rise-title">
+      <span style="--i: 2" class="rise-line">Think Big</span>
+      <span style="--i: 1" class="rise-line rise-line--accent">Rise</span>
+      <span style="--i: 0" class="rise-line rise-line--accent">Together</span>
+    </h2>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo"><img src="images/logo/the-elite-show-community.svg" alt="The Elite Show Community" width="160" height="132" loading="lazy"></div>
+    <div class="footer-tagline">Where people meet ideas. And ideas meet opportunity.</div>
+    <div class="footer-links" role="navigation" aria-label="Legal">
       <a href="privacy.html">Privacy Policy</a>
       <a href="terms.html">Terms &amp; Conditions</a>
       <a href="refunds.html">Refunds &amp; Cancellation</a>
       <a href="contact.html">Contact Us</a>
-    </nav>
+    </div>
+    <div class="footer-copy">© <span id="footerYear">2026</span> The Elite Show Community. All rights reserved.</div>
   </footer>
 
-  <script src="coming_soon.js"></script>
+  <!-- MODAL: the thank-you popup. Each kind of sign-up gets its own little scene in the stage. -->
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal" data-scene="">
+      <button class="modal-close" type="button" aria-label="Close" onclick="closeModal()">✕</button>
+      <svg class="ty-defs" width="0" height="0" aria-hidden="true" focusable="false">
+        <defs>
+          <symbol id="tesMark" viewBox="0 0 1041 1565"><path d="M318.2 12.4h522.3a256 256 0 0 1 40.6 2.8c21.8 3.3 44 12 62 24.7q4.5 3.2 9.5 5.9c5.4 3.2 9.2 6.9 13.3 11.8q3.5 3.8 7.5 7c1.5 1.3 1.5 1.3 3.4 3.7 1.9 2.3 3.6 3.9 5.9 5.8 4.7 4 7.9 8.6 11.2 13.8l1.7 2.6q5.8 9 10.7 18.3 2 3.8 4.2 7.5c3.1 5.5 4.9 11.6 6.8 17.6l1.8 5.4c5.5 15.6 11 32.7 10.9 49.2v47.1l.1 32.8v373.9l.1 156v259.5l.1 72.3v110c.1 18-2.6 35.5-6.4 53l-1.3 6.4c-1.5 7-3.2 13.1-6.7 19.4l-2.3 7.6c-2.4 8-5.8 15-9.7 22.4l-2.6 5.3q-3 6-6.9 11.5l-4.1 6.8c-3.2 6-6.4 10.8-11.8 15a47 47 0 0 0-4.9 5.1 122 122 0 0 1-45 34.5l-3.1 1.3c-7.1 3-13.9 5.3-21.6 6.5l-3 .6c-22 4.1-49.1 2.4-70-5.6l-5-1.7a185 185 0 0 1-41.2-19 67 67 0 0 0-13-6c-2.8-1.3-2.8-1.3-5.3-3.3a25 25 0 0 0-8.6-4.3 55 55 0 0 1-12.4-6.2 58 58 0 0 0-33-9.8l-2.8-.1-9.3-.2h-3.2q-17.9-.5-35.8-.4h-3l-14.1.1h-5.1l-2.3.1c-7.9 0-7.9 0-10.9-2.2-3.1-8.4-2.3-17.8-2.2-26.6v-28.4l.2-39.1v-8.6l.3-30.9v-9.4l.2-11v-5.9l.1-3.6v-3c.5-2.9 1.1-3.8 3.4-5.5 3.3-1.7 7.1-1.3 10.8-1.4l5.5-.3 8.6-.3c16.6-.6 32.2-2.8 48.3-6.9l3.2-.8q9.5-2.4 18.6-6.1 4.9-1.9 9.9-3.3 10.4-3.6 20.2-8.5l3-1.4c4.8-2.3 8.9-4.6 12.9-8l7.3-4.9q8-5.2 15.7-11.1l2-1.5a146 146 0 0 0 29.7-27.9q9-11 17.1-22.6l4.2-5.5q3.5-4.6 5.7-9.8l2.1-4.3 1.1-2.2 3.2-6.2c4.7-8.9 8.1-18 11.1-27.6l2.7-7.3c2.4-6.6 3.7-13.2 4.8-20l.3-2c2.6-16.3 2.8-32.6 2.7-49.1l.1-12.5.1-21.1.1-29.6V882l.1-4.9v-27.5c-.1-2.7-.1-2.7-1.1-5.7-3.2-1.6-6.8-1.3-10.3-1.3l-2.6-.1-8.4-.2-5.8-.1q-14.4-.4-28.6-.3h-2.6l-11.8.1c-11 .1-20.1-.1-29.3-6.4l-1.8-1.2a33 33 0 0 1-14.1-20.3c-1.2-8-.9-16.1-.7-24.2l.1-2.3c.2-8.3.5-16.1 3.9-23.7l1.2-3.2a45 45 0 0 1 22.5-15.4q5.1-.7 10.2-.6h7.6l8.2-.1 23.2-.2 14.2-.1 5.4-.1h9.8c3.7-.1 6.5-.3 9.7-2.3l.5-22.4.2-10.4.3-11.9.1-3.8v-3.5l.1-3.1q-.4-4.6-2.2-8.9-17.2-1-34.4-1.2h-6.1l-16.8-.1-10.4-.1h-5.8c-12.2-.2-23.7-2.6-32.5-11.6-6.6-8-8.3-15.5-8.4-25.6v-2.7l-.1-5.8-.1-8.7c-.2-11.3.6-21.3 6.6-31.2 3.1-3 6.2-5 10-7l2.5-1.5c11.2-6.1 22.9-5.8 35.2-5.9h5.2l13.4-.2 21.5-.1 7.5-.1h4.6l2.1-.1c4.8 0 4.8 0 7-1.1l.4-23.3.2-10.9.2-10.4.2-5.9v-3.7l.1-3.2c-.1-2.6-.1-2.6-1.1-5.6-3-1.5-6.1-1.2-9.4-1.2h-7.3l-7.9-.1-22.6-.2-13.8-.1-5.2-.1c-13.9 0-24.8-.8-36.8-8.3l-1.9-1.2a28 28 0 0 1-9.9-17c-2.7-17.5-4.7-41.7 5.8-56.8a41 41 0 0 1 26.1-14.6q6.8-.2 13.7-.2h46.7c7.7 0 15-.2 22.5-2.2 1.2-5.7 1.1-11.2 1.1-17l-.1-3.3v-10.9l-.1-7.6-.1-16-.1-18.3-.1-17.7-.1-7.5c0-13-.4-25.1-3.5-37.7l-.9-5.8c-1.6-8.5-5-16.2-9-23.9q-1.5-3-2.5-6.3c-1.9-5.3-5.3-9.5-8.6-14l-3.4-5-1.5-2.2c-1.1-1.8-1.1-1.8-1.1-3.8l-1.8-.8a18 18 0 0 1-5.4-4.5l-1.8-1.9-1.8-2.1a121 121 0 0 0-12.5-12.3c-1.7-1.4-1.7-1.4-3.6-3.4-10.1-9.7-26.7-15.4-40.1-18.5l-5.9-1.7c-9.6-2.6-19-3.2-28.9-3.4l-4.4-.1q-24.1-.6-48.2-.5h-13.2l-31.8-.1h-9l-56.1-.1h-16.2l-52-.1h-53.7l-30.1-.1h-38.5c-35.5-.2-74.1 3.6-102 27.9-1.9 1.7-1.9 1.7-5.2 3.7-3 2.2-4.5 4.3-6.5 7.3q-2.8 3.6-6.2 6.7-7.9 8.3-14 18l-1.5 2.3a94 94 0 0 0-8.1 16.2l-2.6 6.1c-3.3 7.5-5.4 15-7.1 23.1l-.7 3.5a165 165 0 0 0-3.6 28l-.1 2.6q-.5 14.8-.5 29.7v46.2l-.1 5.8v10.5c.1 7.1.1 7.1 2.3 10 3.6 1.2 6.8 1.1 10.6 1.1h2.3l5.1.1h8l22.7.1 13.9.1h5.3c15.4 0 26.3 2.2 37.7 13.3a36 36 0 0 1 9.5 25.8v6.8l.1 6.9c.1 14-2.4 24.4-11.9 35-8.6 8.2-19.7 9.9-31.1 10h-7.1l-7.6.1-19 .2-16 .2H252l-4.6.1h-2.1a29 29 0 0 0-9.3 1.2q-1 24.1-1.1 48.4l-.1 3.4.1 3.1v2.8c.1 2.3.1 2.3 1.1 5.3 2.9 1.5 5.9 1.1 9.2 1.1h2.2l4.8.1h7.7l21.9.1 13.4.1h5c15.6 0 28.4 2.4 40.7 12.6 10.5 10.9 11.3 22.6 11.5 37l.1 4.9a45 45 0 0 1-10.4 33.7 36 36 0 0 1-27.5 11.6h-5.8l-6.4.1-13.7.2c-48.8.5-48.8.5-52.7 2.5a42 42 0 0 0-1.2 10.6v38l-.1 3.6v6.3c.3 2.5.3 2.5 2.3 5.5 3.6 1.2 6.9 1.1 10.6 1.1l2.4.1h13.1l22.8.2 13.9.1h5.3c15.9 0 25.2 2.4 37.1 13.6a36 36 0 0 1 10.1 27.3v3.3l-.1 3.4c-.6 27.3-.6 27.3-8.3 35.9a96 96 0 0 1-12 9l-2.2 1.4c-11.3 6.2-28.4 3.7-41 3.8l-2.2.1-20.7.2-11.3.1h-4.3l-6 .1h-3.4c-2.8.3-2.8.3-5.8 2.3-1.3 3.3-1.1 6.7-1.2 10.2v32.2l-.1 23.9v48.7l-.1 12.6c-.1 24.6.6 48.8 6.8 72.6l.8 3.5q7.5 30 23.8 56.3l1.4 2.3q5 7.6 11.4 14.2 2.9 3.2 5 6.9c9.3 14.6 25 25.1 39.2 34.3l5.5 3.7q11.7 7.7 24.4 13.6l2.4 1.1a174 174 0 0 0 25.1 9.5 361 361 0 0 0 31.9 8.6 268 268 0 0 0 52.9 4.3l8.5.1 2.6.1h4.6c2.6.4 3.9.7 6 2.3 1.6 4.7 2.2 8.9 2.3 13.9v88.3l.1 22.4v40.4a10 10 0 0 1-3.4 7c-4.4 1.5-9.2 1.1-13.8 1.1h-23.6l-19.4.1h-21.6a75 75 0 0 0-34.6 6.8l-5 2.1-4.4 2-2.4 1.1-5.3 2.5-9.4 4.2a887 887 0 0 0-35.4 17.1l-5.9 2.9-4.5 2.3-18.1 8.8-2.7 1.3q-6.2 3-12.8 5.6c-5.6 2.2-10.6 5.1-15.8 8-6.9 3.9-13.6 7.3-21.1 9.9q-6.7 2.7-13 6.1a202 202 0 0 1-14.2 6.6 367 367 0 0 0-17.9 8.5l-15 7.2-2.9 1.4-9.1 4.4-15.1 7.2q-7.9 3.7-15.6 7.7l-7.4 3.1a65 65 0 0 0-9.2 4.4 63 63 0 0 1-11.2 5q-5.8 2.1-11.1 5.3c-7 4.4-14.5 7.6-21.9 11.1l-7.5 3.6q-11.6 5.7-23.6 10.5-3.9 1.8-7.4 4.1c-4.3 2-8.2 3.4-13 3-1.4-3.8-.6-6.7.3-10.5l.9-3.9.5-2 1.5-6c1.4-5.9 3-11.1 5.8-16.6l1.2-4.2.5-2.2.6-2.4q2.3-9.5 5.7-18.8a131 131 0 0 0 5.5-19.2q1.6-6.8 3.9-13.5 3-8.8 5-17.8 4.1-17.2 10.3-33.9a305 305 0 0 0 8.1-28.3 90 90 0 0 1 4.7-15.3c2.4-5.7 3.6-11.4 4.9-17.5 1.7-8.4 3.9-16.2 6.9-24.3 2.8-7.5 4.6-15.2 6.5-22.9q2.4-10 6.2-19.6a53 53 0 0 0 3.4-12.4q1.3-5.2 3.1-10.2c3.8-10.7 6.5-21.6 9.3-32.5q2.7-10.6 6.2-21c2.1-8.2.6-13.8-3.1-21.1l-2.5-5.1-2.4-4.8q-7-14.6-12-30l-.8-2.4c-10-29.8-11.4-59.8-11.3-91.1l-.1-6.3.1-17.3-.1-15.2.1-42.2V933a127691 127691 0 0 1 .6-390.7q.2-134 .9-268.1v-17l.2-20.3v-10.1c.2-38.6.2-38.6 4.6-55.7l.7-2.6a210 210 0 0 1 28.8-66.7q1.8-2.7 3.2-5.4c5.7-10.1 14.2-17.8 22.4-25.9l8.3-8.3a131 131 0 0 1 30.5-22.6c42.4-26.4 86.8-27.2 135.1-27.2" /></symbol>
+          <radialGradient id="tyWax" cx=".38" cy=".32" r=".75">
+            <stop offset="0" stop-color="#eaff7c" /><stop offset=".35" stop-color="#c6f20b" />
+            <stop offset=".8" stop-color="#8fb300" /><stop offset="1" stop-color="#6c8800" />
+          </radialGradient>
+          <!-- Rubber-stamp ink: speckled holes plus a slight wobble on the edges -->
+          <filter id="tyInk" x="-10%" y="-10%" width="120%" height="120%">
+            <feTurbulence type="fractalNoise" baseFrequency="1.3" numOctaves="2" seed="7" result="n" />
+            <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.7 1.75" result="holes" />
+            <feComposite in="SourceGraphic" in2="holes" operator="in" result="speckled" />
+            <feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="2" seed="3" result="w" />
+            <feDisplacementMap in="speckled" in2="w" scale="2.2" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+          <filter id="tyWaxEdge"><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="11" /><feDisplacementMap in="SourceGraphic" scale="6" /></filter>
+          <filter id="tyPostInk"><feTurbulence type="fractalNoise" baseFrequency=".8" seed="2" result="n" /><feColorMatrix in="n" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2 1.4" result="h" /><feComposite in="SourceGraphic" in2="h" operator="in" /></filter>
+        </defs>
+      </svg>
+
+      <div class="ty-stage" aria-hidden="true">
+        <!-- Premium: a sealed letter drops onto the table -->
+        <div class="ty-scene ty-letter">
+          <div class="ty-letter-shadow"></div>
+          <div class="ty-env">
+            <div class="ty-env-paper">
+              <div class="ty-env-fold"></div>
+              <svg class="ty-postmark" viewBox="0 0 70 44" filter="url(#tyPostInk)">
+                <g fill="none" stroke="#7c9a00" stroke-width="1.4"><circle cx="22" cy="22" r="17" /><circle cx="22" cy="22" r="13" stroke-width=".6" /><path d="M42 12 Q56 8 70 12 M42 19 Q56 15 70 19 M42 26 Q56 22 70 26 M42 33 Q56 29 70 33" /></g>
+                <text x="22" y="20" text-anchor="middle" font-family="Montserrat" font-weight="800" font-size="5" fill="#7c9a00" letter-spacing=".8">BY HAND</text>
+                <text x="22" y="27.5" text-anchor="middle" font-family="Montserrat" font-weight="700" font-size="4.6" fill="#7c9a00" id="tyPostDate"></text>
+              </svg>
+              <div class="ty-env-to" id="tyLetterName"></div>
+            </div>
+            <div class="ty-env-flap"></div>
+            <svg class="ty-seal" viewBox="0 0 62 62">
+              <path filter="url(#tyWaxEdge)" fill="url(#tyWax)" d="M31 3c9 0 13 4 19 8s9 11 9 20-4 14-9 19-11 9-19 9-14-3-19-8-9-12-9-20 3-14 8-19 11-9 20-9z" />
+              <circle cx="31" cy="31" r="17" fill="none" stroke="#7a9800" stroke-width="1.6" opacity=".7" />
+              <circle cx="31" cy="31" r="17.8" fill="none" stroke="#f0ff9c" stroke-width=".7" opacity=".55" />
+              <use href="#tesMark" x="23.8" y="19.9" width="15.2" height="22.8" fill="#6f8c00" />
+              <use href="#tesMark" x="23.4" y="19.4" width="15.2" height="22.8" fill="#f4ffb0" opacity=".35" />
+              <ellipse cx="22" cy="17" rx="7" ry="3.5" fill="#fff" opacity=".35" transform="rotate(-30 22 17)" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Free: a rubber stamp marks their pass ADMITTED -->
+        <div class="ty-scene ty-stamp">
+          <div class="ty-pass">
+            <span class="ty-notch ty-notch-t"></span><span class="ty-notch ty-notch-b"></span>
+            <div class="ty-pass-body">
+              <div class="ty-pass-brand"><svg class="ty-mark"><use href="#tesMark" /></svg><small>The Elite Show<br>Community</small></div>
+              <div class="ty-pass-name"><small>Free member pass</small><b id="tyPassName"></b></div>
+              <div class="ty-pass-meta"><span><em>Issued</em><b id="tyPassDate"></b></span><span><em>Access</em><b>Community</b></span></div>
+            </div>
+            <div class="ty-pass-stub"><span>Admit one · Free</span></div>
+            <svg class="ty-imprint" viewBox="0 0 190 104">
+              <g filter="url(#tyInk)" fill="#CAFB0C">
+                <path fill-rule="evenodd" d="M8 2h174a6 6 0 0 1 6 6v88a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6V8a6 6 0 0 1 6-6zm2 5a3 3 0 0 0-3 3v84a3 3 0 0 0 3 3h170a3 3 0 0 0 3-3V10a3 3 0 0 0-3-3z" />
+                <rect x="12" y="12" width="166" height="1.6" /><rect x="12" y="90.4" width="166" height="1.6" />
+                <text x="95" y="30" text-anchor="middle" font-family="Montserrat" font-weight="800" font-size="9.5" letter-spacing="3">THE ELITE SHOW</text>
+                <text x="95" y="66" text-anchor="middle" font-family="Archivo" font-stretch="125%" font-weight="900" font-size="31" letter-spacing="1">ADMITTED</text>
+                <text x="95" y="84" text-anchor="middle" font-family="Montserrat" font-weight="700" font-size="8.5" letter-spacing="2" id="tyStampDate"></text>
+              </g>
+            </svg>
+          </div>
+          <div class="ty-stamp-shadow"></div>
+          <svg class="ty-stamp-tool" viewBox="0 0 150 230">
+            <defs>
+              <linearGradient id="tyWood" x1="0" x2="1"><stop offset="0" stop-color="#3b2414" /><stop offset=".35" stop-color="#7a4d2b" /><stop offset=".6" stop-color="#5c391f" /><stop offset="1" stop-color="#2a180c" /></linearGradient>
+              <radialGradient id="tyKnob" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#a06a3e" /><stop offset=".6" stop-color="#5a371d" /><stop offset="1" stop-color="#2a180c" /></radialGradient>
+              <linearGradient id="tyMetal" x1="0" x2="1"><stop offset="0" stop-color="#555" /><stop offset=".4" stop-color="#ddd" /><stop offset=".7" stop-color="#8a8a8a" /><stop offset="1" stop-color="#444" /></linearGradient>
+              <linearGradient id="tyBlock" x1="0" x2="1"><stop offset="0" stop-color="#1a1a1a" /><stop offset=".4" stop-color="#3c3c3c" /><stop offset="1" stop-color="#111" /></linearGradient>
+            </defs>
+            <ellipse cx="75" cy="30" rx="32" ry="28" fill="url(#tyKnob)" />
+            <path d="M58 52 Q75 62 92 52 L86 130 Q75 136 64 130 Z" fill="url(#tyWood)" />
+            <rect x="56" y="128" width="38" height="12" rx="2" fill="url(#tyMetal)" />
+            <path d="M14 140 H136 a6 6 0 0 1 6 6 V194 H8 V146 a6 6 0 0 1 6-6z" fill="url(#tyBlock)" />
+            <rect x="8" y="160" width="134" height="2" fill="#000" opacity=".4" />
+            <rect x="8" y="194" width="134" height="14" fill="#0b0b0b" />
+            <rect x="12" y="208" width="126" height="10" rx="1.5" fill="#566b00" />
+            <rect x="12" y="215" width="126" height="3" fill="#CAFB0C" opacity=".8" />
+          </svg>
+        </div>
+
+        <!-- Mentors, investors, collaborators: one handwritten line from the founders -->
+        <div class="ty-scene ty-note">
+          <svg class="ty-hand" viewBox="0 0 300 90">
+            <g class="ty-line ty-line-1"><text x="150" y="36" text-anchor="middle" id="tyNoteLine"></text></g>
+            <g class="ty-line ty-line-2"><text class="ty-sign" x="232" y="80" text-anchor="end">— the founders</text></g>
+          </svg>
+          <span class="ty-nib"></span>
+          <span class="ty-note-rule"></span>
+          <span class="ty-note-role" id="tyNoteRole"></span>
+        </div>
+      </div>
+
+      <div class="modal-icon"><svg class="ty-mark"><use href="#tesMark" /></svg></div>
+      <div class="member-card" id="memberCard" hidden>
+        <div class="member-card-top">
+          <span><b>The Elite Show</b><br>Premium Community</span>
+          <span class="member-card-chip" aria-hidden="true"></span>
+        </div>
+        <div class="member-card-name" id="memberCardName"></div>
+        <div class="member-card-bottom">
+          <span>Member ID<b id="memberCardId"></b></span>
+          <span>Since<b id="memberCardSince"></b></span>
+          <span>Monthly<b>₹199</b></span>
+        </div>
+      </div>
+      <p class="modal-eyebrow" id="modalEyebrow"></p>
+      <h2 class="modal-title" id="modalTitle">Stamped and in</h2>
+      <p class="modal-msg" id="modalMsg">
+        You're officially on the list.<br><br>
+        You've just taken your <strong>first step into the room</strong>. Join our WhatsApp community to hear about
+        the next mentor session, Elite Brew and workshop first.
+      </p>
+      <button class="btn-pay ty-open-card" id="openCardBtn" type="button" hidden>Open your membership card</button>
+      <a class="btn-pay" id="premiumBtn" href="#" target="_blank" rel="noopener" hidden>Join Our Premium Community</a>
+      <a class="btn-whatsapp" href="https://chat.whatsapp.com/ItDdTXKakan01FUREdRxar" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+        </svg>
+        Join Our WhatsApp Community
+      </a>
+      <p class="modal-upsell" id="modalUpsell" hidden>Want the full room? <a href="#waitlist" data-join="Member" onclick="closeModal()">Go Premium · ₹199/month</a></p>
+      <button class="modal-back" id="modalBack" type="button" hidden onclick="closeModal()">Back to the site</button>
+      <div class="member-share" id="memberShare" hidden>
+        <p class="member-share-label">Bring a friend into the room</p>
+        <button type="button" class="member-share-main" id="shareCardImage">Share my card</button>
+        <a class="member-share-btn" id="shareCardWhatsApp" href="#" target="_blank" rel="noopener">WhatsApp</a>
+        <button type="button" class="member-share-btn" id="shareCardCopy">Copy link</button>
+        <button type="button" class="member-share-btn" id="shareCardSave">Save image</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="importmap">{ "imports": { "three": "./vendor/three/three.module.min.js" } }</script>
+  <script src="supabase_config.js"></script>
+  <script src="site_content.js"></script>
+  <script src="mentor_sessions.js"></script>
+  <script src="reviews.js"></script>
+  <script src="the_elite_show.js"></script>
+  <script src="member_share.js"></script>
+  <script type="module" src="rubiks_cube.js"></script>
+  <script src="motion.js"></script>
+  <script src="responsive.js"></script>
 </body>
 
 </html>
