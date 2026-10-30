@@ -493,6 +493,22 @@ a.nav-logo {
   animation: pulse-glow 2.5s ease-in-out infinite;
 }
 
+/* Plain line under the tagline: says what and where for people and search engines */
+.brand-place {
+  margin-top: 1.1rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+
+@media (max-width: 599px) {
+  .brand-place {
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+  }
+}
+
 @keyframes pulse-glow {
 
   0%,
@@ -1107,6 +1123,23 @@ footer {
   text-transform: uppercase;
   color: var(--grey-dark);
   margin-bottom: 1.5rem;
+}
+
+.footer-social {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: #8a8a8a;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-social:hover,
+.footer-social:focus-visible {
+  color: var(--green);
 }
 
 .footer-copy {

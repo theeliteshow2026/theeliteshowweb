@@ -5,15 +5,52 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#070707">
-  <title>The Elite Show Community — Where People Meet Ideas</title>
+  <title>The Elite Show Community | Startup &amp; Growth Community in Kerala</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="apple-touch-icon" href="images/logo/apple-touch-icon.png">
   <meta name="description"
-    content="The Elite Show Community brings students, founders, creators and professionals together through mentor sessions, Elite Brew meetups and workshops. Join the free community or The Elite Show Premium Community, or mentor, invest or partner with us.">
+    content="A startup and growth community in Kerala for students, founders and creators. Saturday sessions, daily discussions, Elite Brew meetups and workshops. Join free.">
   <meta property="og:title" content="The Elite Show Community">
   <meta property="og:description" content="Where people meet ideas. And ideas meet opportunity.">
   <!-- Link preview: the card WhatsApp, LinkedIn and X show when the site is shared.
        Rebuild the image with tools/make_share_cards.js; use a new file name when it changes, because apps keep old cards. -->
+  <!-- Tells search engines who we are: the community, its founders and its profiles -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://www.theeliteshow.com/#organization",
+        "name": "The Elite Show Community",
+        "alternateName": ["The Elite Show", "Elite Show Community"],
+        "url": "https://www.theeliteshow.com/",
+        "logo": "https://www.theeliteshow.com/images/logo/tes-mark.png",
+        "image": "https://www.theeliteshow.com/images/share/poster-wall-logo.jpg",
+        "description": "A startup and growth community in Kerala that brings students, founders, creators and professionals together through Saturday sessions, daily discussions, Elite Brew meetups and workshops.",
+        "slogan": "Where people meet ideas. And ideas meet opportunity.",
+        "email": "theeliteshow0@gmail.com",
+        "areaServed": { "@type": "State", "name": "Kerala" },
+        "address": { "@type": "PostalAddress", "addressRegion": "Kerala", "addressCountry": "IN" },
+        "knowsAbout": ["Startups", "Entrepreneurship", "Personal growth", "Mentorship", "Networking"],
+        "founder": [
+          { "@type": "Person", "name": "Azvan Sait", "jobTitle": "Co-founder", "sameAs": ["https://www.linkedin.com/in/azvan-sait/"] },
+          { "@type": "Person", "name": "Aman Muhammed", "jobTitle": "Co-founder", "sameAs": ["https://www.linkedin.com/in/aman-muhammed123/"] }
+        ],
+        "sameAs": ["https://www.instagram.com/theeliteshow.in/"]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://www.theeliteshow.com/#website",
+        "name": "The Elite Show Community",
+        "alternateName": "The Elite Show",
+        "url": "https://www.theeliteshow.com/",
+        "inLanguage": "en-IN",
+        "publisher": { "@id": "https://www.theeliteshow.com/#organization" }
+      }
+    ]
+  }
+  </script>
   <link rel="canonical" href="https://www.theeliteshow.com/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="The Elite Show Community">
@@ -87,6 +124,7 @@
       </h2>
     </div>
     <p class="brand-tag" data-text="— Where People Meet Ideas —"><span>—</span> Where People Meet Ideas <span>—</span></p>
+    <p class="brand-place">A startup &amp; growth community from Kerala</p>
   </section>
 
   <!-- STATS -->
@@ -405,7 +443,7 @@
               </div>
               <div class="field-group">
                 <label for="city">City</label>
-                <input type="text" id="city" name="city" placeholder="e.g. Kochi" autocomplete="address-level2" autocapitalize="words" enterkeyhint="done" required>
+                <input type="text" id="city" name="city" placeholder="Your city" autocomplete="address-level2" autocapitalize="words" enterkeyhint="done" required>
                 <span class="field-error" id="cityError"></span>
               </div>
             </div>
@@ -538,6 +576,10 @@
   <footer>
     <div class="footer-logo"><img src="images/logo/the-elite-show-community.svg" alt="The Elite Show Community" width="160" height="132" loading="lazy"></div>
     <div class="footer-tagline">Where people meet ideas. And ideas meet opportunity.</div>
+    <a class="footer-social" href="https://www.instagram.com/theeliteshow.in/" target="_blank" rel="noopener me">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17.3" cy="6.7" r="1.2" fill="currentColor"/></svg>
+      <span>@theeliteshow.in</span>
+    </a>
     <div class="footer-links" role="navigation" aria-label="Legal">
       <a href="privacy.html">Privacy Policy</a>
       <a href="terms.html">Terms &amp; Conditions</a>
