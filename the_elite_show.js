@@ -830,7 +830,7 @@ if (supportsPointerEffects) {
   animateRing();
 
   // Watched on the whole page so cards that load later (live sessions, reviews) count too
-  const interactable = 'a, button, input, textarea, .feature-card, .audience-card, .session-card, .scramble-target';
+  const interactable = 'a, button, input, textarea, .feature-card, .audience-card, .session-card';
   document.addEventListener('mouseover', e => {
     const on = !!e.target.closest(interactable);
     cursorRing?.classList.toggle('hovered', on);
@@ -941,7 +941,7 @@ if (hero && heroCrowd && typeof MENTOR_SESSIONS !== 'undefined') {
 
 // ===== BRAND BAND: TITLE SCRAMBLE =====
 // Letters shuffle, flip to $, then settle one by one. Plays when the band
-// scrolls into view, and again on hover where there is a mouse.
+// scrolls into view, then stays put.
 const scrambleTarget = document.querySelector('.scramble-target');
 if (scrambleTarget) {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -968,7 +968,6 @@ if (scrambleTarget) {
       if (entries[entries.length - 1].isIntersecting) { scramble(); bandWatcher.disconnect(); }
     }, { threshold: 0.6 });
     bandWatcher.observe(scrambleTarget);
-    if (supportsPointerEffects) scrambleTarget.addEventListener('mouseenter', scramble);
   }
 }
 
