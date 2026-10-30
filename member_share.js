@@ -39,8 +39,8 @@ window.MemberShare = (() => {
   // Opens the welcome popup again, showing only the card and the share buttons.
   function reopen() {
     openModal('Member');
-    document.querySelectorAll('#confetti-container').forEach(el => el.remove());
     showMemberCard(member.name, member.memberCode, member.since);
+    document.getElementById('modalEyebrow').textContent = 'Premium member';
     document.getElementById('modalTitle').textContent = 'Your member card';
     document.getElementById('modalMsg').innerHTML =
       "Show people you're in. <strong>Your image, link and message are ready to send.</strong>";

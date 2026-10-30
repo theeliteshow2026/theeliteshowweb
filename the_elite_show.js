@@ -230,10 +230,12 @@ function goToContactDetails() {
 
 // ===== JOINING AS (free member / premium member / mentor / investor / partner) =====
 // 'Member' is the paid Premium Community; the value is kept so earlier signups still match.
+// Mentors, investors and collaborators get a handwritten "Thank you" from the founders
 const PARTNER_MODAL = {
-  modalTitle: 'Thank you for reaching out 🤝',
-  modalMsg: "We've received your details and <strong>someone from the team will reach out personally</strong>. " +
-    'In the meantime, you are welcome to join the WhatsApp community and see the room for yourself.'
+  scene: 'note',
+  modalEyebrow: 'Request received',
+  modalTitle: "We'll be in touch",
+  modalMsg: '<strong>Someone from the team will reach out personally</strong> to talk through your idea.'
 };
 
 const JOIN_COPY = {
@@ -241,23 +243,29 @@ const JOIN_COPY = {
     step2: 'About Me',
     progress: 'About Me',
     submit: 'Join for Free',
-    modalTitle: 'Welcome to The Elite Show Community 🎉',
-    modalMsg: "You're officially in.<br><br>You've just taken your <strong>first step into the room</strong>. " +
-      'Join our WhatsApp community to hear about the next mentor session, Elite Brew and workshop first.'
+    scene: 'stamp',
+    modalEyebrow: 'Welcome to The Elite Show Community',
+    modalTitle: 'Stamped and in',
+    modalMsg: 'Your <strong>first step into the room</strong>. Join WhatsApp to hear about ' +
+      '<strong>Saturday sessions</strong> and <strong>daily discussions</strong> first.'
   },
   Member: {
     step2: 'Your Membership',
     progress: 'Membership',
     submit: 'Join for ₹199/month',
     // Shown only if online payment is unavailable; a paid member sees openPremiumWelcome instead
-    modalTitle: 'Welcome to The Elite Show Premium Community 🎉',
-    modalMsg: "Your spot is reserved.<br><br><strong>One last step: pay your first month's ₹199.</strong> " +
+    scene: '',
+    modalEyebrow: 'Premium · Spot reserved',
+    modalTitle: 'Your spot is reserved',
+    modalMsg: "<strong>One last step: pay your first month's ₹199.</strong> " +
       "We'll send your payment link to your WhatsApp and email shortly." +
       '<br><br>Meanwhile, join our WhatsApp community to hear about the next mentor session, Elite Brew and workshop first.'
   },
   Mentor: {
     ...PARTNER_MODAL,
     progress: 'Your Interest',
+    noteRole: 'Mentor request',
+    modalMsg: '<strong>Someone from the team will reach out personally</strong> to plan a session with you.',
     step2: 'Mentoring With Us',
     submit: 'Apply as a Mentor',
     label: 'What could you share with the community?',
@@ -266,6 +274,8 @@ const JOIN_COPY = {
   Investor: {
     ...PARTNER_MODAL,
     progress: 'Your Interest',
+    noteRole: 'Investor note',
+    modalMsg: '<strong>A founder will reach out personally</strong> to set up a conversation.',
     step2: 'Investing With Us',
     submit: 'Start the Conversation',
     label: 'What would you like to explore with us?',
@@ -274,6 +284,7 @@ const JOIN_COPY = {
   Collaborator: {
     ...PARTNER_MODAL,
     progress: 'Your Interest',
+    noteRole: 'Partnership idea',
     step2: 'Partnering With Us',
     submit: 'Partner With Us',
     label: 'How would you like to collaborate?',
@@ -519,19 +530,34 @@ async function startPremiumPayment(contact) {
   });
 }
 
+// A paid Premium member first sees a sealed letter; opening it shows their member card
 function openPremiumWelcome({ memberCode, communityLink, name }) {
-  openModal('Member');
-  showMemberCard(name, memberCode);
+  openModal('Member', name, 'letter');
   if (window.MemberShare) MemberShare.remember(name, memberCode);
+  document.getElementById('memberShare').hidden = true;
+  document.getElementById('modalEyebrow').textContent = 'Payment confirmed' + (memberCode ? ' · ' + memberCode : '');
+  document.getElementById('modalTitle').textContent = 'Something arrived for you';
   document.getElementById('modalMsg').innerHTML =
-    "Your payment is confirmed. <strong>You're now a Premium member.</strong> Your card above shows your member ID." +
-    (communityLink
-      ? '<br><br>Tap below to join the Premium community.'
-      : "<br><br>We'll add you to the Premium community shortly.");
-  const premiumBtn = document.getElementById('premiumBtn');
-  premiumBtn.hidden = !communityLink;
-  if (communityLink) premiumBtn.href = communityLink;
-  document.querySelector('.btn-whatsapp').hidden = Boolean(communityLink);
+    "You're a <strong>Premium member</strong> now. Your membership card is sealed inside.";
+  document.querySelector('.btn-whatsapp').hidden = true;
+  const openCardBtn = document.getElementById('openCardBtn');
+  openCardBtn.hidden = false;
+  openCardBtn.onclick = () => {
+    setModalScene('');
+    openCardBtn.hidden = true;
+    showMemberCard(name, memberCode);
+    document.getElementById('modalEyebrow').textContent = 'Your membership card';
+    document.getElementById('modalTitle').textContent = 'Welcome to Premium';
+    document.getElementById('modalMsg').innerHTML = communityLink
+      ? 'Tap below to join the Premium community.'
+      : "We'll add you to the Premium community shortly.";
+    const premiumBtn = document.getElementById('premiumBtn');
+    premiumBtn.hidden = !communityLink;
+    if (communityLink) premiumBtn.href = communityLink;
+    document.querySelector('.btn-whatsapp').hidden = Boolean(communityLink);
+    // The share image was already prepared by MemberShare.remember above
+    document.getElementById('memberShare').hidden = !window.MemberShare;
+  };
 }
 
 function memberSinceNow() {
@@ -630,7 +656,7 @@ async function handleSubmit() {
         const payer = pendingPremium;
         pendingPremium = null;
         markSubmitted(joiningAs);
-        outcome.status === 'paid' ? openPremiumWelcome({ ...outcome, name: payer.name }) : openModal(joiningAs);
+        outcome.status === 'paid' ? openPremiumWelcome({ ...outcome, name: payer.name }) : openModal(joiningAs, payer.name);
       } else {
         errEl.textContent = outcome.message;
         errEl.style.display = 'block';
@@ -638,7 +664,7 @@ async function handleSubmit() {
       return;
     }
     markSubmitted(joiningAs);
-    openModal(joiningAs);
+    openModal(joiningAs, name);
   } catch (err) {
     errEl.textContent = 'Something went wrong. Please try again.';
     errEl.style.display = 'block';
@@ -654,126 +680,57 @@ document.getElementById('waitlistForm').addEventListener('submit', function (e) 
 
 updateJoinMode();
 
-function openModal(joiningAs = 'Free Member') {
-  document.getElementById('modalTitle').textContent = JOIN_COPY[joiningAs].modalTitle;
-  document.getElementById('modalMsg').innerHTML = JOIN_COPY[joiningAs].modalMsg;
+function shortDate(date = new Date()) {
+  return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
+}
+
+// Shows one scene in the popup's stage ('letter', 'stamp', 'note' or '' for none) and replays its animation
+function setModalScene(scene) {
+  const modal = document.querySelector('#modalOverlay .modal');
+  modal.dataset.scene = scene;
+  modal.classList.remove('is-playing');
+  void modal.offsetWidth;
+  modal.classList.add('is-playing');
+  document.querySelector('.modal-icon').hidden = Boolean(scene);
+}
+
+function fillModalScene(copy, name) {
+  const fullName = name || 'Friend';
+  const firstName = fullName.split(/\s+/)[0];
+  const today = shortDate();
+  document.getElementById('tyLetterName').textContent = fullName;
+  document.getElementById('tyPostDate').textContent = today.replace(/ /g, '·');
+  document.getElementById('tyPassName').textContent = fullName;
+  document.getElementById('tyPassDate').textContent = today;
+  document.getElementById('tyStampDate').textContent = '★ ' + today + ' ★';
+  const line = document.getElementById('tyNoteLine');
+  line.textContent = `Thank you, ${firstName}.`;
+  // Shrinks the handwriting for long first names so the line stays inside the note
+  line.style.fontSize = Math.min(34, Math.floor(650 / line.textContent.length)) + 'px';
+  document.getElementById('tyNoteRole').textContent = copy.noteRole || '';
+}
+
+function openModal(joiningAs = 'Free Member', name = '', scene = JOIN_COPY[joiningAs].scene || '') {
+  const copy = JOIN_COPY[joiningAs];
+  document.getElementById('modalEyebrow').textContent = copy.modalEyebrow || '';
+  document.getElementById('modalTitle').textContent = copy.modalTitle;
+  document.getElementById('modalMsg').innerHTML = copy.modalMsg;
   document.getElementById('premiumBtn').hidden = true;
-  document.querySelector('.btn-whatsapp').hidden = false;
+  document.getElementById('openCardBtn').hidden = true;
+  document.querySelector('.btn-whatsapp').hidden = scene === 'note';
+  document.getElementById('modalUpsell').hidden = joiningAs !== 'Free Member';
+  document.getElementById('modalBack').hidden = scene !== 'note';
   document.getElementById('memberCard').hidden = true;
   document.getElementById('memberShare').hidden = true;
-  document.querySelector('.modal-icon').hidden = false;
+  fillModalScene(copy, name);
+  setModalScene(scene);
   document.getElementById('modalOverlay').classList.add('active');
   document.body.style.overflow = 'hidden';
-  launchConfetti();
 }
 
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('active');
   document.body.style.overflow = '';
-}
-
-// CONFETTI ANIMATION EFFECT
-function launchConfetti() {
-  const colors = [
-    '#00FF40', '#00e676', '#69f0ae',  // vibrant greens
-    '#FFD700', '#FFA500', '#ffea00',  // vibrant golds/yellows
-    '#ffffff', '#00FFFF', '#FF00FF'   // bright white, cyan, magenta
-  ];
-  const shapes = ['square', 'circle', 'ribbon', 'star'];
-  const total = 180;
-
-  const container = document.createElement('div');
-  container.id = 'confetti-container';
-  container.style.cssText = `
-    position: fixed; inset: 0; pointer-events: none; z-index: 99999; overflow: hidden;
-  `;
-  document.body.appendChild(container);
-
-  for (let i = 0; i < total; i++) {
-    const piece = document.createElement('div');
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    const shape = shapes[Math.floor(Math.random() * shapes.length)];
-    const size = Math.random() * 6 + 3; // Smaller size
-
-    // Bottom-left origin
-    const startLeft = -5 + Math.random() * 5;
-    const startBottom = -5 + Math.random() * 5;
-
-    const delay = Math.random() * 0.3; // tighter burst
-    const duration = Math.random() * 2.5 + 2.5;
-
-    const rotStart = Math.random() * 360;
-    const rotEnd = rotStart + (Math.random() * 1440 - 720);
-
-    // Shoot up and right
-    const horizontalDistance = Math.random() * 100 + 30; // 30vw to 130vw
-    const peakHeight = -(Math.random() * 70 + 50); // -50vh to -120vh
-    const endHeight = 20; // 20vh below screen bottom
-
-    let borderRadius = '2px';
-    let width = size + 'px';
-    let height = size + 'px';
-    let clipPath = 'none';
-
-    if (shape === 'circle') {
-      borderRadius = '50%';
-    } else if (shape === 'ribbon') {
-      width = (size * 0.5) + 'px';
-      height = (size * 2.5) + 'px';
-    } else if (shape === 'star') {
-      clipPath = 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
-      borderRadius = '0';
-      width = (size * 1.5) + 'px';
-      height = (size * 1.5) + 'px';
-    }
-
-    piece.style.cssText = `
-      position: absolute;
-      bottom: ${startBottom}%;
-      left: ${startLeft}%;
-      width: ${width};
-      height: ${height};
-      background: ${color};
-      border-radius: ${borderRadius};
-      clip-path: ${clipPath};
-      opacity: 1;
-      box-shadow: ${shape === 'star' ? 'none' : `0 0 6px ${color}88`};
-      transform-origin: center center;
-    `;
-
-    const kfName = 'cf_' + i;
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes ${kfName} {
-        0%   { 
-          transform: translate(0, 0) rotate(${rotStart}deg); 
-          animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-          opacity: 1;
-        }
-        40%  { 
-          transform: translate(${horizontalDistance * 0.5}vw, ${peakHeight}vh) rotate(${rotStart + (rotEnd - rotStart) * 0.4}deg); 
-          animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53); 
-          opacity: 1; 
-        }
-        100% { 
-          transform: translate(${horizontalDistance}vw, ${endHeight}vh) rotate(${rotEnd}deg); 
-          opacity: 0; 
-        }
-      }
-    `;
-    document.head.appendChild(style);
-    piece.style.animation = `${kfName} ${duration}s linear ${delay}s forwards`;
-
-    container.appendChild(piece);
-  }
-
-  // Auto-clean DOM after animation completes
-  setTimeout(() => {
-    container.remove();
-    document.querySelectorAll('style').forEach(s => {
-      if (s.textContent.includes('cf_')) s.remove();
-    });
-  }, 6000);
 }
 
 // Close on Escape

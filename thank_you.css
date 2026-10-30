@@ -1,0 +1,660 @@
+/* ===================== THANK-YOU POPUP =====================
+   Shown right after the join form is sent. Each sign-up gets its own scene in the stage:
+   Premium (paid) a sealed letter, Free a rubber stamp, mentors/investors/collaborators a handwritten line.
+   Loaded after the_elite_show.css and responsive.css, so the popup rules here win. */
+
+:root {
+  --ty-lime: #CAFB0C;
+  --ty-ink: #0a0a0a;
+  --ty-soft: #c9c9c2;
+  --ty-muted: #9a9a92;
+  --ty-line: #262626;
+  --ty-hand: 'Caveat', 'Segoe Print', cursive;
+  --ty-display: 'Archivo', 'Arial Black', sans-serif;
+  --ty-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --ty-fibre: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.02 .5' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+}
+
+/* ----- The popup box ----- */
+.modal-overlay .modal {
+  max-width: 400px;
+  padding: 3rem 1.4rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+  background: #0b0b0b;
+  border: 1px solid var(--ty-line);
+  border-radius: 22px;
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+}
+
+.modal-overlay .modal:not([data-scene=""]) {
+  padding-top: 0;
+}
+
+.modal-overlay .modal-close {
+  z-index: 5;
+  color: #8a8a84;
+}
+
+.ty-defs {
+  position: absolute;
+}
+
+.ty-mark {
+  display: block;
+  fill: var(--ty-lime);
+}
+
+.modal-icon {
+  width: auto;
+  height: auto;
+  margin: 0 auto 0.4rem;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  animation: none;
+}
+
+.modal-icon .ty-mark {
+  width: 46px;
+  height: 69px;
+}
+
+.modal-eyebrow {
+  margin: 0.4rem 0 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--ty-lime);
+}
+
+.modal-eyebrow:empty {
+  display: none;
+}
+
+.modal-overlay .modal-title {
+  margin: 0;
+  font-family: var(--ty-display);
+  font-weight: 900;
+  font-stretch: 125%;
+  font-variation-settings: 'wdth' 125;
+  font-size: 1.6rem;
+  line-height: 0.94;
+  text-transform: uppercase;
+  color: var(--white);
+  text-wrap: balance;
+}
+
+.modal-overlay .modal-msg {
+  margin: 0 0 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--ty-soft);
+}
+
+.modal-overlay .btn-pay,
+.modal-overlay .btn-whatsapp {
+  margin: 0;
+  padding: 1rem 0.8rem;
+  border-radius: 4px;
+  background: var(--ty-lime);
+  color: var(--ty-ink);
+  letter-spacing: 0.13em;
+  min-height: 48px;
+  border: 0;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.modal-overlay .btn-whatsapp svg {
+  fill: currentColor;
+}
+
+.modal-overlay .btn-pay:hover,
+.modal-overlay .btn-whatsapp:hover {
+  background: var(--ty-lime);
+  box-shadow: 0 0 30px rgba(202, 251, 12, 0.35);
+}
+
+.modal-overlay .btn-pay:focus-visible,
+.modal-overlay .btn-whatsapp:focus-visible,
+.modal-back:focus-visible,
+.modal-upsell a:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 3px;
+}
+
+.modal-upsell {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--ty-muted);
+}
+
+.modal-upsell a {
+  color: var(--ty-lime);
+}
+
+.modal-back {
+  min-height: 48px;
+  padding: 1rem;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  background: none;
+  color: var(--white);
+  font: 700 0.72rem 'Montserrat', sans-serif;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.modal-back:hover {
+  border-color: var(--ty-lime);
+  color: var(--ty-lime);
+}
+
+.modal-overlay .member-card {
+  margin-bottom: 0.4rem;
+}
+
+/* ----- Stage: holds one scene ----- */
+.ty-stage {
+  position: relative;
+  height: 300px;
+  margin: 0 -1.4rem 0.2rem;
+  overflow: hidden;
+  background: radial-gradient(ellipse 75% 60% at 50% 55%, #1a1a18, #050505 75%);
+}
+
+.ty-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--ty-grain);
+  opacity: 0.3;
+  mix-blend-mode: overlay;
+}
+
+.ty-stage::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 48px;
+  background: linear-gradient(transparent, #0b0b0b);
+  pointer-events: none;
+}
+
+.modal[data-scene=""] .ty-stage,
+.ty-scene {
+  display: none;
+}
+
+.modal[data-scene="letter"] .ty-letter,
+.modal[data-scene="stamp"] .ty-stamp,
+.modal[data-scene="note"] .ty-note {
+  display: block;
+}
+
+.modal[data-scene="letter"] .ty-stage {
+  background: radial-gradient(ellipse 70% 60% at 50% 55%, #26241e, #0c0b09 70%, #000);
+}
+
+/* The words under the stage rise in after the scene starts */
+.modal.is-playing:not([data-scene=""]) > :is(.modal-eyebrow, .modal-title, .modal-msg, .btn-pay, .btn-whatsapp, .modal-upsell, .modal-back) {
+  animation: ty-up 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.25s both;
+}
+
+@keyframes ty-up {
+  from { opacity: 0; transform: translateY(10px); }
+}
+
+/* ----- Premium: the sealed letter ----- */
+.ty-letter-shadow {
+  position: absolute;
+  left: 50%;
+  top: 72%;
+  width: 230px;
+  height: 40px;
+  margin-left: -115px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.85), transparent 70%);
+  filter: blur(6px);
+  opacity: 0.9;
+}
+
+.ty-env {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 236px;
+  height: 156px;
+  margin: -78px 0 0 -118px;
+  transform-style: preserve-3d;
+}
+
+.ty-env-paper {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  background: linear-gradient(170deg, #f6f0e2 0%, #ebe3d0 55%, #ddd3bd 100%);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06), inset 0 -10px 20px rgba(120, 100, 60, 0.12);
+  overflow: hidden;
+}
+
+.ty-env-paper::before,
+.ty-env-flap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--ty-grain), var(--ty-fibre);
+  mix-blend-mode: multiply;
+  opacity: 0.16;
+}
+
+.ty-env-fold {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top right, transparent calc(50% - 0.6px), rgba(90, 70, 40, 0.18) 50%, rgba(255, 255, 255, 0.5) calc(50% + 0.8px), transparent calc(50% + 1.6px)) left bottom / 50% 62% no-repeat,
+    linear-gradient(to top left, transparent calc(50% - 0.6px), rgba(90, 70, 40, 0.18) 50%, rgba(255, 255, 255, 0.5) calc(50% + 0.8px), transparent calc(50% + 1.6px)) right bottom / 50% 62% no-repeat;
+}
+
+.ty-env-flap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 96px;
+  clip-path: polygon(0 0, 100% 0, 50.5% 100%, 49.5% 100%);
+  background: linear-gradient(180deg, #efe7d4, #e2d8c2 80%, #d6caaf);
+}
+
+.ty-seal {
+  position: absolute;
+  left: 50%;
+  top: 58px;
+  width: 54px;
+  height: 54px;
+  margin-left: -27px;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.45));
+}
+
+.ty-postmark {
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  width: 70px;
+  height: 44px;
+  opacity: 0.85;
+  mix-blend-mode: multiply;
+}
+
+.ty-env-to {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 12px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgba(60, 50, 30, 0.25);
+  font: 600 1.45rem/1 var(--ty-hand);
+  color: #2c2a24;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.modal.is-playing .ty-env {
+  animation: ty-letter 1.5s cubic-bezier(0.25, 0.75, 0.3, 1) both, ty-hover 5s ease-in-out 1.6s infinite;
+}
+
+.modal.is-playing .ty-letter-shadow {
+  animation: ty-letter-shadow 1.5s cubic-bezier(0.25, 0.75, 0.3, 1) both;
+}
+
+@keyframes ty-letter {
+  0% { opacity: 1; transform: translate3d(-40px, -320px, 0) rotateZ(-28deg) rotateX(30deg); }
+  45% { transform: translate3d(30px, -60px, 0) rotateZ(10deg) rotateX(-12deg); }
+  70% { transform: translate3d(-6px, 8px, 0) rotateZ(-3deg) rotateX(6deg); }
+  85% { transform: translate3d(2px, -2px, 0) rotateZ(1deg) rotateX(-2deg); }
+  100% { opacity: 1; transform: none; }
+}
+
+@keyframes ty-hover {
+  50% { transform: translateY(-4px) rotateZ(-0.6deg); }
+}
+
+@keyframes ty-letter-shadow {
+  0% { opacity: 0; transform: scale(0.3); }
+  70% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 0.9; transform: scale(1); }
+}
+
+/* ----- Free: the rubber stamp ----- */
+.ty-pass {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  width: 262px;
+  height: 164px;
+  margin: -82px 0 0 -131px;
+  border-radius: 10px;
+  transform: rotate(-3deg);
+  background: linear-gradient(160deg, #1c1c1a, #121211 60%, #0d0d0c);
+  box-shadow: 0 22px 34px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+  text-align: left;
+  color: #e9e6dc;
+}
+
+.ty-pass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--ty-grain), var(--ty-fibre);
+  opacity: 0.5;
+  mix-blend-mode: soft-light;
+}
+
+.ty-notch {
+  position: absolute;
+  right: 51px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #0b0b0a;
+}
+
+.ty-notch-t { top: -7px; }
+.ty-notch-b { bottom: -7px; }
+
+.ty-pass-stub {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 58px;
+  border-left: 2px dotted #3a3a36;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ty-pass-stub span {
+  writing-mode: vertical-rl;
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #77756b;
+}
+
+.ty-pass-body {
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  right: 74px;
+  bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.ty-pass-brand {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ty-pass-brand .ty-mark {
+  width: 17px;
+  height: 26px;
+  fill: #e9e6dc;
+}
+
+.ty-pass-brand small,
+.ty-pass-name small,
+.ty-pass-meta em {
+  display: block;
+  font-size: 0.46rem;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 1.3;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #8d8a7f;
+}
+
+.ty-pass-name b {
+  display: block;
+  margin-top: 3px;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ty-pass-meta {
+  display: flex;
+  gap: 16px;
+}
+
+.ty-pass-meta b {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #b9b6aa;
+  font-variant-numeric: tabular-nums;
+}
+
+.ty-imprint {
+  position: absolute;
+  left: 84px;
+  top: 66px;
+  width: 160px;
+  height: 88px;
+  overflow: visible;
+  transform: rotate(-11deg);
+  opacity: 0.93;
+}
+
+.ty-stamp-tool {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  width: 175px;
+  margin: -238px 0 0 -54px;
+  transform-origin: 50% 100%;
+  transform: translateY(-340px);
+  filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.6));
+}
+
+.ty-stamp-shadow {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  width: 170px;
+  height: 70px;
+  margin: -7px 0 0 -52px;
+  border-radius: 40%;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.9), transparent 70%);
+  opacity: 0;
+}
+
+.modal.is-playing .ty-stamp-tool {
+  animation: ty-press 1.9s cubic-bezier(0.55, 0, 0.4, 1) 0.2s both;
+}
+
+.modal.is-playing .ty-stamp-shadow {
+  animation: ty-press-shadow 1.9s cubic-bezier(0.55, 0, 0.4, 1) 0.2s both;
+}
+
+.modal.is-playing .ty-imprint {
+  animation: ty-ink 1.8s 1.02s both;
+}
+
+.modal.is-playing[data-scene="stamp"] .ty-stage {
+  animation: ty-thud 0.35s 1.02s;
+}
+
+@keyframes ty-press {
+  0% { transform: translateY(-300px) rotate(-6deg); }
+  42% { transform: translateY(-40px) rotate(-11deg); }
+  43.5% { transform: translateY(0) rotate(-11deg) scaleY(1); }
+  47% { transform: translateY(4px) rotate(-11deg) scaleY(0.93); }
+  56% { transform: translateY(2px) rotate(-11deg) scaleY(0.96); }
+  62% { transform: translateY(-6px) rotate(-10deg); }
+  100% { transform: translateY(-340px) rotate(-4deg); }
+}
+
+@keyframes ty-press-shadow {
+  0% { opacity: 0; transform: scale(2) rotate(-11deg); filter: blur(10px); }
+  43% { opacity: 0.9; transform: scale(1) rotate(-11deg); filter: blur(3px); }
+  60% { opacity: 0.6; }
+  100% { opacity: 0; transform: scale(2.2) rotate(-11deg); filter: blur(14px); }
+}
+
+/* The ink appears the moment the stamp lands, bright and wet, then dries to its normal colour */
+@keyframes ty-ink {
+  0% { opacity: 0; }
+  0.1% { opacity: 1; filter: brightness(1.5) saturate(1.2) drop-shadow(0 0 6px rgba(202, 251, 12, 0.45)); }
+  100% { opacity: 0.93; filter: none; }
+}
+
+@keyframes ty-thud {
+  20% { transform: translateY(3px); }
+  45% { transform: translateY(-1px); }
+  70% { transform: translateY(1px); }
+}
+
+/* ----- Mentors, investors, collaborators: one handwritten line ----- */
+.ty-note {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+}
+
+.ty-hand {
+  display: block;
+  width: 300px;
+  max-width: 86%;
+  height: 90px;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.ty-hand text {
+  font: 600 34px var(--ty-hand);
+  fill: var(--ty-lime);
+}
+
+.ty-hand .ty-sign {
+  font-size: 22px;
+  fill: var(--ty-muted);
+}
+
+.ty-nib {
+  position: absolute;
+  left: 76%;
+  top: 52%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ty-lime);
+  box-shadow: 0 0 14px 4px rgba(202, 251, 12, 0.55);
+  opacity: 0;
+}
+
+.ty-note-rule {
+  display: block;
+  width: 120px;
+  height: 1px;
+  margin: 14px auto 10px;
+  background: #2c2c2a;
+}
+
+.ty-note-role {
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ty-muted);
+}
+
+.modal.is-playing .ty-line-1 {
+  animation: ty-write 1.9s steps(28, end) 0.3s both;
+}
+
+.modal.is-playing .ty-line-2 {
+  animation: ty-write 0.9s steps(12, end) 2.3s both;
+}
+
+.modal.is-playing .ty-nib {
+  animation: ty-nib 2.9s linear 0.3s both;
+}
+
+@keyframes ty-write {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes ty-nib {
+  0% { opacity: 1; left: 12%; top: 20%; }
+  64% { left: 88%; top: 20%; }
+  66% { left: 34%; top: 50%; }
+  97% { opacity: 1; left: 76%; top: 50%; }
+  100% { opacity: 0; left: 76%; top: 50%; }
+}
+
+/* ----- Phones: the popup becomes a full screen with the scene on top ----- */
+@media (max-width: 520px) {
+  .modal-overlay {
+    padding: 0;
+  }
+
+  .modal-overlay .modal {
+    max-width: none;
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    justify-content: flex-end;
+    padding-bottom: max(1.4rem, env(safe-area-inset-bottom, 0px));
+    padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+  }
+
+  .ty-stage {
+    flex: 1 1 auto;
+    min-height: 300px;
+    margin-left: calc(-1 * max(1.25rem, env(safe-area-inset-left, 0px)));
+    margin-right: calc(-1 * max(1.25rem, env(safe-area-inset-right, 0px)));
+  }
+
+  .modal-overlay .modal-close {
+    top: max(0.6rem, env(safe-area-inset-top, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal.is-playing *,
+  .modal.is-playing > * {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+  }
+}
