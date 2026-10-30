@@ -1140,9 +1140,29 @@ window.addEventListener('scroll', () => {
     section.classList.add('is-impact');
   }
 
+  // Magnetic hold: the page eases the screen into place and holds it until the last line lands, then lets go
+  const HOLD = (lines.length - 1) * STAGGER + IMPACT_AT + 150;
+  const swallow = e => e.preventDefault();
+  const swallowKeys = e => {
+    if ([' ', 'PageDown', 'PageUp', 'ArrowDown', 'ArrowUp', 'End', 'Home'].includes(e.key)) e.preventDefault();
+  };
+  function magnetHold() {
+    const top = section.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top, behavior: 'smooth' });
+    window.addEventListener('wheel', swallow, { passive: false });
+    window.addEventListener('touchmove', swallow, { passive: false });
+    window.addEventListener('keydown', swallowKeys);
+    setTimeout(() => {
+      window.removeEventListener('wheel', swallow);
+      window.removeEventListener('touchmove', swallow);
+      window.removeEventListener('keydown', swallowKeys);
+    }, HOLD);
+  }
+
   const watcher = new IntersectionObserver(entries => {
     if (!entries[entries.length - 1].isIntersecting) return;
     watcher.disconnect();
+    magnetHold();
     section.classList.add('rise--dropped');
     lines.forEach((_, i) => setTimeout(impact, i * STAGGER + IMPACT_AT));
   }, { threshold: 0.55 });
