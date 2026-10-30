@@ -75,6 +75,11 @@ h3 { font-size: 0.95rem; }
 }
 .field textarea { resize: vertical; min-height: 84px; line-height: 1.45; }
 .field input[type="date"], .field input[type="time"], .field input[type="datetime-local"] { color-scheme: dark; }
+.pw-wrap { position: relative; display: block; }
+.pw-wrap input { width: 100%; padding-right: 2.8rem; }
+.pw-toggle { position: absolute; top: 50%; right: 0.35rem; transform: translateY(-50%); display: grid; place-items: center; width: 2.2rem; height: 2.2rem; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; }
+.pw-toggle:hover, .pw-toggle[aria-pressed="true"] { color: var(--lime); }
+.pw-toggle:focus-visible { outline: 2px solid var(--lime); outline-offset: 1px; }
 .field .hint { font-size: 0.74rem; color: var(--muted); }
 .field.is-check input, .field.is-check textarea, .field.is-check select { border-color: var(--check); background: var(--check-soft); }
 .field.is-default input, .field.is-default select { border-color: var(--info); background: var(--info-soft); }
