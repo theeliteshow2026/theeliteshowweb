@@ -1,7 +1,8 @@
 {
   "redirects": [
     { "source": "/home.html", "destination": "/", "permanent": false },
-    { "source": "/home", "destination": "/", "permanent": false }
+    { "source": "/home", "destination": "/", "permanent": false },
+    { "source": "/coming-soon.html", "destination": "/", "permanent": false }
   ],
   "rewrites": [
     { "source": "/join", "destination": "/invite.html" }

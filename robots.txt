@@ -1,5 +1,4 @@
 User-agent: *
 Disallow: /admin/
-Disallow: /coming-soon.html
 
 Sitemap: https://www.theeliteshow.com/sitemap.xml
