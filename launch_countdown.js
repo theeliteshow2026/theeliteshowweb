@@ -14,7 +14,9 @@
   var SEEN_KEY = 'tes_launch_countdown_2026';
   var COUNT = 5;
 
-  /* ---------- Sound: everything is scheduled from one start time ---------- */
+  /* ---------- Sound: a movie-trailer cue, scheduled from one start time ----------
+     Drone + rising strings build tension under five heavy hits, the music
+     cuts out, a reverse swell sucks in, then a huge braam and boom. */
   function noiseBuffer(ac, seconds) {
     var len = Math.floor(ac.sampleRate * seconds);
     var buf = ac.createBuffer(1, len, ac.sampleRate);
@@ -27,6 +29,27 @@
     return buf;
   }
 
+  function reverbIR(ac, seconds) {
+    var len = Math.floor(ac.sampleRate * seconds);
+    var buf = ac.createBuffer(2, len, ac.sampleRate);
+    var seed = 777;
+    for (var ch = 0; ch < 2; ch++) {
+      var d = buf.getChannelData(ch);
+      for (var i = 0; i < len; i++) {
+        seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+        d[i] = ((seed / 0x7fffffff) * 2 - 1) * Math.pow(1 - i / len, 2.6);
+      }
+    }
+    return buf;
+  }
+
+  function drive(ac, amount) {
+    var ws = ac.createWaveShaper(), n = 2048, curve = new Float32Array(n);
+    for (var i = 0; i < n; i++) { var x = i / (n - 1) * 2 - 1; curve[i] = Math.tanh(x * amount) / Math.tanh(amount); }
+    ws.curve = curve; ws.oversample = '2x';
+    return ws;
+  }
+
   function env(g, t, a, peak, hold, rel) {
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(peak, t + a);
@@ -34,106 +57,148 @@
     g.gain.exponentialRampToValueAtTime(0.0001, t + a + hold + rel);
   }
 
-  function tick(ac, out, t, i) {
-    // Low thump + bright click, pitch rising with each number.
-    var o = ac.createOscillator(), g = ac.createGain();
-    o.type = 'sine';
-    o.frequency.setValueAtTime(140 + i * 12, t);
-    o.frequency.exponentialRampToValueAtTime(45, t + 0.28);
-    env(g, t, 0.005, 0.9, 0.02, 0.32);
-    o.connect(g).connect(out); o.start(t); o.stop(t + 0.4);
-
-    var c = ac.createOscillator(), cg = ac.createGain();
-    c.type = 'square';
-    c.frequency.setValueAtTime(1300 + i * 160, t);
-    env(cg, t, 0.002, 0.12, 0.0, 0.07);
-    c.connect(cg).connect(out); c.start(t); c.stop(t + 0.1);
+  // Detuned saw stack through a closing filter and drive: the trailer "braam".
+  function braam(ac, out, t, freqs, peak, len, cutoff) {
+    var lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 6;
+    lp.frequency.setValueAtTime(cutoff, t);
+    lp.frequency.exponentialRampToValueAtTime(90, t + len);
+    var d = drive(ac, 3), g = ac.createGain();
+    env(g, t, 0.012, peak, 0.05, len);
+    lp.connect(d).connect(g).connect(out);
+    freqs.forEach(function (f) {
+      [-9, 0, 9].forEach(function (cents) {
+        var o = ac.createOscillator(); o.type = 'sawtooth';
+        o.frequency.value = f; o.detune.value = cents;
+        var og = ac.createGain(); og.gain.value = 0.22;
+        o.connect(og).connect(lp); o.start(t); o.stop(t + len + 0.2);
+      });
+    });
   }
 
-  function riser(ac, out, t, len, nb) {
+  function sub(ac, out, t, from, to, peak, len) {
+    var o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(from, t);
+    o.frequency.exponentialRampToValueAtTime(to, t + len * 0.8);
+    env(g, t, 0.004, peak, 0.04, len);
+    o.connect(g).connect(out); o.start(t); o.stop(t + len + 0.1);
+  }
+
+  function noiseHit(ac, out, t, nb, type, f0, f1, q, peak, len) {
     var n = ac.createBufferSource(); n.buffer = nb;
-    var f = ac.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 1.2;
-    f.frequency.setValueAtTime(250, t);
-    f.frequency.exponentialRampToValueAtTime(5000, t + len);
+    var f = ac.createBiquadFilter(); f.type = type; f.Q.value = q;
+    f.frequency.setValueAtTime(f0, t);
+    f.frequency.exponentialRampToValueAtTime(f1, t + len);
     var g = ac.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.32, t + len - 0.05);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + len + 0.05);
-    n.connect(f).connect(g).connect(out); n.start(t); n.stop(t + len + 0.1);
-
-    var o = ac.createOscillator(), og = ac.createGain();
-    o.type = 'sawtooth';
-    o.frequency.setValueAtTime(70, t);
-    o.frequency.exponentialRampToValueAtTime(420, t + len);
-    var lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
-    og.gain.setValueAtTime(0.0001, t);
-    og.gain.exponentialRampToValueAtTime(0.12, t + len - 0.05);
-    og.gain.exponentialRampToValueAtTime(0.0001, t + len + 0.03);
-    o.connect(lp).connect(og).connect(out); o.start(t); o.stop(t + len + 0.1);
+    env(g, t, 0.002, peak, 0.0, len);
+    n.connect(f).connect(g).connect(out); n.start(t, Math.random() * 2); n.stop(t + len + 0.05);
   }
 
-  function boom(ac, out, t, nb) {
-    // Sub drop.
-    var o = ac.createOscillator(), g = ac.createGain();
-    o.type = 'sine';
-    o.frequency.setValueAtTime(120, t);
-    o.frequency.exponentialRampToValueAtTime(28, t + 1.4);
-    env(g, t, 0.004, 1.0, 0.08, 1.6);
-    o.connect(g).connect(out); o.start(t); o.stop(t + 1.9);
-    // Explosion body.
+  function hit(ac, out, wet, t, i, nb) {
+    var k = (i + 1) / COUNT; // grows towards "1"
+    braam(ac, wet, t, [41.2, 55], 0.22 + 0.3 * k, 0.75, 900 + 1400 * k);
+    sub(ac, out, t, 110, 38, 0.95, 0.5);
+    noiseHit(ac, wet, t, nb, 'bandpass', 3200, 2400, 9, 0.35 + 0.2 * k, 0.35); // metal clank
+    noiseHit(ac, out, t, nb, 'lowpass', 2500, 200, 1, 0.5, 0.18);              // impact body
+    var c = ac.createOscillator(), cg = ac.createGain();                        // clock tick
+    c.type = 'square'; c.frequency.value = 2400;
+    env(cg, t + 0.5, 0.001, 0.07, 0, 0.03);
+    c.connect(cg).connect(out); c.start(t + 0.5); c.stop(t + 0.56);
+  }
+
+  function tension(ac, out, wet, t, len, nb) {
+    var cut = t + len - 0.4; // the music drops out just before zero
+    // Drone.
+    var lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 4;
+    lp.frequency.setValueAtTime(140, t);
+    lp.frequency.exponentialRampToValueAtTime(2400, cut);
+    var dg = ac.createGain();
+    dg.gain.setValueAtTime(0.0001, t);
+    dg.gain.exponentialRampToValueAtTime(0.26, cut - 0.05);
+    dg.gain.linearRampToValueAtTime(0, cut);
+    lp.connect(drive(ac, 2)).connect(dg).connect(wet);
+    [55, 55.5, 82.4, 110.3].forEach(function (f) {
+      var o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f;
+      o.connect(lp); o.start(t); o.stop(cut + 0.05);
+    });
+    // Rising strings (stacked, slightly detuned).
+    var sg = ac.createGain();
+    sg.gain.setValueAtTime(0.0001, t);
+    sg.gain.exponentialRampToValueAtTime(0.1, cut - 0.05);
+    sg.gain.linearRampToValueAtTime(0, cut);
+    var slp = ac.createBiquadFilter(); slp.type = 'lowpass'; slp.frequency.value = 3500;
+    slp.connect(sg).connect(wet);
+    [220, 221.5, 330, 440.8].forEach(function (f) {
+      var o = ac.createOscillator(); o.type = 'sawtooth';
+      o.frequency.setValueAtTime(f, t);
+      o.frequency.exponentialRampToValueAtTime(f * 2.4, cut);
+      var vib = ac.createOscillator(), vg = ac.createGain();
+      vib.frequency.value = 5.5; vg.gain.value = f * 0.006;
+      vib.connect(vg).connect(o.frequency);
+      o.connect(slp); o.start(t); o.stop(cut + 0.05); vib.start(t); vib.stop(cut + 0.05);
+    });
+    // Reverse swell that sucks in to the blast.
     var n = ac.createBufferSource(); n.buffer = nb;
-    var f = ac.createBiquadFilter(); f.type = 'lowpass';
-    f.frequency.setValueAtTime(4000, t);
-    f.frequency.exponentialRampToValueAtTime(140, t + 1.8);
-    var ng = ac.createGain();
-    env(ng, t, 0.003, 0.9, 0.05, 2.0);
-    n.connect(f).connect(ng).connect(out); n.start(t); n.stop(t + 2.2);
-    // Crack on top.
-    var c = ac.createBufferSource(); c.buffer = nb;
-    var hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 2500;
-    var cg = ac.createGain();
-    env(cg, t, 0.001, 0.5, 0.0, 0.18);
-    c.connect(hp).connect(cg).connect(out); c.start(t, 0.5); c.stop(t + 0.3);
+    var hp = ac.createBiquadFilter(); hp.type = 'bandpass'; hp.Q.value = 0.7;
+    hp.frequency.setValueAtTime(600, cut - 0.1);
+    hp.frequency.exponentialRampToValueAtTime(6000, t + len);
+    var rg = ac.createGain();
+    rg.gain.setValueAtTime(0.0001, cut - 0.1);
+    rg.gain.exponentialRampToValueAtTime(0.75, t + len - 0.01);
+    rg.gain.linearRampToValueAtTime(0, t + len);
+    n.connect(hp).connect(rg).connect(out); n.start(cut - 0.1); n.stop(t + len + 0.02);
+  }
+
+  function blastSound(ac, out, wet, t, nb) {
+    braam(ac, wet, t, [27.5, 41.2, 55, 82.4], 1.0, 3.2, 3800);
+    sub(ac, out, t, 95, 24, 1.0, 2.6);
+    noiseHit(ac, wet, t, nb, 'lowpass', 7000, 90, 0.8, 1.0, 2.6);  // explosion body
+    noiseHit(ac, out, t, nb, 'highpass', 3000, 3000, 0.7, 0.6, 0.2); // crack
+    noiseHit(ac, wet, t + 0.05, nb, 'bandpass', 4200, 1500, 6, 0.3, 1.8); // metal ring
   }
 
   function cheer(ac, out, t, nb) {
-    // A crowd: several bands of noise that swell and flutter.
-    var bands = [520, 900, 1400, 2100, 3000];
-    bands.forEach(function (fr, k) {
+    [520, 900, 1400, 2100, 3000].forEach(function (fr, k) {
       var n = ac.createBufferSource(); n.buffer = nb; n.loop = true;
       var f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = fr; f.Q.value = 1.4;
       var g = ac.createGain();
       var lfo = ac.createOscillator(), lg = ac.createGain();
-      lfo.frequency.value = 5 + k * 1.7; lg.gain.value = 0.05;
+      lfo.frequency.value = 5 + k * 1.7; lg.gain.value = 0.03;
       lfo.connect(lg).connect(g.gain);
       g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.13, t + 0.35);
-      g.gain.setValueAtTime(0.13, t + 1.2);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 3.4);
+      g.gain.exponentialRampToValueAtTime(0.08, t + 0.5);
+      g.gain.setValueAtTime(0.08, t + 1.4);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 3.6);
       n.connect(f).connect(g).connect(out);
-      n.start(t, k * 0.37); n.stop(t + 3.5); lfo.start(t); lfo.stop(t + 3.5);
-    });
-    // Two whistles.
-    [[0.25, 1800, 2700], [0.7, 2100, 3100]].forEach(function (w) {
-      var o = ac.createOscillator(), g = ac.createGain(), s = t + w[0];
-      o.type = 'sine';
-      o.frequency.setValueAtTime(w[1], s);
-      o.frequency.exponentialRampToValueAtTime(w[2], s + 0.25);
-      o.frequency.exponentialRampToValueAtTime(w[1] * 1.1, s + 0.55);
-      env(g, s, 0.03, 0.05, 0.4, 0.15);
-      o.connect(g).connect(out); o.start(s); o.stop(s + 0.7);
+      n.start(t, k * 0.37); n.stop(t + 3.7); lfo.start(t); lfo.stop(t + 3.7);
     });
   }
 
   // The whole soundtrack, from t0 (countdown start). Also used to render the preview video's audio.
   function scheduleAll(ac, out, t0) {
     var nb = noiseBuffer(ac, 4);
-    riser(ac, out, t0, COUNT, nb);
-    for (var i = 0; i < COUNT; i++) tick(ac, out, t0 + i, i);
-    boom(ac, out, t0 + COUNT, nb);
-    cheer(ac, out, t0 + COUNT + 0.15, nb);
+    var verb = ac.createConvolver(); verb.buffer = reverbIR(ac, 3.6);
+    var wetG = ac.createGain(); wetG.gain.value = 0.45;
+    var wet = ac.createGain(); // dry + reverb bus
+    wet.connect(out); wet.connect(verb).connect(wetG).connect(out);
+    tension(ac, out, wet, t0, COUNT, nb);
+    for (var i = 0; i < COUNT; i++) hit(ac, out, wet, t0 + i, i, nb);
+    blastSound(ac, out, wet, t0 + COUNT, nb);
+    cheer(ac, wet, t0 + COUNT + 0.6, nb);
   }
-  window.TESLaunchSound = { scheduleAll: scheduleAll, count: COUNT };
+  // Compress hard and limit, so it plays loud without clipping.
+  function loudChain(ac) {
+    var comp = ac.createDynamicsCompressor();
+    comp.threshold.value = -20; comp.knee.value = 6; comp.ratio.value = 10;
+    comp.attack.value = 0.003; comp.release.value = 0.25;
+    var makeup = ac.createGain(); makeup.gain.value = 2.0;
+    var lim = ac.createDynamicsCompressor();
+    lim.threshold.value = -1.5; lim.knee.value = 0; lim.ratio.value = 20;
+    lim.attack.value = 0.001; lim.release.value = 0.1;
+    comp.connect(makeup).connect(lim).connect(ac.destination);
+    return comp;
+  }
+  window.TESLaunchSound = { scheduleAll: scheduleAll, loudChain: loudChain, count: COUNT };
 
   /* ---------- Should it show? ---------- */
   var params = new URLSearchParams(location.search);
@@ -331,9 +396,7 @@
           ac = new AC();
           master = ac.createGain();
           master.gain.value = muted ? 0 : 0.9;
-          var comp = ac.createDynamicsCompressor();
-          comp.threshold.value = -10; comp.ratio.value = 6;
-          master.connect(comp).connect(ac.destination);
+          master.connect(loudChain(ac));
           if (ac.resume) ac.resume();
           scheduleAll(ac, master, ac.currentTime + 0.06);
         }
