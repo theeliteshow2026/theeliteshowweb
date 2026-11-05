@@ -5,6 +5,10 @@ const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbylsTW9H43fY6
 // Premium Community payments: Razorpay Checkout, backed by Supabase Edge Functions
 const PAYMENTS_API = "https://mlrzeqekvhbzwnblzzlv.supabase.co/functions/v1";
 const RAZORPAY_CHECKOUT_JS = "https://checkout.razorpay.com/v1/checkout.js";
+// Premium payments are paused (Nov 2026). Until they reopen, choosing Premium puts people on
+// the Premium waitlist: they agree to pay ₹199/month once it opens and nothing is charged.
+// Set this to true to bring back the Razorpay payment flow; all of its code is kept below.
+const PREMIUM_PAYMENTS_OPEN = false;
 
 // Update WhatsApp button dynamically
 document.querySelector('.btn-whatsapp').href = WHATSAPP_LINK;
@@ -292,6 +296,65 @@ const JOIN_COPY = {
   }
 };
 
+// While payments are paused, Premium signups join the waitlist instead
+const PREMIUM_WAITLIST_COPY = {
+  step2: 'Premium Waitlist',
+  progress: 'Waitlist',
+  submit: 'Join the Premium Waitlist',
+  scene: 'stamp',
+  pass: { kind: 'Premium waitlist pass', access: 'Waitlist', stub: 'Reserved · ₹199/mo when open', stamp: 'RESERVED' },
+  modalEyebrow: 'Premium · Waitlist',
+  modalTitle: "You're on the Premium waitlist",
+  modalMsg: "<strong>Nothing to pay today.</strong> We'll message you on WhatsApp and email the day Premium opens, " +
+    'and your ₹199 a month starts only then.' +
+    '<br><br>Meanwhile, join our free WhatsApp community to hear about <strong>Saturday sessions</strong> and ' +
+    '<strong>daily discussions</strong> first.'
+};
+const FREE_PASS = { kind: 'Free member pass', access: 'Community', stub: 'Admit one · Free', stamp: 'ADMITTED' };
+
+// Puts back the paid Premium wording on the page when payments reopen
+function showPaidPremiumCopy() {
+  JOIN_COPY.Member = JOIN_COPY.PaidMember;
+  const text = (id, value) => { document.getElementById(id).textContent = value; };
+  text('premiumBadge', 'Now Open');
+  text('premiumNote', 'Monthly membership of the Premium Community');
+  text('premiumCta', 'Join Premium for ₹199/month →');
+  text('premiumChoice', 'Premium · ₹199/mo');
+  text('upsellLink', 'Go Premium · ₹199/month');
+  text('premiumAudienceText', 'Join free, or go further with The Elite Show Premium Community for ₹199 a month. Meet ambitious ' +
+    'people near you, learn from those ahead of you and find your next mentor, collaborator or opportunity.');
+  text('premiumFormLead', 'Join free, or become a Premium member for ₹199 a month. Coming as a mentor, investor or partner ' +
+    "instead? Pick that below and we'll reach out personally.");
+  document.getElementById('paymentConsentText').innerHTML =
+    'I agree to pay <strong>₹199 a month</strong> to join The Elite Show Premium Community.';
+  document.getElementById('paymentHint').innerHTML = "You'll pay securely with Razorpay by UPI or card. " +
+    'Your membership renews every month and you can cancel any time. By paying you agree to our ' +
+    '<a href="terms.html" target="_blank" rel="noopener">Terms</a>, <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> ' +
+    'and <a href="refunds.html" target="_blank" rel="noopener">Refund Policy</a>.';
+}
+
+JOIN_COPY.PaidMember = JOIN_COPY.Member;
+if (PREMIUM_PAYMENTS_OPEN) showPaidPremiumCopy();
+else JOIN_COPY.Member = PREMIUM_WAITLIST_COPY;
+
+function isPremiumWaitlist(joiningAs) {
+  return joiningAs === 'Member' && !PREMIUM_PAYMENTS_OPEN;
+}
+
+// Saves a Premium waitlist signup in Supabase (the admin panel's Premium waitlist page)
+async function joinPremiumWaitlist(payload) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/join_premium_waitlist`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: SUPABASE_PUBLISHABLE_KEY },
+    body: JSON.stringify({
+      p_name: payload.name, p_email: payload.email, p_phone: payload.phone,
+      p_state: payload.state, p_city: payload.city, p_age: payload.age, p_role: payload.role,
+      p_topics: payload.topics, p_involvement: payload.involvement, p_agreed_to_pay: payload.paymentConsent
+    })
+  });
+  if (!res.ok) throw new Error('Unable to join the Premium waitlist.');
+}
+
 function checkedValue(name) {
   return document.querySelector(`input[name="${name}"]:checked`)?.value || '';
 }
@@ -303,6 +366,7 @@ function getJoiningAs() {
 // One submission per audience, so a member can still apply as a mentor later.
 // Members keep the original key so earlier signups stay recognised.
 function submittedKey(joiningAs) {
+  if (isPremiumWaitlist(joiningAs)) return 'eliteWaitlistSubmitted:Premium Waitlist';
   return joiningAs === 'Member' ? 'eliteWaitlistSubmitted' : `eliteWaitlistSubmitted:${joiningAs}`;
 }
 
@@ -423,7 +487,9 @@ function validateAboutMe() {
     hasError = true;
   }
   if (getJoiningAs() === 'Member' && !paymentConsent) {
-    showGroupError('paymentGroup', 'paymentError', 'Please agree to the ₹199 monthly membership fee to join.');
+    showGroupError('paymentGroup', 'paymentError', PREMIUM_PAYMENTS_OPEN
+      ? 'Please agree to the ₹199 monthly membership fee to join.'
+      : 'Please agree to pay ₹199 a month once Premium opens to join the waitlist.');
     hasError = true;
   }
 
@@ -686,6 +752,12 @@ async function handleSubmit() {
       const result = await res.json();
       if (!result.success) throw new Error(result.message || 'Unable to save registration.');
     }
+    if (isPremiumWaitlist(joiningAs)) {
+      await joinPremiumWaitlist(payload);
+      markSubmitted(joiningAs);
+      openModal(joiningAs, name);
+      return;
+    }
     if (joiningAs === 'Member') {
       pendingPremium = pendingPremium || { name, email, phone };
       btnTxt.textContent = 'Opening Payment...';
@@ -746,6 +818,11 @@ function fillModalScene(copy, name) {
   // Shrinks the handwriting for long first names so the line stays inside the note
   line.style.fontSize = Math.min(34, Math.floor(650 / line.textContent.length)) + 'px';
   document.getElementById('tyNoteRole').textContent = copy.noteRole || '';
+  const pass = copy.pass || FREE_PASS;
+  document.getElementById('tyPassKind').textContent = pass.kind;
+  document.getElementById('tyPassAccess').textContent = pass.access;
+  document.getElementById('tyPassStub').textContent = pass.stub;
+  document.getElementById('tyStampWord').textContent = pass.stamp;
 }
 
 function openModal(joiningAs = 'Free Member', name = '', scene = JOIN_COPY[joiningAs].scene || '') {

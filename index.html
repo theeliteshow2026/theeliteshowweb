@@ -301,9 +301,9 @@
         <a class="tier-cta tier-cta--ghost" href="#waitlist" data-join="Free Member">Join for Free →</a>
       </article>
       <article class="tier-card tier-card--premium reveal-scale">
-        <p class="audience-tag">Premium Community <span class="tier-badge">Now Open</span></p>
+        <p class="audience-tag">Premium Community <span class="tier-badge" id="premiumBadge">Waitlist</span></p>
         <p class="tier-amount">₹199<span class="tier-period">/month</span></p>
-        <p class="tier-note">Monthly membership of the Premium Community</p>
+        <p class="tier-note" id="premiumNote">Opening soon. Join the waitlist now, pay only when it opens</p>
         <ul class="tier-perks">
           <li><strong>Everything in the free community</strong></li>
           <li><strong>Saturday mentor sessions</strong> with people a few steps ahead of you</li>
@@ -312,7 +312,7 @@
           <li><strong>A close circle of ambitious people</strong> who grow together</li>
           <li><strong>Direct connections</strong> to mentors, founders, creators and collaborators</li>
         </ul>
-        <a class="tier-cta" href="#waitlist" data-join="Member">Join Premium for ₹199/month →</a>
+        <a class="tier-cta" href="#waitlist" data-join="Member" id="premiumCta">Join the Premium waitlist →</a>
         <button type="button" class="tier-cta tier-cta--ghost tier-share" id="shareMyCard" hidden>Share your member card →</button>
       </article>
     </div>
@@ -338,7 +338,7 @@
       <article class="audience-card reveal-scale">
         <p class="audience-tag">For new members</p>
         <h3>Join the community</h3>
-        <p>Join free, or go further with The Elite Show Premium Community for ₹199 a month. Meet ambitious people near you,
+        <p id="premiumAudienceText">Join free, or get on the waitlist for The Elite Show Premium Community (₹199 a month when it opens). Meet ambitious people near you,
           learn from those ahead of you and find your next mentor, collaborator or opportunity.</p>
         <a class="audience-cta" href="#membership">Choose Your Membership →</a>
       </article>
@@ -383,8 +383,8 @@
     <div class="waitlist-inner">
       <p class="section-label reveal">Take Your Seat</p>
       <h2 class="section-title reveal">Join The Elite Show <em>Community</em></h2>
-      <p class="waitlist-sub reveal">
-        Join free, or become a Premium member for ₹199 a month. Coming as a mentor, investor or partner instead? Pick that
+      <p class="waitlist-sub reveal" id="premiumFormLead">
+        Join free, or join the Premium waitlist (₹199 a month when it opens). Coming as a mentor, investor or partner instead? Pick that
         below and we'll reach out personally.
       </p>
 
@@ -412,7 +412,7 @@
               <legend>I'd like to</legend>
               <div class="option-grid join-grid">
                 <label class="choice-option"><input type="radio" name="joiningAs" value="Free Member" checked><span>Join Free</span></label>
-                <label class="choice-option"><input type="radio" name="joiningAs" value="Member"><span>Premium · ₹199/mo</span></label>
+                <label class="choice-option"><input type="radio" name="joiningAs" value="Member"><span id="premiumChoice">Premium waitlist</span></label>
                 <label class="choice-option"><input type="radio" name="joiningAs" value="Mentor"><span>Mentor</span></label>
                 <label class="choice-option"><input type="radio" name="joiningAs" value="Investor"><span>Invest</span></label>
                 <label class="choice-option"><input type="radio" name="joiningAs" value="Collaborator"><span>Partner</span></label>
@@ -538,9 +538,9 @@
               <label class="payment-consent">
                 <input type="checkbox" id="paymentConsent" name="paymentConsent">
                 <span class="checkmark" aria-hidden="true"></span>
-                <span>I agree to pay <strong>₹199 a month</strong> to join The Elite Show Premium Community.</span>
+                <span id="paymentConsentText">I agree to pay <strong>₹199 a month</strong> when The Elite Show Premium Community opens. Nothing to pay today.</span>
               </label>
-              <p class="field-hint">You'll pay securely with Razorpay by UPI or card. Your membership renews every month and you can cancel any time. By paying you agree to our <a href="terms.html" target="_blank" rel="noopener">Terms</a>, <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and <a href="refunds.html" target="_blank" rel="noopener">Refund Policy</a>.</p>
+              <p class="field-hint" id="paymentHint">We'll message you on WhatsApp and email the day Premium opens. You pay securely with Razorpay only then, and you can cancel any time. See our <a href="terms.html" target="_blank" rel="noopener">Terms</a>, <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and <a href="refunds.html" target="_blank" rel="noopener">Refund Policy</a>.</p>
               <span class="field-error" id="paymentError"></span>
             </div>
             </div>
@@ -645,16 +645,16 @@
             <span class="ty-notch ty-notch-t"></span><span class="ty-notch ty-notch-b"></span>
             <div class="ty-pass-body">
               <div class="ty-pass-brand"><svg class="ty-mark"><use href="#tesMark" /></svg><small>The Elite Show<br>Community</small></div>
-              <div class="ty-pass-name"><small>Free member pass</small><b id="tyPassName"></b></div>
-              <div class="ty-pass-meta"><span><em>Issued</em><b id="tyPassDate"></b></span><span><em>Access</em><b>Community</b></span></div>
+              <div class="ty-pass-name"><small id="tyPassKind">Free member pass</small><b id="tyPassName"></b></div>
+              <div class="ty-pass-meta"><span><em>Issued</em><b id="tyPassDate"></b></span><span><em>Access</em><b id="tyPassAccess">Community</b></span></div>
             </div>
-            <div class="ty-pass-stub"><span>Admit one · Free</span></div>
+            <div class="ty-pass-stub"><span id="tyPassStub">Admit one · Free</span></div>
             <svg class="ty-imprint" viewBox="0 0 190 104">
               <g filter="url(#tyInk)" fill="#CAFB0C">
                 <path fill-rule="evenodd" d="M8 2h174a6 6 0 0 1 6 6v88a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6V8a6 6 0 0 1 6-6zm2 5a3 3 0 0 0-3 3v84a3 3 0 0 0 3 3h170a3 3 0 0 0 3-3V10a3 3 0 0 0-3-3z" />
                 <rect x="12" y="12" width="166" height="1.6" /><rect x="12" y="90.4" width="166" height="1.6" />
                 <text x="95" y="30" text-anchor="middle" font-family="Montserrat" font-weight="800" font-size="9.5" letter-spacing="3">THE ELITE SHOW</text>
-                <text x="95" y="66" text-anchor="middle" font-family="Archivo" font-stretch="125%" font-weight="900" font-size="31" letter-spacing="1">ADMITTED</text>
+                <text x="95" y="66" text-anchor="middle" font-family="Archivo" font-stretch="125%" font-weight="900" font-size="31" letter-spacing="1" id="tyStampWord">ADMITTED</text>
                 <text x="95" y="84" text-anchor="middle" font-family="Montserrat" font-weight="700" font-size="8.5" letter-spacing="2" id="tyStampDate"></text>
               </g>
             </svg>
@@ -719,7 +719,7 @@
         </svg>
         Join Our WhatsApp Community
       </a>
-      <p class="modal-upsell" id="modalUpsell" hidden>Want the full room? <a href="#waitlist" data-join="Member" onclick="closeModal()">Go Premium · ₹199/month</a></p>
+      <p class="modal-upsell" id="modalUpsell" hidden>Want the full room? <a href="#waitlist" data-join="Member" onclick="closeModal()" id="upsellLink">Join the Premium waitlist</a></p>
       <button class="modal-back" id="modalBack" type="button" hidden onclick="closeModal()">Back to the site</button>
       <div class="member-share" id="memberShare" hidden>
         <p class="member-share-label">Bring a friend into the room</p>

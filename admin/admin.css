@@ -340,3 +340,8 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.7); }
   .cancel-row, .cancel-mark { grid-template-columns: minmax(0, 1fr); }
   .reason-bars li { grid-template-columns: minmax(90px, 7.5rem) minmax(0, 1fr) 1.6rem; }
 }
+
+/* Premium waitlist */
+.plain-link { color: inherit; text-decoration: none; }
+.plain-link:hover { color: var(--lime); }
+a.tile { text-decoration: none; }

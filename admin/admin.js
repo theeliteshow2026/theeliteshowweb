@@ -300,7 +300,7 @@
     $$('.nav a').forEach(a => a.classList.toggle('is-active', a.dataset.view === (view === 'session' ? 'sessions' : view)));
     const main = $('#main');
     main.replaceChildren();
-    const views = { dashboard, members: () => membersView(main, arg), business: businessPage, sessions: sessionsView, session: () => editor(arg), reviews: reviewsView, mentors: mentorsView, history: historyView, admins: adminsView, settings: settingsView };
+    const views = { dashboard, members: () => membersView(main, arg), waitlist: waitlistPage, business: businessPage, sessions: sessionsView, session: () => editor(arg), reviews: reviewsView, mentors: mentorsView, history: historyView, admins: adminsView, settings: settingsView };
     (views[view] || dashboard)(main);
     showDriveCount();
     main.focus({ preventScroll: true });
@@ -328,6 +328,7 @@
       tile(scheduled.length, 'Scheduled'),
       tile(drafts.length, 'Drafts'),
       tile(shownReviews.length, samples.length ? `Reviews on the site (${samples.length} samples)` : 'Reviews on the site'),
+      h('a', { class: 'tile tile-button', href: '#waitlist', dataset: { premium: 'waitlist' } }, h('b', { text: '…' }), h('span', { text: 'On the Premium waitlist' })),
       h('div', { class: 'tile', dataset: { premium: 'active' } }, h('b', { text: '…' }), h('span', { text: 'Active Premium members' })),
       h('div', { class: 'tile', dataset: { premium: 'paid' } }, h('b', { text: '…' }), h('span', { text: 'Premium payments received' })),
       h('div', { class: 'tile', dataset: { premium: 'due' } }, h('b', { text: '…' }), h('span', { text: 'Renewals in the next 7 days' })));
@@ -371,6 +372,8 @@
       h('section', { class: 'card' }, h('div', { class: 'card-title' }, h('h3', { text: 'Sign-ups' })),
         h('p', { class: 'muted' }, 'Coming soon sign-ups are in Google Sheets: ', h('a', { href: SHEET_COMING_SOON, target: '_blank', rel: 'noopener', text: 'open the sheet' }), '.')));
 
+    db.from('premium_waitlist').select('id', { count: 'exact', head: true }).neq('status', 'removed')
+      .then(({ count, error }) => { const t = $('[data-premium="waitlist"] b', tiles); if (t) t.textContent = error ? '—' : count; });
     const [m, p] = await Promise.all([
       db.from('premium_members').select('member_code,name,email,phone,status,current_period_end,created_at').order('created_at', { ascending: false }).limit(500),
       db.from('premium_payments').select('amount_paise,status').limit(5000)
@@ -532,23 +535,124 @@
     if (memberView.query) search.focus();
   }
 
-  function downloadMembers(list) {
+  function downloadCsv(rows, name) {
     // A leading = + - @ would run as a formula in a spreadsheet
     const cell = v => {
       let s = v == null ? '' : String(v);
       if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
       return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
-    const day = t => (t ? new Date(Date.parse(t) + 5.5 * 3600e3).toISOString().slice(0, 10) : '');
-    const rows = [['Member ID', 'Name', 'Email', 'Phone', 'Status', 'Joined', 'Activated', 'Paid until', 'Renewal', 'Months paid', 'Total paid (Rs)']]
-      .concat(list.map(m => [m.member_code, m.name, m.email, m.phone, (MEMBER_STATUS[m.status] || [m.status])[0], day(m.created_at), day(m.activated_at),
-        day(m.current_period_end), !m.inPeriod ? '' : m.autoRenews ? 'Auto-renews' : 'Ends', m.months, m.total / 100]));
-    const csv = '﻿' + rows.map(r => r.map(cell).join(',')).join('\r\n');
-    const link = h('a', { href: URL.createObjectURL(new Blob([csv], { type: 'text/csv' })), download: `premium-members-${todayIST()}.csv` });
+    const csv = '\ufeff' + rows.map(r => r.map(cell).join(',')).join('\r\n');
+    const link = h('a', { href: URL.createObjectURL(new Blob([csv], { type: 'text/csv' })), download: `${name}-${todayIST()}.csv` });
     document.body.append(link);
     link.click();
     link.remove();
     setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  }
+  const csvDay = t => (t ? new Date(Date.parse(t) + 5.5 * 3600e3).toISOString().slice(0, 10) : '');
+
+  function downloadMembers(list) {
+    const day = csvDay;
+    const rows = [['Member ID', 'Name', 'Email', 'Phone', 'Status', 'Joined', 'Activated', 'Paid until', 'Renewal', 'Months paid', 'Total paid (Rs)']]
+      .concat(list.map(m => [m.member_code, m.name, m.email, m.phone, (MEMBER_STATUS[m.status] || [m.status])[0], day(m.created_at), day(m.activated_at),
+        day(m.current_period_end), !m.inPeriod ? '' : m.autoRenews ? 'Auto-renews' : 'Ends', m.months, m.total / 100]));
+    downloadCsv(rows, 'premium-members');
+  }
+
+  // ---------- Premium waitlist ----------
+  // While Premium payments are paused, people join this list and agree to pay ₹199 a month
+  // once it opens. Admins track who they have contacted and who has joined.
+  const WAITLIST_STATUS = {
+    waiting: ['Waiting', 'status-scheduled'],
+    contacted: ['Contacted', 'status-draft'],
+    joined: ['Joined Premium', 'status-live'],
+    removed: ['Removed', 'status-past']
+  };
+  const waitlistState = { filter: 'all', query: '' };
+
+  async function waitlistPage(main) {
+    const box = h('div', null, h('p', { class: 'muted', text: 'Loading the waitlist…' }));
+    main.append(box);
+    const { data, error } = await db.from('premium_waitlist').select('*').order('created_at', { ascending: false }).limit(10000);
+    if (error) { box.replaceChildren(h('p', { class: 'muted', text: 'Couldn\'t load the Premium waitlist.' })); return fail('Couldn\'t load the waitlist', error); }
+    const people = data.map(p => ({ ...p, haystack: [p.name, p.email, p.phone, (p.phone || '').replace(/\D/g, ''), p.city, p.state, p.role].join(' ').toLowerCase() }));
+    const live = people.filter(p => p.status !== 'removed');
+    const since = days => live.filter(p => Date.now() - Date.parse(p.created_at) < days * 864e5).length;
+    const count = st => people.filter(p => p.status === st).length;
+    const pickTile = (filter, value, label) => h('button', { class: 'tile tile-button', type: 'button', onclick: () => { waitlistState.filter = filter; render(); } }, h('b', { text: value }), h('span', { text: label }));
+
+    const search = h('input', { type: 'search', placeholder: 'Search name, email, phone or city', value: waitlistState.query, autocomplete: 'off', 'aria-label': 'Search the waitlist' });
+    const filters = { all: 'All', ...Object.fromEntries(Object.entries(WAITLIST_STATUS).map(([k, [label]]) => [k, label])) };
+    const chips = h('div', { class: 'filters' }, Object.entries(filters).map(([k, label]) =>
+      h('button', { class: 'chip' + (k === waitlistState.filter ? ' is-on' : ''), type: 'button', text: label, 'aria-pressed': String(k === waitlistState.filter), onclick: () => { waitlistState.filter = k; render(); } })));
+    const list = h('ul', { class: 'cancel-list' });
+    const summary = h('p', { class: 'muted small', style: 'margin-bottom:0.6rem' });
+
+    const shown = () => {
+      const q = waitlistState.query.trim().toLowerCase();
+      return people.filter(p => (waitlistState.filter === 'all' ? p.status !== 'removed' : p.status === waitlistState.filter)
+        && (!q || q.split(/\s+/).every(word => p.haystack.includes(word))));
+    };
+    const row = p => {
+      const saved = h('span', { class: 'small muted save-state', 'aria-live': 'polite' });
+      const status = h('select', { 'aria-label': `Status for ${p.name}` }, Object.entries(WAITLIST_STATUS).map(([k, [label]]) => h('option', { value: k, text: label, selected: p.status === k })));
+      const text = h('textarea', { rows: 2, maxlength: 1000, placeholder: 'Notes, e.g. messaged on WhatsApp (optional)', 'aria-label': `Notes for ${p.name}` }, p.note || '');
+      const badge = h('span', { class: 'status ' + WAITLIST_STATUS[p.status][1], text: WAITLIST_STATUS[p.status][0] });
+      let last = JSON.stringify([p.status, p.note || '']);
+      const save = async () => {
+        const now = JSON.stringify([status.value, text.value.trim()]);
+        if (now === last) return;
+        saved.textContent = 'Saving…';
+        const { data: row, error } = await db.from('premium_waitlist').update({ status: status.value, note: text.value.trim() || null, updated_at: new Date().toISOString() }).eq('id', p.id).select().single();
+        if (error) { saved.textContent = 'Not saved'; return fail('Couldn\'t save the change', error); }
+        last = now;
+        Object.assign(p, row);
+        badge.className = 'status ' + WAITLIST_STATUS[p.status][1];
+        badge.textContent = WAITLIST_STATUS[p.status][0];
+        saved.textContent = 'Saved';
+        setTimeout(() => { if (saved.textContent === 'Saved') saved.textContent = ''; }, 2500);
+      };
+      status.addEventListener('change', save);
+      text.addEventListener('blur', save);
+      const about = [p.role, p.age && `age ${p.age}`, [p.city, p.state].filter(Boolean).join(', ')].filter(Boolean).join(' · ');
+      return h('li', { class: 'cancel-row' },
+        h('div', { class: 'cancel-who' },
+          h('strong', { text: p.name || '—' }),
+          h('span', { class: 'small' }, h('a', { class: 'plain-link', href: 'mailto:' + p.email, text: p.email }), ' · ', h('a', { class: 'plain-link', href: 'tel:' + (p.phone || '').replace(/[^\d+]/g, ''), text: p.phone })),
+          about ? h('span', { class: 'muted small', text: about }) : null,
+          p.topics ? h('span', { class: 'muted small', text: 'Interested in ' + p.topics }) : null,
+          h('span', { class: 'small' }, `Joined ${formatWhen(p.created_at)}`, p.signups > 1 ? h('span', { class: 'muted', text: ` · signed up ${p.signups} times` }) : null),
+          h('span', null, badge, ' ', p.agreed_to_pay ? h('span', { class: 'status status-live', text: `Agreed to ₹${p.agreed_amount}/mo` }) : null)),
+        h('div', { class: 'cancel-mark' },
+          h('label', { class: 'field' }, h('span', { text: 'Status' }), status),
+          h('label', { class: 'field cancel-note' }, h('span', { text: 'Notes' }), text),
+          saved));
+    };
+    const paint = () => {
+      const items = shown();
+      summary.textContent = `${items.length} of ${live.length} on the waitlist${waitlistState.filter === 'removed' ? ' (showing removed)' : ''}. Changes save on their own.`;
+      list.replaceChildren(...(items.length ? items.map(row)
+        : [h('li', { class: 'muted', text: people.length ? 'Nobody matches.' : 'Nobody is on the Premium waitlist yet. Signups from the website show up here.' })]));
+    };
+    search.addEventListener('input', () => { waitlistState.query = search.value; paint(); });
+
+    const exportButton = h('button', { class: 'btn', type: 'button', text: 'Download CSV', onclick: () => downloadCsv(
+      [['Name', 'Email', 'Phone', 'City', 'State', 'Age', 'Role', 'Interested in', 'Involvement', 'Agreed to pay (Rs/month)', 'Status', 'Notes', 'Joined']]
+        .concat(shown().map(p => [p.name, p.email, p.phone, p.city, p.state, p.age, p.role, p.topics, p.involvement, p.agreed_to_pay ? p.agreed_amount : '',
+          WAITLIST_STATUS[p.status][0], p.note, csvDay(p.created_at)])), 'premium-waitlist') });
+    box.replaceChildren(
+      head('Premium waitlist', 'Premium is paused. These people agreed to pay ₹199 a month once it opens.', exportButton),
+      h('div', { class: 'tiles' },
+        pickTile('all', live.length, 'On the waitlist'),
+        tile(since(7), 'Joined in the last 7 days'),
+        tile(since(30), 'Joined in the last 30 days'),
+        pickTile('waiting', count('waiting'), 'Not contacted yet'),
+        pickTile('joined', count('joined'), 'Joined Premium')),
+      h('section', { class: 'card' },
+        h('div', { class: 'member-tools' }, h('label', { class: 'field member-search' }, h('span', { text: 'Search' }), search)),
+        chips, summary, list));
+    paint();
+    if (waitlistState.query) search.focus();
   }
 
   // One member's story, oldest first, ending with what happens next
